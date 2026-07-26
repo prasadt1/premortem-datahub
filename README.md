@@ -56,6 +56,19 @@ premortem --queries-dir tests/fixtures/queries \
   --schema-fields id,order_status,customer_id
 ```
 
+Live against DataHub (Quickstart + showcase demo URN; adjudication on by default):
+
+```bash
+premortem --live --rename order_status:order_state \
+  --out examples/forecast-order-status.md \
+  --json-out examples/forecast-order-status.json
+
+premortem --live --drop order_status \
+  --out examples/forecast-drop-order-status.md
+
+premortem --live --rename order_status:order_state --write-back
+```
+
 Drop is the same pipeline:
 
 ```bash
@@ -75,9 +88,15 @@ Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` 
 
 ## Demo corpus
 
-Sample forecast: [`examples/forecast-offline.md`](examples/forecast-offline.md).
+Live forecasts (from Quickstart `ORDER_HISTORY.order_status`):
 
-Frozen SQL fixtures under `tests/fixtures/queries/` drive the deterministic sqlglot classifier. For a live DataHub demo against showcase-style `ORDER_HISTORY.order_status`, see [`examples/seeded_queries.json`](examples/seeded_queries.json).
+- [`examples/forecast-order-status.md`](examples/forecast-order-status.md)
+- [`examples/forecast-drop-order-status.md`](examples/forecast-drop-order-status.md)
+- [`examples/forecast-order-status.json`](examples/forecast-order-status.json)
+
+Offline sample: [`examples/forecast-offline.md`](examples/forecast-offline.md).
+
+Frozen SQL fixtures under `tests/fixtures/queries/` drive the deterministic sqlglot classifier. Seeded query corpus for live fallback: [`examples/seeded_queries.json`](examples/seeded_queries.json).
 
 ## Limits (honest)
 

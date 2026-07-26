@@ -1,4 +1,4 @@
-"""CLI — core / offline forecast + Gate 1 write-back."""
+"""CLI — offline fixtures, live DataHub rehearsal, write-back."""
 
 from __future__ import annotations
 
@@ -10,8 +10,14 @@ from pathlib import Path
 from premortem.agent import rehearse
 from premortem.classify import classify_query
 from premortem.datahub_client import HttpDataHubClient, write_forecast_to_catalog
+from premortem.live import run_live_rehearsal
 from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
 from premortem.report import to_json, to_markdown
+
+DEMO_URN = (
+    "urn:li:dataset:(urn:li:dataPlatform:snowflake,"
+    "b2fd91.order_entry_db.analytics.order_history,PROD)"
+)
 
 
 def _load_queries_from_dir(path: Path) -> list[QueryRecord]:
@@ -41,10 +47,21 @@ def _parse_diff(args: argparse.Namespace) -> SchemaDiff:
     raise SystemExit("require --rename old:new or --drop column")
 
 
+def _emit(forecast_md: str, forecast_js: str, args: argparse.Namespace) -> None:
+    if args.out:
+        Path(args.out).write_text(forecast_md, encoding="utf-8")
+        print(f"wrote {args.out}")
+    else:
+        print(forecast_md)
+    if args.json_out:
+        Path(args.json_out).write_text(forecast_js, encoding="utf-8")
+        print(f"wrote {args.json_out}")
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(
         prog="premortem",
-        description="Schema-change rehearsal (core / offline / write-back)",
+        description="Schema-change rehearsal (offline / live DataHub / write-back)",
     )
     p.add_argument("--sql-file", help="Classify a single SQL file (no DataHub)")
     p.add_argument("--column", help="Column name")
@@ -53,7 +70,12 @@ def main(argv: list[str] | None = None) -> None:
         "--queries-dir",
         help="Offline: classify all *.sql in directory into a forecast",
     )
-    p.add_argument("--urn", default="urn:li:dataset:offline-demo")
+    p.add_argument(
+        "--live",
+        action="store_true",
+        help="Fetch schema, lineage, and queries from DataHub for --urn",
+    )
+    p.add_argument("--urn", default=DEMO_URN)
     p.add_argument("--rename", help="old:new column rename")
     p.add_argument("--drop", help="column to drop (mutually exclusive with --rename)")
     p.add_argument("--out", help="Write markdown forecast to this path")
@@ -61,8 +83,8 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument(
         "--lineage-count",
         type=int,
-        default=0,
-        help="Impact Analysis baseline dependent count (compose framing)",
+        default=None,
+        help="Override Impact Analysis baseline count (default: live downstream len)",
     )
     p.add_argument(
         "--use-exec-count",
@@ -72,21 +94,26 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument(
         "--write-back",
         action="store_true",
-        help="Write forecast to DataHub (Gate 1 PASS: tag + description / document)",
+        help="Write forecast to DataHub (tag + description / document)",
     )
     p.add_argument(
         "--adjudicate",
         action="store_true",
-        help="Upgrade UNKNOWN findings via agent (heuristic binder by default)",
+        help="Upgrade UNKNOWN findings via agent (default on for --live)",
+    )
+    p.add_argument(
+        "--no-adjudicate",
+        action="store_true",
+        help="Disable adjudication (useful with --live)",
     )
     p.add_argument(
         "--schema-fields",
-        help="Comma-separated schema fields for adjudication (default: the change column)",
+        help="Comma-separated schema fields for offline adjudication",
     )
     p.add_argument(
         "--gms",
         default=os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080"),
-        help="GMS URL for --write-back",
+        help="GMS URL for --live / --write-back",
     )
     args = p.parse_args(argv)
 
@@ -102,6 +129,42 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit(0)
         return
 
+    if args.live:
+        if args.queries_dir:
+            p.error("--live and --queries-dir are mutually exclusive")
+        if not args.rename and not args.drop:
+            p.error("--live requires --rename old:new or --drop column")
+        diff = _parse_diff(args)
+        adjudicate = not args.no_adjudicate
+        if args.adjudicate:
+            adjudicate = True
+        client = HttpDataHubClient(
+            gms_url=args.gms,
+            write_back_enabled=args.write_back,
+        )
+        try:
+            result = run_live_rehearsal(
+                client,
+                diff=diff,
+                dialect=args.dialect,
+                use_exec_count=args.use_exec_count,
+                adjudicate=adjudicate,
+                write_back=args.write_back,
+                lineage_count_override=args.lineage_count,
+            )
+        except RuntimeError as exc:
+            print(f"live rehearsal failed: {exc}", file=sys.stderr)
+            sys.exit(1)
+        print(
+            f"# live urn={diff.dataset_urn}\n"
+            f"# schema_fields={result.schema_fields}\n"
+            f"# queries={result.query_count} downstream={len(result.downstream)}\n"
+        )
+        _emit(result.markdown, result.json_text, args)
+        if result.write_back_ref:
+            print(f"write-back ok → {result.write_back_ref}")
+        return
+
     if args.queries_dir:
         diff = _parse_diff(args)
         queries = _load_queries_from_dir(Path(args.queries_dir))
@@ -110,25 +173,19 @@ def main(argv: list[str] | None = None) -> None:
             if args.schema_fields
             else [diff.column]
         )
+        lineage_count = args.lineage_count if args.lineage_count is not None else 0
         forecast = rehearse(
             diff=diff,
             queries=queries,
-            lineage_dependent_count=args.lineage_count,
+            lineage_dependent_count=lineage_count,
             dialect=args.dialect,
             use_exec_count=args.use_exec_count,
             schema_fields=fields,
-            adjudicate=args.adjudicate,
+            adjudicate=args.adjudicate and not args.no_adjudicate,
         )
         md = to_markdown(forecast, use_exec_count=args.use_exec_count)
         js = to_json(forecast, use_exec_count=args.use_exec_count)
-        if args.out:
-            Path(args.out).write_text(md, encoding="utf-8")
-            print(f"wrote {args.out}")
-        else:
-            print(md)
-        if args.json_out:
-            Path(args.json_out).write_text(js, encoding="utf-8")
-            print(f"wrote {args.json_out}")
+        _emit(md, js, args)
 
         if args.write_back:
             title = f"Premortem: {diff.kind} {diff.column}"
@@ -140,15 +197,18 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     if args.write_back:
-        p.error("--write-back requires --queries-dir (and --rename/--drop)")
+        p.error("--write-back requires --live or --queries-dir")
 
     print(
         "Schema-change rehearsal CLI.\n"
-        "  premortem --sql-file path.sql --column order_status\n"
-        "  premortem --queries-dir tests/fixtures/queries "
-        "--rename order_status:order_state --lineage-count 12\n"
-        "  … --adjudicate   # upgrade UNKNOWN via agent\n"
-        "  … --write-back --urn <dataset-urn>"
+        "  Offline:\n"
+        "    premortem --queries-dir tests/fixtures/queries "
+        "--rename order_status:order_state --lineage-count 12 --adjudicate\n"
+        "  Live DataHub (Quickstart):\n"
+        "    premortem --live --rename order_status:order_state "
+        "--out examples/forecast-order-status.md\n"
+        "    premortem --live --drop order_status --out examples/forecast-drop-order-status.md\n"
+        "    … --write-back   # tag + description on the dataset"
     )
 
 
