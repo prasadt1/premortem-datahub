@@ -1,0 +1,13 @@
+{
+  "column": "order_status",
+  "dialect": "snowflake",
+  "cases": [
+    {"file": "hard_where.sql", "severity": "hard", "evidence_contains": "WHERE"},
+    {"file": "soft_select.sql", "severity": "soft"},
+    {"file": "unknown_bare_join.sql", "severity": "unknown"},
+    {"file": "hard_qualified_join.sql", "severity": "hard"},
+    {"file": "unaffected.sql", "severity": "unaffected"},
+    {"file": "hard_groupby.sql", "severity": "hard", "evidence_contains": "GROUP"},
+    {"file": "hard_orderby.sql", "severity": "hard", "evidence_contains": "ORDER"}
+  ]
+}

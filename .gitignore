@@ -8,5 +8,11 @@ dist/
 build/
 .env
 .DS_Store
+
+# Internal — Claude / Cursor / human only (not for the public repo)
+VERIFY.md
+docs/LABOR.md
+docs/superpowers/
+media/
+scripts/
 examples/DEMO.md
-.venv/
