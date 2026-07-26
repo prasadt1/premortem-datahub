@@ -7,9 +7,9 @@ import os
 import sys
 from pathlib import Path
 
+from premortem.agent import rehearse
 from premortem.classify import classify_query
 from premortem.datahub_client import HttpDataHubClient, write_forecast_to_catalog
-from premortem.forecast import build_forecast
 from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
 from premortem.report import to_json, to_markdown
 
@@ -75,6 +75,15 @@ def main(argv: list[str] | None = None) -> None:
         help="Write forecast to DataHub (Gate 1 PASS: tag + description / document)",
     )
     p.add_argument(
+        "--adjudicate",
+        action="store_true",
+        help="Upgrade UNKNOWN findings via agent (heuristic binder by default)",
+    )
+    p.add_argument(
+        "--schema-fields",
+        help="Comma-separated schema fields for adjudication (default: the change column)",
+    )
+    p.add_argument(
         "--gms",
         default=os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080"),
         help="GMS URL for --write-back",
@@ -96,12 +105,19 @@ def main(argv: list[str] | None = None) -> None:
     if args.queries_dir:
         diff = _parse_diff(args)
         queries = _load_queries_from_dir(Path(args.queries_dir))
-        forecast = build_forecast(
+        fields = (
+            [f.strip() for f in args.schema_fields.split(",") if f.strip()]
+            if args.schema_fields
+            else [diff.column]
+        )
+        forecast = rehearse(
             diff=diff,
             queries=queries,
             lineage_dependent_count=args.lineage_count,
             dialect=args.dialect,
             use_exec_count=args.use_exec_count,
+            schema_fields=fields,
+            adjudicate=args.adjudicate,
         )
         md = to_markdown(forecast, use_exec_count=args.use_exec_count)
         js = to_json(forecast, use_exec_count=args.use_exec_count)
@@ -127,11 +143,12 @@ def main(argv: list[str] | None = None) -> None:
         p.error("--write-back requires --queries-dir (and --rename/--drop)")
 
     print(
-        "Core / offline CLI. Live query history after Gate 2.\n"
+        "Schema-change rehearsal CLI.\n"
         "  premortem --sql-file path.sql --column order_status\n"
         "  premortem --queries-dir tests/fixtures/queries "
         "--rename order_status:order_state --lineage-count 12\n"
-        "  … --write-back --urn <dataset-urn>   # Gate 1 PASS"
+        "  … --adjudicate   # upgrade UNKNOWN via agent\n"
+        "  … --write-back --urn <dataset-urn>"
     )
 
 

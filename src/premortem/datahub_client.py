@@ -333,8 +333,15 @@ class HttpDataHubClient:
         )
 
     def save_forecast_document(self, urn: str, title: str, body_md: str) -> str:
-        """Prefer createDocument; fall back to description + tag (Gate 1 tools)."""
+        """Write forecast so it is visible on the dataset page.
+
+        Quickstart often creates Document entities that never appear in search.
+        Always also tag + update the dataset description (Gate 1–proven, UI-visible).
+        Still attempt createDocument for Cloud / newer stacks.
+        """
         self._require_write_back()
+        refs: list[str] = []
+
         try:
             data = self._post(
                 """
@@ -352,18 +359,23 @@ class HttpDataHubClient:
             )
             doc = data.get("createDocument")
             if isinstance(doc, str) and doc:
-                return doc
-            if isinstance(doc, dict) and doc.get("urn"):
-                return str(doc["urn"])
+                refs.append(doc)
+            elif isinstance(doc, dict) and doc.get("urn"):
+                refs.append(str(doc["urn"]))
         except GraphqlError:
             pass
 
-        # Fallback path proven in Gate 1
         tag = self.ensure_forecast_tag()
         self.add_tags(urn, [tag])
+        # Keep original description context: prepend a clear Premortem block.
         header = f"## {title}\n\n"
-        self.update_description(urn, header + body_md)
-        return f"description+tag:{tag}"
+        footer = (
+            "\n\n---\n_Premortem schema rehearsal "
+            "(hard / soft / unknown). Tag: premortem_forecast._"
+        )
+        self.update_description(urn, header + body_md + footer)
+        refs.append(f"description+tag:{tag}")
+        return " | ".join(refs)
 
 
 def write_forecast_to_catalog(

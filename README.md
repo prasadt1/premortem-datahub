@@ -46,6 +46,16 @@ premortem --queries-dir tests/fixtures/queries \
   --out examples/forecast-offline.md
 ```
 
+Upgrade UNKNOWN findings with the agent binder (heuristic by default — no API key):
+
+```bash
+premortem --queries-dir tests/fixtures/queries \
+  --rename order_status:order_state \
+  --lineage-count 12 \
+  --adjudicate \
+  --schema-fields id,order_status,customer_id
+```
+
 Drop is the same pipeline:
 
 ```bash

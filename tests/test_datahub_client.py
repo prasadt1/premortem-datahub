@@ -65,8 +65,10 @@ def test_http_add_tags_posts_graphql():
 
 def test_http_save_forecast_falls_back_to_tag_and_description():
     client = HttpDataHubClient(gms_url="http://localhost:8080", write_back_enabled=True)
+    calls: list[str] = []
 
     def fake_post(query: str, variables=None):
+        calls.append(query)
         if "createDocument" in query:
             raise GraphqlError("documents not available")
         if "createTag" in query:
@@ -81,7 +83,34 @@ def test_http_save_forecast_falls_back_to_tag_and_description():
         ref = client.save_forecast_document(
             "urn:li:dataset:x", "Premortem", "# forecast"
         )
-    assert ref.startswith("description+tag:")
+    assert "description+tag:" in ref
+    assert any("batchAddTags" in c for c in calls)
+    assert any("updateDescription" in c for c in calls)
+
+
+def test_http_save_forecast_also_updates_description_when_doc_ok():
+    client = HttpDataHubClient(gms_url="http://localhost:8080", write_back_enabled=True)
+    calls: list[str] = []
+
+    def fake_post(query: str, variables=None):
+        calls.append(query)
+        if "createDocument" in query:
+            return {"createDocument": "urn:li:document:abc"}
+        if "createTag" in query:
+            return {"createTag": FORECAST_TAG_URN}
+        if "batchAddTags" in query:
+            return {"batchAddTags": True}
+        if "updateDescription" in query:
+            return {"updateDescription": True}
+        raise AssertionError(query)
+
+    with patch.object(client, "_post", side_effect=fake_post):
+        ref = client.save_forecast_document(
+            "urn:li:dataset:x", "Premortem", "# forecast"
+        )
+    assert "urn:li:document:abc" in ref
+    assert "description+tag:" in ref
+    assert any("updateDescription" in c for c in calls)
 
 
 def test_http_queries_from_seed_file(tmp_path):
