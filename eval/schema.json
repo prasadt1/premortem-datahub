@@ -1,0 +1,49 @@
+{
+  "subject": {
+    "dataset": "analytics.order_history",
+    "column": "order_status",
+    "change": {
+      "kind": "rename",
+      "new_column": "order_state"
+    },
+    "dialect": "snowflake"
+  },
+  "tables": {
+    "analytics.order_history": [
+      "order_id",
+      "customer_id",
+      "order_status",
+      "order_total",
+      "currency",
+      "created_at"
+    ],
+    "analytics.customers": [
+      "customer_id",
+      "customer_name",
+      "region",
+      "segment",
+      "created_at"
+    ],
+    "logistics.shipments": [
+      "shipment_id",
+      "order_id",
+      "order_status",
+      "carrier",
+      "shipped_at"
+    ],
+    "support.tickets": [
+      "ticket_id",
+      "order_id",
+      "status",
+      "priority",
+      "opened_at"
+    ],
+    "analytics.order_items": [
+      "order_item_id",
+      "order_id",
+      "product_id",
+      "quantity",
+      "unit_price"
+    ]
+  }
+}

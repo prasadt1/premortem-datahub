@@ -1,0 +1,296 @@
+{
+  "version": "1.0.0",
+  "dialect": "snowflake",
+  "subject": {
+    "dataset": "analytics.order_history",
+    "column": "order_status",
+    "change": {
+      "kind": "rename",
+      "new_column": "order_state"
+    },
+    "dialect": "snowflake"
+  },
+  "note": "Gold = ground truth per the approved taxonomy (remediation blast radius), authored blind-verified before any classifier tuning.",
+  "cases": [
+    {
+      "id": "q01",
+      "case_id": "hard_where_single",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column filters rows in WHERE (inequality predicate); wrong repair changes row counts."
+    },
+    {
+      "id": "q02",
+      "case_id": "decoy_other_dataset_bare",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Bare order_status but subject dataset absent; binds to logistics.shipments.order_status."
+    },
+    {
+      "id": "q03",
+      "case_id": "soft_select_plain",
+      "stratum": "unambiguous_soft",
+      "gold": "soft",
+      "rationale": "Projection-only reference on subject table; contained mechanical rename."
+    },
+    {
+      "id": "q04",
+      "case_id": "star_subject",
+      "stratum": "select_star",
+      "gold": "unknown",
+      "rationale": "Star ranges over subject dataset; projection includes subject column but no explicit reference settles usage - needs a human."
+    },
+    {
+      "id": "q05",
+      "case_id": "ambiguous_where",
+      "stratum": "truly_ambiguous",
+      "gold": "unknown",
+      "rationale": "Bare order_status with BOTH order_history and shipments in scope carrying the column; binding genuinely ambiguous."
+    },
+    {
+      "id": "q06",
+      "case_id": "hard_join_on",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Qualified subject reference inside JOIN condition; wrong repair changes join semantics."
+    },
+    {
+      "id": "q07",
+      "case_id": "cte_soft",
+      "stratum": "cte_single_source",
+      "gold": "soft",
+      "rationale": "Single-source CTE; subject column stays projection-only end to end. CTE must not count as a second table."
+    },
+    {
+      "id": "q08",
+      "case_id": "decoy_join_qualified_other",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Subject table IS in scope, but every order_status reference is qualified to shipments; subject column untouched."
+    },
+    {
+      "id": "q09",
+      "case_id": "jinja_star",
+      "stratum": "unparseable",
+      "gold": "unknown",
+      "rationale": "dbt/jinja template; does not parse as Snowflake SQL (verified). Unparseable -> UNKNOWN."
+    },
+    {
+      "id": "q10",
+      "case_id": "narrowable_where",
+      "stratum": "narrowable",
+      "gold": "hard",
+      "rationale": "Bare column, two tables in scope, but only the subject table carries order_status (order_items lacks it); unique resolution to subject; WHERE -> hard."
+    },
+    {
+      "id": "q11",
+      "case_id": "soft_select_qualified_join",
+      "stratum": "unambiguous_soft",
+      "gold": "soft",
+      "rationale": "Qualified subject reference confined to SELECT list; join keys unaffected."
+    },
+    {
+      "id": "q12",
+      "case_id": "hard_groupby",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column drives grouping; wrong repair changes aggregation results. HARD outranks the projection use."
+    },
+    {
+      "id": "q13",
+      "case_id": "star_other_table",
+      "stratum": "select_star",
+      "gold": "unaffected",
+      "rationale": "Star, but over a non-subject dataset only; cannot reference the subject column. Trap for a naive star->UNKNOWN rule."
+    },
+    {
+      "id": "q14",
+      "case_id": "subq_in_filter",
+      "stratum": "subquery",
+      "gold": "hard",
+      "rationale": "Subject column filters inside an IN-subquery; participates in outer row selection at nesting depth."
+    },
+    {
+      "id": "q15",
+      "case_id": "decoy_qualified_other",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Qualified reference to shipments.order_status; subject dataset absent."
+    },
+    {
+      "id": "q16",
+      "case_id": "cte_group_flow",
+      "stratum": "cte_single_source",
+      "gold": "hard",
+      "rationale": "Subject column flows through single-source CTE into outer GROUP BY; grouping semantics derive from subject column."
+    },
+    {
+      "id": "q17",
+      "case_id": "ambiguous_select",
+      "stratum": "truly_ambiguous",
+      "gold": "unknown",
+      "rationale": "Bare order_status; both in-scope tables carry the column; even projection-only use cannot be attributed."
+    },
+    {
+      "id": "q18",
+      "case_id": "hard_orderby",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column drives ordering; wrong repair silently changes result order."
+    },
+    {
+      "id": "q19",
+      "case_id": "truncated",
+      "stratum": "unparseable",
+      "gold": "unknown",
+      "rationale": "Truncated SQL (realistic query-log artifact); does not parse (verified). Unparseable -> UNKNOWN."
+    },
+    {
+      "id": "q20",
+      "case_id": "soft_select_alias",
+      "stratum": "unambiguous_soft",
+      "gold": "soft",
+      "rationale": "Aliased projection of subject column; contained rename."
+    },
+    {
+      "id": "q21",
+      "case_id": "decoy_comment",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Subject name appears only in a comment; no live reference."
+    },
+    {
+      "id": "q22",
+      "case_id": "narrowable_select",
+      "stratum": "narrowable",
+      "gold": "soft",
+      "rationale": "Bare column uniquely resolvable to subject (customers has no order_status); projection-only -> soft."
+    },
+    {
+      "id": "q23",
+      "case_id": "hard_having",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column inside HAVING aggregate condition; wrong repair changes which groups survive."
+    },
+    {
+      "id": "q24",
+      "case_id": "star_subject_join",
+      "stratum": "select_star",
+      "gold": "unknown",
+      "rationale": "Qualified star over subject dataset; projection includes subject column without explicit reference - needs a human."
+    },
+    {
+      "id": "q25",
+      "case_id": "cte_star_outer_where",
+      "stratum": "cte_single_source",
+      "gold": "hard",
+      "rationale": "Star is resolvable (single source = subject); outer WHERE order_status is an explicit reference binding through the CTE to the subject column. Explicit bound reference outranks star uncertainty."
+    },
+    {
+      "id": "q26",
+      "case_id": "decoy_literal",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Subject name appears only as a string literal."
+    },
+    {
+      "id": "q27",
+      "case_id": "subq_scalar_select",
+      "stratum": "subquery",
+      "gold": "hard",
+      "rationale": "Correlated scalar subquery in SELECT list, but the subject reference sits in the subquery's WHERE - it filters which rows aggregate; wrong repair changes values."
+    },
+    {
+      "id": "q28",
+      "case_id": "hard_qualify_window",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column partitions a window feeding QUALIFY row filtering; wrong repair changes which rows survive."
+    },
+    {
+      "id": "q29",
+      "case_id": "ambiguous_orderby",
+      "stratum": "truly_ambiguous",
+      "gold": "unknown",
+      "rationale": "Bare order_status in ORDER BY; both in-scope tables carry the column; binding ambiguous."
+    },
+    {
+      "id": "q30",
+      "case_id": "soft_select_expr",
+      "stratum": "unambiguous_soft",
+      "gold": "soft",
+      "rationale": "Subject column inside a SELECT-list expression only; contained rename."
+    },
+    {
+      "id": "q31",
+      "case_id": "jinja_config",
+      "stratum": "unparseable",
+      "gold": "unknown",
+      "rationale": "dbt model file with jinja config block; does not parse (verified)."
+    },
+    {
+      "id": "q32",
+      "case_id": "decoy_status_other_col",
+      "stratum": "decoy",
+      "gold": "unaffected",
+      "rationale": "Different column name (status != order_status) on a different table; no subject reference."
+    },
+    {
+      "id": "q33",
+      "case_id": "hard_correlated_exists",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Correlated EXISTS; subject column filters at nesting depth, controlling outer row selection."
+    },
+    {
+      "id": "q34",
+      "case_id": "narrowable_groupby_3tab",
+      "stratum": "narrowable",
+      "gold": "hard",
+      "rationale": "Bare column across three tables; only subject carries it; unique resolution; GROUP BY -> hard."
+    },
+    {
+      "id": "q35",
+      "case_id": "star_count_where",
+      "stratum": "select_star",
+      "gold": "hard",
+      "rationale": "COUNT(*) is not column expansion; the explicit WHERE reference decides. Trap for star-handling that overreaches."
+    },
+    {
+      "id": "q36",
+      "case_id": "cte_other_table",
+      "stratum": "cte_single_source",
+      "gold": "unaffected",
+      "rationale": "CTE over non-subject table; order_status binds through the CTE to shipments. CTE must not create a false subject binding."
+    },
+    {
+      "id": "q37",
+      "case_id": "placeholders",
+      "stratum": "unparseable",
+      "gold": "unknown",
+      "rationale": "Templated placeholders (${...}); does not parse as Snowflake (verified). Fixture-consistent columns."
+    },
+    {
+      "id": "q38",
+      "case_id": "hard_case_where",
+      "stratum": "unambiguous_hard",
+      "gold": "hard",
+      "rationale": "Subject column inside a CASE expression that lives in WHERE; still filter semantics."
+    },
+    {
+      "id": "q39",
+      "case_id": "subq_projection_in",
+      "stratum": "subquery",
+      "gold": "hard",
+      "rationale": "Subject column is projected by the subquery, but the projection IS the outer filter's value set; wrong repair changes which tickets match. Filter participation at depth outranks the projection form."
+    },
+    {
+      "id": "q40",
+      "case_id": "soft_select_case",
+      "stratum": "unambiguous_soft",
+      "gold": "soft",
+      "rationale": "CASE expression confined to SELECT list; the subject value shapes a projected column only; no row-selection participation."
+    }
+  ]
+}

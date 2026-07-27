@@ -1,0 +1,1 @@
+WITH recent AS (SELECT order_id, order_status FROM analytics.order_history WHERE created_at >= DATEADD('day', -30, CURRENT_DATE)) SELECT order_status, COUNT(*) AS n FROM recent GROUP BY recent.order_status

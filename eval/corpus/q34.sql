@@ -1,0 +1,1 @@
+SELECT order_status, SUM(i.quantity * i.unit_price) AS gmv FROM analytics.order_history o JOIN analytics.customers c ON o.customer_id = c.customer_id JOIN analytics.order_items i ON o.order_id = i.order_id GROUP BY order_status
