@@ -29,9 +29,11 @@ sys.path.insert(0, str(EVAL_DIR.parent / "src"))
 
 from premortem.agent import rehearse  # noqa: E402
 from premortem.classify import classify_query  # noqa: E402
+from premortem.llm_adjudicator import ResidueLlmAdjudicator  # noqa: E402
 from premortem.models import QueryRecord, SchemaDiff  # noqa: E402
 
 CLASSES = ["hard", "soft", "unknown", "unaffected"]
+LLM_CACHE = EVAL_DIR / "llm_adjudicator_cache.json"
 
 
 def load_fixture():
@@ -90,6 +92,42 @@ def predict_adjudicated(cases, column, dialect, schema):
         dialect=dialect,
         schema_fields=subject_fields,
         adjudicate=True,
+        subject_table=subject["dataset"],
+        tables=schema["tables"],
+    )
+    by_id = {f.query_id: f.severity.value for f in forecast.findings}
+    return {c["id"]: by_id.get(c["id"], "unaffected") for c in cases}
+
+
+def predict_b2_llm(cases, column, dialect, schema):
+    """Binder + residue LLM adjudicator (cache-only; no network in the harness)."""
+    subject = schema["subject"]
+    diff = SchemaDiff(
+        dataset_urn=f"eval:{subject['dataset']}",
+        kind=subject["change"]["kind"],
+        column=column,
+        new_column=subject["change"].get("new_column"),
+    )
+    queries = [QueryRecord(query_id=c["id"], sql=c["sql"]) for c in cases]
+    subject_fields = schema["tables"][subject["dataset"]]
+    if not LLM_CACHE.is_file():
+        # No cache yet — identical to binder-only C.
+        return predict_classifier(
+            cases, column=column, dialect=dialect, schema=schema
+        )
+    adj = ResidueLlmAdjudicator(
+        tables=schema["tables"],
+        subject_table=subject["dataset"],
+        cache_path=LLM_CACHE,
+        allow_network=False,
+    )
+    forecast = rehearse(
+        diff=diff,
+        queries=queries,
+        dialect=dialect,
+        schema_fields=subject_fields,
+        adjudicate=True,
+        adjudicator=adj,
         subject_table=subject["dataset"],
         tables=schema["tables"],
     )
@@ -197,15 +235,38 @@ def main():
         "C classifier": predict_classifier(
             cases, column=column, dialect=dialect, schema=schema
         ),
-        "C+A adjudicated": predict_adjudicated(cases, column=column, dialect=dialect, schema=schema),
+        "C+A adjudicated": predict_adjudicated(
+            cases, column=column, dialect=dialect, schema=schema
+        ),
+        "B2 LLM-on-residue": predict_b2_llm(
+            cases, column=column, dialect=dialect, schema=schema
+        ),
     }
     results = {name: score(cases, preds) for name, preds in runs.items()}
     lift = adjudicator_lift(cases, runs["C classifier"], runs["C+A adjudicated"])
+    lift_b2 = adjudicator_lift(cases, runs["C classifier"], runs["B2 LLM-on-residue"])
 
     if args.json:
-        print(json.dumps({"results": results, "adjudicator_lift": lift}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "results": results,
+                    "adjudicator_lift": lift,
+                    "b2_llm_lift": lift_b2,
+                },
+                indent=2,
+            )
+        )
     else:
         print(to_markdown(results, lift))
+        print(
+            f"B2 LLM-on-residue lift: bound {lift_b2['bound']}/{lift_b2['base_unknowns']} "
+            f"(bind rate {fmt(lift_b2['bind_rate'])}, "
+            f"bind accuracy {fmt(lift_b2['bind_accuracy'])})"
+        )
+        if lift_b2.get("bound_cases"):
+            print("B2 bound cases: " + json.dumps(lift_b2["bound_cases"]))
+        print()
 
 
 if __name__ == "__main__":

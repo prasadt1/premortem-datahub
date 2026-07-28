@@ -20,6 +20,15 @@ for f in binding-problem dual-mcp-flow eval-results verdict-taxonomy; do
 done
 ```
 
+### Eval explorer data
+
+The Pages [eval explorer](../eval-explorer.html) is driven by generated JSON/JS —
+see [EVAL_EXPLORER.md](../EVAL_EXPLORER.md). From the repo root:
+
+```bash
+python tools/generate_eval_explorer.py
+```
+
 1800×1200 is 3:2 — Devpost's recommended gallery ratio, and large enough to stay
 crisp when a judge opens an image full-screen.
 

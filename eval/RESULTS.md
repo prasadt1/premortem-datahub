@@ -15,6 +15,7 @@ classifier numbers). Re-run: `python eval/run_eval.py`.
 | B1 substring grep | 0.45 | 0.44 | 1.00 | 0.00 | 0.83 |
 | **C classifier (binder)** | **0.97** | **1.00** | **0.94** | 0.23 | **0.00** |
 | C+A adjudicated (heuristic) | 0.90 | 0.88 | 0.94 | 0.15 | 0.00 |
+| B2 LLM-on-residue (cached) | 0.97 | 1.00 | 0.94 | 0.23 | 0.00 |
 
 Before/after the multi-table binder (freeze baseline → binder):
 
@@ -38,9 +39,32 @@ Heuristic adjudication binds **3 of 9** classifier UNKNOWNs (bind rate 0.33) wit
 | q29 | unknown | hard |
 
 Those three are the entire `truly_ambiguous` stratum. Live/`--live` therefore
-defaults to **`adjudicate=False`** (binder-only). `--adjudicate` remains for the
-B2 / LLM-on-residue row later. Shipping an honest negative on our own component
-is intentional.
+defaults to **`adjudicate=False`** (binder-only). `--adjudicate` without an
+explicit LLM adjudicator still selects the net-negative heuristic. Shipping an
+honest negative on our own component is intentional.
+
+## B2 LLM-on-residue (measured)
+
+Residue-only LLM adjudicator (`ResidueLlmAdjudicator`): runs **only** on genuine
+multi-table bare-column UNKNOWNs (q05, q17, q29). Parse failures and `SELECT *`
+are not sent to the model. Temperature-0 Claude CLI responses are committed in
+[`eval/llm_adjudicator_cache.json`](llm_adjudicator_cache.json) so
+`python eval/run_eval.py` reproduces B2 with **no API key**.
+
+| metric | C binder | C+A heuristic | B2 LLM-on-residue |
+|---|---|---|---|
+| accuracy | **0.97** | 0.90 | **0.97** |
+| residue binds | — | 3/3 wrong | **0/3** (all left UNKNOWN) |
+| bind accuracy | — | 0.00 | n/a (no binds) |
+
+The model preferred “cannot determine” on every residue case — correct against
+gold (`unknown`) and the opposite of the heuristic’s false confidence. B2 does
+**not** beat binder-only on the headline metrics (it ties). Live default stays
+**binder-only**; B2 ships available via cache but is not the default path.
+
+“I tried the LLM on the residue and it refused to guess” is the published
+result — a second honest negative relative to the hope that an LLM would clear
+the UNKNOWN rate, and a positive relative to the heuristic.
 
 ## Named C miss (do not “fix” from the answer key)
 
@@ -60,15 +84,16 @@ With binder + `adjudicate=False` default:
 2. **Honest UNKNOWN** — `unknown_bare_two_tables` stays UNKNOWN (not emptied by the
    tautological adjudicator)
 
-## B2 placeholder
-
-LLM-on-residue (optional Aug 3–4) would replace the net-negative heuristic and
-update this file’s C+A / B2 row only. Corpus and labels stay frozen.
-
 ## Reproduce
 
 ```bash
 python eval/run_eval.py
 # or
 python eval/run_eval.py --json
+```
+
+Rebuild the LLM cache (requires Claude CLI; commit the file afterward):
+
+```bash
+python tools/build_llm_adjudicator_cache.py
 ```

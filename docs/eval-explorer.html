@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Premortem — frozen eval explorer</title>
+  <meta name="description" content="Browse all 40 frozen-eval queries: gold labels vs binder-only Premortem verdicts." />
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --surface: #fffcf7;
+      --ink: #1a1916;
+      --muted: #5c584f;
+      --line: #d9d4c8;
+      --accent: #1f4d3a;
+      --agree-bg: #e4ebe3;
+      --agree-ink: #2f4f38;
+      --disagree-bg: #f3e0dc;
+      --disagree-ink: #7a2e22;
+      --chip-bg: #ece8df;
+      --chip-on: #1f4d3a;
+      --chip-on-ink: #f7f5f1;
+      --code-bg: #ece8df;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141311;
+        --surface: #1c1b18;
+        --ink: #f2efe7;
+        --muted: #a8a296;
+        --line: #3a372f;
+        --accent: #8fbfa6;
+        --agree-bg: #223028;
+        --agree-ink: #b5d0bc;
+        --disagree-bg: #3a221e;
+        --disagree-ink: #f0b5aa;
+        --chip-bg: #26241f;
+        --chip-on: #8fbfa6;
+        --chip-on-ink: #141311;
+        --code-bg: #26241f;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 420px at 8% -8%, rgba(31, 77, 58, 0.08), transparent 60%),
+        radial-gradient(800px 360px at 100% 0%, rgba(122, 46, 34, 0.06), transparent 55%),
+        var(--bg);
+      font-family: var(--ui);
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+    main {
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 1.75rem 1.1rem 3.5rem;
+    }
+    a { color: var(--accent); }
+    h1 {
+      font-family: var(--sans);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-size: clamp(1.65rem, 4.5vw, 2.15rem);
+      line-height: 1.15;
+      margin: 0.35rem 0 0.5rem;
+    }
+    .nav { font-size: 0.92rem; }
+    .note {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0 0 1.25rem;
+      max-width: 42rem;
+    }
+    .note code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--code-bg);
+      padding: 0.1em 0.35em;
+    }
+    .summary {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0 0 1rem;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--chip-bg);
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .chip[aria-pressed="true"] {
+      background: var(--chip-on);
+      color: var(--chip-on-ink);
+      border-color: var(--chip-on);
+    }
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.92rem;
+      color: var(--ink);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle input { width: 1rem; height: 1rem; accent-color: var(--accent); }
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 0.9rem 0.95rem 1rem;
+      min-width: 0;
+    }
+    .card.disagree {
+      border-color: var(--disagree-ink);
+      box-shadow: inset 3px 0 0 var(--disagree-ink);
+    }
+    .card-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem 0.65rem;
+      margin-bottom: 0.55rem;
+    }
+    .qid {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .stratum {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+    }
+    .badge.agree {
+      background: var(--agree-bg);
+      color: var(--agree-ink);
+    }
+    .badge.disagree {
+      background: var(--disagree-bg);
+      color: var(--disagree-ink);
+    }
+    .labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      font-size: 0.9rem;
+      margin: 0 0 0.55rem;
+    }
+    .labels dt {
+      display: inline;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .labels dd {
+      display: inline;
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.88rem;
+    }
+    .pair { white-space: nowrap; }
+    pre.sql {
+      margin: 0 0 0.55rem;
+      padding: 0.65rem 0.75rem;
+      background: var(--code-bg);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+      word-break: break-word;
+    }
+    .meta strong { color: var(--ink); font-weight: 600; }
+    .empty {
+      color: var(--muted);
+      padding: 1.5rem 0;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="nav"><a href="index.html">← Premortem</a></p>
+    <h1>Frozen eval explorer</h1>
+    <p class="note">
+      Generated from the frozen eval (binder-only classifier). Regenerate with
+      <code>python tools/generate_eval_explorer.py</code> — do not hand-edit the data files.
+    </p>
+    <p class="summary" id="summary"></p>
+    <div class="controls">
+      <div class="chips" id="chips" role="group" aria-label="Filter by stratum"></div>
+      <label class="toggle">
+        <input type="checkbox" id="disagreeOnly" />
+        Show only disagreements
+      </label>
+    </div>
+    <ul class="list" id="list"></ul>
+    <p class="empty hidden" id="empty">No cases match the current filters.</p>
+  </main>
+  <script src="./eval-explorer-data.js"></script>
+  <script>
+(function () {
+  var data = window.EVAL_EXPLORER_DATA;
+  if (!data || !Array.isArray(data.cases)) {
+    document.getElementById("summary").textContent =
+      "Missing eval-explorer-data.js — run: python tools/generate_eval_explorer.py";
+    return;
+  }
+
+  var cases = data.cases;
+  var activeStratum = "all";
+  var disagreeOnly = false;
+
+  var strata = [];
+  var seen = {};
+  cases.forEach(function (c) {
+    if (!seen[c.stratum]) {
+      seen[c.stratum] = true;
+      strata.push(c.stratum);
+    }
+  });
+  strata.sort();
+
+  var summary = document.getElementById("summary");
+  summary.textContent =
+    data.n_cases + " queries · " + data.n_agree + " agree · " +
+    data.n_disagree + " disagree · subject `" + data.subject_table +
+    "` · column `" + data.column + "`";
+
+  var chips = document.getElementById("chips");
+  function addChip(value, label) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip";
+    btn.textContent = label;
+    btn.setAttribute("aria-pressed", value === activeStratum ? "true" : "false");
+    btn.dataset.stratum = value;
+    btn.addEventListener("click", function () {
+      activeStratum = value;
+      Array.prototype.forEach.call(chips.querySelectorAll(".chip"), function (el) {
+        el.setAttribute("aria-pressed", el.dataset.stratum === activeStratum ? "true" : "false");
+      });
+      render();
+    });
+    chips.appendChild(btn);
+  }
+  addChip("all", "All");
+  strata.forEach(function (s) { addChip(s, s); });
+
+  document.getElementById("disagreeOnly").addEventListener("change", function (e) {
+    disagreeOnly = e.target.checked;
+    render();
+  });
+
+  var list = document.getElementById("list");
+  var empty = document.getElementById("empty");
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function render() {
+    list.innerHTML = "";
+    var shown = 0;
+    cases.forEach(function (c) {
+      if (activeStratum !== "all" && c.stratum !== activeStratum) return;
+      if (disagreeOnly && c.agree) return;
+      shown++;
+
+      var li = document.createElement("li");
+      li.className = "card" + (c.agree ? "" : " disagree");
+      if (c.id === "q39") li.id = "q39";
+
+      var badgeClass = c.agree ? "agree" : "disagree";
+      var badgeText = c.agree ? "agree" : "disagree";
+
+      var reasonBits = [];
+      if (c.evidence) {
+        reasonBits.push("<strong>evidence</strong> " + esc(c.evidence));
+      }
+      if (c.unknown_reason) {
+        reasonBits.push("<strong>reason</strong> " + esc(c.unknown_reason));
+      }
+      if (c.agent_note) {
+        reasonBits.push("<strong>agent</strong> " + esc(c.agent_note));
+      }
+      if (!c.agree && !c.unknown_reason && c.evidence) {
+        reasonBits.push(
+          "<strong>miss</strong> gold " + esc(c.gold) + " → predicted " + esc(c.predicted)
+        );
+      }
+
+      li.innerHTML =
+        '<div class="card-head">' +
+          '<span class="qid">' + esc(c.id) + '</span>' +
+          '<span class="stratum">' + esc(c.stratum) + '</span>' +
+          '<span class="badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '</div>' +
+        '<dl class="labels">' +
+          '<span class="pair"><dt>Gold </dt><dd>' + esc(c.gold) + '</dd></span>' +
+          '<span class="pair"><dt>Premortem </dt><dd>' + esc(c.predicted) + '</dd></span>' +
+        '</dl>' +
+        '<pre class="sql">' + esc(c.sql.trim()) + '</pre>' +
+        (reasonBits.length
+          ? '<p class="meta">' + reasonBits.join(" · ") + '</p>'
+          : '');
+
+      list.appendChild(li);
+    });
+    empty.classList.toggle("hidden", shown > 0);
+  }
+
+  render();
+})();
+  </script>
+</body>
+</html>

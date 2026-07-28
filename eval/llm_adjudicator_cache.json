@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "model": "claude-cli",
+  "temperature": 0,
+  "entries": {
+    "8517eb308ad81e53279771847e6564f65135bbb7433a841110ce553205c62833": {
+      "severity": "unknown",
+      "note": "The column `order_status` is unqualified in the WHERE clause and both analytics.order_history and logistics.shipments expose that column in scope. Most SQL engines would raise an ambiguous-column error. Without an explicit table qualifier (o.order_status or s.order_status), binding cannot be determined.",
+      "cache_key": "8517eb308ad81e53279771847e6564f65135bbb7433a841110ce553205c62833",
+      "query_id": "q05"
+    },
+    "0325056571f46c46c19b514f7d86f03e8b36066ada41547f5250d55b239fd42d": {
+      "severity": "unknown",
+      "note": "The column `order_status` is unqualified and both analytics.order_history and logistics.shipments expose that column in the join scope. Standard SQL engines (PostgreSQL, SQL Server, Oracle, MySQL strict) would raise an ambiguous-column error, so the reference does not deterministically bind to either table.",
+      "cache_key": "0325056571f46c46c19b514f7d86f03e8b36066ada41547f5250d55b239fd42d",
+      "query_id": "q17"
+    },
+    "1f3fb9833deac6ec59ea7862ad97bb5dfe6f88f14f2d92aa583726ca33b00746": {
+      "severity": "unknown",
+      "note": "The ORDER BY reference `order_status` is unqualified and both analytics.order_history and logistics.shipments have that column in scope; a compliant SQL engine would raise an ambiguity error, so binding cannot be determined.",
+      "cache_key": "1f3fb9833deac6ec59ea7862ad97bb5dfe6f88f14f2d92aa583726ca33b00746",
+      "query_id": "q29"
+    }
+  },
+  "note": "Committed so eval B2 reproduces without API credentials."
+}

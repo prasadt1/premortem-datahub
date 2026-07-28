@@ -1,0 +1,411 @@
+{
+  "source": "frozen eval (binder-only classifier)",
+  "column": "order_status",
+  "subject_table": "analytics.order_history",
+  "dialect": "snowflake",
+  "n_cases": 40,
+  "n_agree": 39,
+  "n_disagree": 1,
+  "cases": [
+    {
+      "id": "q01",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT order_id FROM analytics.order_history WHERE order_status <> 'CANCELLED' AND order_total > 500\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q02",
+      "stratum": "decoy",
+      "sql": "SELECT order_status, COUNT(*) AS n FROM logistics.shipments GROUP BY order_status\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "BOUND_ELSEWHERE:shipments",
+      "unknown_reason": null
+    },
+    {
+      "id": "q03",
+      "stratum": "unambiguous_soft",
+      "sql": "SELECT customer_id, order_status, created_at FROM analytics.order_history\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q04",
+      "stratum": "select_star",
+      "sql": "SELECT * FROM analytics.order_history WHERE created_at >= '2026-01-01'\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "STAR",
+      "unknown_reason": "SELECT * may hide column references; needs schema expand or human"
+    },
+    {
+      "id": "q05",
+      "stratum": "truly_ambiguous",
+      "sql": "SELECT o.order_id FROM analytics.order_history o JOIN logistics.shipments s ON o.order_id = s.order_id WHERE order_status = 'DELIVERED'\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
+    },
+    {
+      "id": "q06",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT o.order_id, s.carrier FROM analytics.order_history o JOIN logistics.shipments s ON o.order_id = s.order_id AND o.order_status = 'SHIPPED'\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "JOIN",
+      "unknown_reason": null
+    },
+    {
+      "id": "q07",
+      "stratum": "cte_single_source",
+      "sql": "WITH base AS (SELECT order_id, order_status FROM analytics.order_history) SELECT order_id, order_status FROM base\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q08",
+      "stratum": "decoy",
+      "sql": "SELECT o.order_id, s.order_status FROM analytics.order_history o JOIN logistics.shipments s ON o.order_id = s.order_id WHERE s.order_status = 'RETURNED'\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "BOUND_ELSEWHERE:shipments",
+      "unknown_reason": null
+    },
+    {
+      "id": "q09",
+      "stratum": "unparseable",
+      "sql": "SELECT {{ dbt_utils.star(ref('order_history')) }} FROM {{ ref('order_history') }} WHERE order_status = 'OPEN'\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "PARSE",
+      "unknown_reason": "sqlglot parse failed: Expected table name but got <Token token_type: TokenType.L_BRACE, text: {, line: 1, col: 56, start: 55, end: 55, comments: []>. Line 1, Col: 56.\n  SELECT {{ dbt_utils.star(ref('order_history')) }} FROM \u001b[4m{\u001b[0m{ ref('order_history') }} WHERE order_status = 'OPEN'\n"
+    },
+    {
+      "id": "q10",
+      "stratum": "narrowable",
+      "sql": "SELECT o.order_id, i.product_id FROM analytics.order_history o JOIN analytics.order_items i ON o.order_id = i.order_id WHERE order_status = 'PARTIALLY_SHIPPED'\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q11",
+      "stratum": "unambiguous_soft",
+      "sql": "SELECT o.order_id, o.order_status, c.region FROM analytics.order_history o JOIN analytics.customers c ON o.customer_id = c.customer_id\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q12",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT order_status, COUNT(*) AS n FROM analytics.order_history GROUP BY order_status\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "GROUP",
+      "unknown_reason": null
+    },
+    {
+      "id": "q13",
+      "stratum": "select_star",
+      "sql": "SELECT * FROM logistics.shipments WHERE shipped_at IS NULL\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "NO_REFERENCE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q14",
+      "stratum": "subquery",
+      "sql": "SELECT c.customer_id, c.customer_name FROM analytics.customers c WHERE c.customer_id IN (SELECT customer_id FROM analytics.order_history WHERE order_status = 'ON_HOLD')\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q15",
+      "stratum": "decoy",
+      "sql": "SELECT s.shipment_id, s.carrier FROM logistics.shipments s WHERE s.order_status = 'IN_TRANSIT'\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "BOUND_ELSEWHERE:shipments",
+      "unknown_reason": null
+    },
+    {
+      "id": "q16",
+      "stratum": "cte_single_source",
+      "sql": "WITH recent AS (SELECT order_id, order_status FROM analytics.order_history WHERE created_at >= DATEADD('day', -30, CURRENT_DATE)) SELECT order_status, COUNT(*) AS n FROM recent GROUP BY recent.order_status\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "GROUP",
+      "unknown_reason": null
+    },
+    {
+      "id": "q17",
+      "stratum": "truly_ambiguous",
+      "sql": "SELECT order_status, s.carrier FROM analytics.order_history o JOIN logistics.shipments s ON o.order_id = s.order_id\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
+    },
+    {
+      "id": "q18",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT order_id, order_status FROM analytics.order_history ORDER BY order_status DESC, created_at\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "ORDER",
+      "unknown_reason": null
+    },
+    {
+      "id": "q19",
+      "stratum": "unparseable",
+      "sql": "SELECT order_id, order_status FROM analytics.order_history WHERE order_status IN ('OPEN',\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "PARSE",
+      "unknown_reason": "sqlglot parse failed: Expecting ). Line 1, Col: 89.\n  SELECT order_id, order_status FROM analytics.order_history WHERE order_status IN ('OPEN'\u001b[4m,\u001b[0m\n"
+    },
+    {
+      "id": "q20",
+      "stratum": "unambiguous_soft",
+      "sql": "SELECT order_status AS current_state, order_id FROM analytics.order_history\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q21",
+      "stratum": "decoy",
+      "sql": "-- TODO: re-add order_status filter after backfill\nSELECT order_id, order_total FROM analytics.order_history WHERE created_at > '2026-01-01'\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "NO_REFERENCE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q22",
+      "stratum": "narrowable",
+      "sql": "SELECT order_status, c.region FROM analytics.order_history o JOIN analytics.customers c ON o.customer_id = c.customer_id\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q23",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT customer_id, COUNT(*) AS n FROM analytics.order_history GROUP BY customer_id HAVING COUNT(CASE WHEN order_status = 'CANCELLED' THEN 1 END) > 3\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "HAVING",
+      "unknown_reason": null
+    },
+    {
+      "id": "q24",
+      "stratum": "select_star",
+      "sql": "SELECT o.*, c.region FROM analytics.order_history o JOIN analytics.customers c ON o.customer_id = c.customer_id\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "STAR",
+      "unknown_reason": "SELECT * may hide column references; needs schema expand or human"
+    },
+    {
+      "id": "q25",
+      "stratum": "cte_single_source",
+      "sql": "WITH o AS (SELECT * FROM analytics.order_history) SELECT order_id FROM o WHERE order_status = 'OPEN'\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q26",
+      "stratum": "decoy",
+      "sql": "SELECT 'order_status' AS config_key, COUNT(*) AS row_ct FROM analytics.order_history\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "NO_REFERENCE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q27",
+      "stratum": "subquery",
+      "sql": "SELECT c.customer_id, (SELECT MAX(o.created_at) FROM analytics.order_history o WHERE o.customer_id = c.customer_id AND o.order_status = 'COMPLETE') AS last_completed_at FROM analytics.customers c\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q28",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT order_id, ROW_NUMBER() OVER (PARTITION BY order_status ORDER BY created_at DESC) AS rn FROM analytics.order_history QUALIFY rn = 1\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "PARTITION",
+      "unknown_reason": null
+    },
+    {
+      "id": "q29",
+      "stratum": "truly_ambiguous",
+      "sql": "SELECT o.order_id, s.shipment_id FROM analytics.order_history o JOIN logistics.shipments s ON o.order_id = s.order_id ORDER BY order_status\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "ORDER",
+      "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
+    },
+    {
+      "id": "q30",
+      "stratum": "unambiguous_soft",
+      "sql": "SELECT order_id, UPPER(order_status) AS status_uc FROM analytics.order_history\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q31",
+      "stratum": "unparseable",
+      "sql": "{{ config(materialized='table') }}\nSELECT order_id, order_status FROM {{ source('analytics','order_history') }}\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "PARSE",
+      "unknown_reason": "sqlglot parse failed: Invalid expression / Unexpected token. Line 2, Col: 6.\n  {{ config(materialized='table') }}\n\u001b[4mSELECT\u001b[0m order_id, order_status FROM {{ source('analytics','order_history') }}\n"
+    },
+    {
+      "id": "q32",
+      "stratum": "decoy",
+      "sql": "SELECT t.ticket_id, t.priority FROM support.tickets t WHERE t.status = 'OPEN'\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "NO_REFERENCE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q33",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT c.customer_id FROM analytics.customers c WHERE EXISTS (SELECT 1 FROM analytics.order_history o WHERE o.customer_id = c.customer_id AND o.order_status = 'OPEN')\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q34",
+      "stratum": "narrowable",
+      "sql": "SELECT order_status, SUM(i.quantity * i.unit_price) AS gmv FROM analytics.order_history o JOIN analytics.customers c ON o.customer_id = c.customer_id JOIN analytics.order_items i ON o.order_id = i.order_id GROUP BY order_status\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "GROUP",
+      "unknown_reason": null
+    },
+    {
+      "id": "q35",
+      "stratum": "select_star",
+      "sql": "SELECT COUNT(*) AS open_orders FROM analytics.order_history WHERE order_status = 'OPEN'\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q36",
+      "stratum": "cte_single_source",
+      "sql": "WITH s AS (SELECT * FROM logistics.shipments) SELECT s.shipment_id, s.order_status FROM s\n",
+      "gold": "unaffected",
+      "predicted": "unaffected",
+      "agree": true,
+      "evidence": "BOUND_ELSEWHERE:shipments",
+      "unknown_reason": null
+    },
+    {
+      "id": "q37",
+      "stratum": "unparseable",
+      "sql": "SELECT order_id FROM analytics.order_history WHERE order_status = :status_param AND currency = ${currency_code}\n",
+      "gold": "unknown",
+      "predicted": "unknown",
+      "agree": true,
+      "evidence": "PARSE",
+      "unknown_reason": "sqlglot parse failed: Required keyword: 'this' missing for <class 'sqlglot.expressions.core.Parameter'>. Line 1, Col: 97.\n  SELECT order_id FROM analytics.order_history WHERE order_status = :status_param AND currency = $\u001b[4m{\u001b[0mcurrency_code}\n"
+    },
+    {
+      "id": "q38",
+      "stratum": "unambiguous_hard",
+      "sql": "SELECT order_id FROM analytics.order_history WHERE CASE WHEN order_status IN ('OPEN', 'ON_HOLD') THEN 1 ELSE 0 END = 1\n",
+      "gold": "hard",
+      "predicted": "hard",
+      "agree": true,
+      "evidence": "WHERE",
+      "unknown_reason": null
+    },
+    {
+      "id": "q39",
+      "stratum": "subquery",
+      "sql": "SELECT t.ticket_id FROM support.tickets t WHERE t.priority IN (SELECT order_status FROM analytics.order_history)\n",
+      "gold": "hard",
+      "predicted": "soft",
+      "agree": false,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    },
+    {
+      "id": "q40",
+      "stratum": "unambiguous_soft",
+      "sql": "SELECT order_id, CASE WHEN order_status = 'COMPLETE' THEN 'done' ELSE 'wip' END AS phase FROM analytics.order_history\n",
+      "gold": "soft",
+      "predicted": "soft",
+      "agree": true,
+      "evidence": "SELECT",
+      "unknown_reason": null
+    }
+  ]
+}

@@ -225,6 +225,227 @@
       .row { grid-template-columns: 1fr; gap: 0.35rem; }
       .badge { width: auto; }
     }
+
+    /* Binding walkthrough */
+    .binding-walk {
+      margin: 1.35rem 0 0.25rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .binding-walk-head {
+      padding: 0.95rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .binding-walk-head strong {
+      display: block;
+      font-family: var(--sans);
+      font-size: 1.05rem;
+    }
+    .binding-walk-head span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .binding-walk-stage {
+      position: relative;
+      min-height: 11.5rem;
+      padding: 1rem;
+    }
+    .bw-step {
+      display: none;
+    }
+    .bw-step.is-active {
+      display: block;
+    }
+    .bw-step[hidden] {
+      display: none !important;
+    }
+    .bw-kicker {
+      margin: 0 0 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .bw-explain {
+      margin: 0.65rem 0 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .bw-sql {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--ink);
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.75rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bw-sql .hl {
+      background: rgba(31, 77, 58, 0.18);
+      box-shadow: inset 0 -1px 0 var(--accent);
+      border-radius: 0.15rem;
+      padding: 0.05rem 0.12rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      .bw-sql .hl {
+        background: rgba(143, 191, 166, 0.22);
+      }
+    }
+    .bw-tables {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      margin-top: 0.15rem;
+    }
+    .bw-table {
+      border: 1px solid var(--line);
+      background: var(--code-bg);
+      padding: 0.65rem 0.7rem;
+      font-size: 0.85rem;
+    }
+    .bw-table.is-subject {
+      border-color: var(--hard-ink);
+      box-shadow: inset 0 0 0 1px var(--hard-ink);
+    }
+    .bw-table.is-bound {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+    .bw-table .name {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+    .bw-table .meta {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .bw-table .col {
+      display: block;
+      margin-top: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+    .bw-bind {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem 0.65rem;
+      margin-top: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+    .bw-bind .token {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      padding: 0.28rem 0.45rem;
+    }
+    .bw-bind .arrow {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .bw-verdict {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.15rem;
+    }
+    .bw-verdict .badge {
+      width: auto;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.55rem;
+    }
+    .bw-verdict-note {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .bw-tables-follow { margin-top: 0.75rem; }
+    .bw-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-top: 1px solid var(--line);
+    }
+    .bw-btn {
+      font-family: var(--ui);
+      font-size: 0.85rem;
+      color: var(--ink);
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      padding: 0.35rem 0.7rem;
+      cursor: pointer;
+    }
+    .bw-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .bw-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .bw-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .bw-dots {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+    .bw-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+    }
+    .bw-dot[aria-current="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .bw-dot:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .bw-sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 560px) {
+      .bw-tables { grid-template-columns: 1fr; }
+      .binding-walk-stage { min-height: 0; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .bw-step.is-active {
+        animation: bw-in 0.35s ease both;
+      }
+      @keyframes bw-in {
+        from { opacity: 0; transform: translateY(0.35rem); }
+        to { opacity: 1; transform: none; }
+      }
+    }
   </style>
 </head>
 <body>
@@ -271,6 +492,102 @@ python eval/run_eval.py</code></pre>
           clears it by name. That single distinction took decoy false positives from 0.50 to 0.00.
         </figcaption>
       </figure>
+
+      <div
+        class="binding-walk"
+        id="binding-walk"
+        role="region"
+        aria-labelledby="binding-walk-title"
+        aria-roledescription="animated walkthrough"
+        tabindex="0"
+      >
+        <div class="binding-walk-head">
+          <strong id="binding-walk-title">Decoy walkthrough</strong>
+          <span>Same column name on two tables — only binding clears the false positive</span>
+        </div>
+
+        <div class="binding-walk-stage" id="bw-stage">
+          <p class="bw-sr" id="bw-live" aria-live="polite"></p>
+
+          <div class="bw-step is-active" data-step="0" role="group" aria-labelledby="bw-k0" aria-hidden="false">
+            <p class="bw-kicker" id="bw-k0">Step 1 of 4 — Query arrives</p>
+            <pre class="bw-sql" tabindex="0"><code>SELECT s.shipment_id FROM shipments s
+WHERE s.order_status = 'SHIPPED'</code></pre>
+            <p class="bw-explain">
+              A consumer query mentions <code>order_status</code>. Naïve name matching
+              would flag it as breaking the rename on <code>order_history</code>.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="1" role="group" aria-labelledby="bw-k1" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k1">Step 2 of 4 — Two tables in scope</p>
+            <div class="bw-tables">
+              <div class="bw-table is-subject">
+                <span class="name">order_history</span>
+                <span class="meta">subject of the rename</span>
+                <span class="col">order_status</span>
+              </div>
+              <div class="bw-table">
+                <span class="name">shipments</span>
+                <span class="meta">also in the warehouse</span>
+                <span class="col">order_status</span>
+              </div>
+            </div>
+            <p class="bw-explain">
+              Both tables carry <code>order_status</code>. Column-name equality alone
+              cannot tell which one this query means.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="2" role="group" aria-labelledby="bw-k2" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k2">Step 3 of 4 — Resolve the alias</p>
+            <pre class="bw-sql" tabindex="0"><code>SELECT <span class="hl">s</span>.shipment_id FROM shipments <span class="hl">s</span>
+WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
+            <div class="bw-bind">
+              <span class="token">s</span>
+              <span class="arrow" aria-hidden="true">→</span>
+              <span class="bw-sr">binds to</span>
+              <span class="token">shipments</span>
+            </div>
+            <p class="bw-explain">
+              Premortem binds alias <code>s</code> to <code>shipments</code>, so
+              <code>s.order_status</code> is not a reference to the subject table.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="3" role="group" aria-labelledby="bw-k3" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k3">Step 4 of 4 — Not the subject</p>
+            <div class="bw-verdict">
+              <span class="badge cleared">CLEARED</span>
+              <span class="bw-verdict-note">binds to <code>shipments</code> · not <code>order_history</code></span>
+            </div>
+            <div class="bw-tables bw-tables-follow">
+              <div class="bw-table">
+                <span class="name">order_history</span>
+                <span class="meta">subject — unchanged by this query</span>
+              </div>
+              <div class="bw-table is-bound">
+                <span class="name">shipments</span>
+                <span class="meta">bound reference — safe to clear</span>
+              </div>
+            </div>
+            <p class="bw-explain">
+              Cleared by name. That distinction took decoy false positives from 0.50 to 0.00.
+            </p>
+          </div>
+        </div>
+
+        <div class="bw-controls">
+          <button type="button" class="bw-btn" id="bw-prev" aria-label="Previous step" disabled>Prev</button>
+          <div class="bw-dots" role="group" aria-label="Walkthrough steps">
+            <button type="button" class="bw-dot" aria-label="Go to step 1: Query arrives" aria-current="true" data-goto="0"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 2: Two tables in scope" data-goto="1"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 3: Resolve the alias" data-goto="2"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 4: Not the subject — CLEARED" data-goto="3"></button>
+          </div>
+          <button type="button" class="bw-btn" id="bw-next" aria-label="Next step">Next</button>
+        </div>
+      </div>
     </section>
 
     <section aria-labelledby="forecast">
@@ -403,6 +720,8 @@ python eval/run_eval.py</code></pre>
       <h2 id="links">Links</h2>
       <ul class="links">
         <li><a href="https://github.com/prasadt1/premortem-datahub">Repository</a></li>
+        <li><a href="eval-explorer.html">Frozen eval explorer</a> — all 40 queries, gold vs binder verdict</li>
+        <li><a href="real-world-run.md">Real-world run</a> — mozilla/bigquery-etl observables (not the frozen eval)</li>
         <li><a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a></li>
         <li><a href="https://github.com/prasadt1/premortem-datahub/tree/main/examples">examples/</a></li>
         <li>
@@ -424,5 +743,118 @@ python eval/run_eval.py</code></pre>
       come from the frozen eval — not from this demo instance.
     </footer>
   </main>
+  <script>
+    (function () {
+      var root = document.getElementById("binding-walk");
+      if (!root) return;
+
+      var steps = Array.prototype.slice.call(root.querySelectorAll(".bw-step"));
+      var dots = Array.prototype.slice.call(root.querySelectorAll(".bw-dot"));
+      var prevBtn = document.getElementById("bw-prev");
+      var nextBtn = document.getElementById("bw-next");
+      var live = document.getElementById("bw-live");
+      var total = steps.length;
+      var current = 0;
+      var autoplayDone = false;
+      var autoplayTimer = null;
+      var STEP_MS = 2800;
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      var titles = [
+        "Step 1 of 4: Query arrives",
+        "Step 2 of 4: Two tables in scope",
+        "Step 3 of 4: Resolve alias s to shipments",
+        "Step 4 of 4: Not the subject — CLEARED"
+      ];
+
+      function stopAutoplay() {
+        if (autoplayTimer) {
+          clearTimeout(autoplayTimer);
+          autoplayTimer = null;
+        }
+        autoplayDone = true;
+      }
+
+      function goTo(index, opts) {
+        opts = opts || {};
+        if (index < 0 || index >= total) return;
+        if (!opts.fromAutoplay) stopAutoplay();
+
+        current = index;
+        steps.forEach(function (el, i) {
+          var on = i === current;
+          el.classList.toggle("is-active", on);
+          el.hidden = !on;
+          el.setAttribute("aria-hidden", on ? "false" : "true");
+        });
+        dots.forEach(function (dot, i) {
+          if (i === current) dot.setAttribute("aria-current", "true");
+          else dot.removeAttribute("aria-current");
+        });
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === total - 1;
+        if (live) live.textContent = titles[current];
+      }
+
+      function scheduleNext() {
+        if (autoplayDone || reduceMotion) return;
+        if (current >= total - 1) {
+          autoplayDone = true;
+          return;
+        }
+        autoplayTimer = setTimeout(function () {
+          goTo(current + 1, { fromAutoplay: true });
+          scheduleNext();
+        }, STEP_MS);
+      }
+
+      function startAutoplay() {
+        if (autoplayDone || reduceMotion) return;
+        autoplayDone = false;
+        goTo(0, { fromAutoplay: true });
+        scheduleNext();
+      }
+
+      prevBtn.addEventListener("click", function () { goTo(current - 1); });
+      nextBtn.addEventListener("click", function () { goTo(current + 1); });
+      dots.forEach(function (dot) {
+        dot.addEventListener("click", function () {
+          goTo(parseInt(dot.getAttribute("data-goto"), 10));
+        });
+      });
+
+      root.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          goTo(current - 1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          goTo(current + 1);
+        }
+      });
+
+      if (reduceMotion) {
+        goTo(total - 1);
+        autoplayDone = true;
+      } else if ("IntersectionObserver" in window) {
+        var seen = false;
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting && !seen) {
+                seen = true;
+                startAutoplay();
+                io.disconnect();
+              }
+            });
+          },
+          { threshold: 0.45 }
+        );
+        io.observe(root);
+      } else {
+        startAutoplay();
+      }
+    })();
+  </script>
 </body>
 </html>

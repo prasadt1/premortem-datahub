@@ -100,7 +100,7 @@ Details and versions: [`examples/OSS_ISSUES.md`](examples/OSS_ISSUES.md).
 - Camera assertion: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
 - MCP composition (filming): [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)
 
-Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md).
+Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md). Real-world observables (no labels): [`docs/real-world-run.md`](docs/real-world-run.md). Eval explorer: [prasadt1.github.io/premortem-datahub/eval-explorer.html](https://prasadt1.github.io/premortem-datahub/eval-explorer.html).
 
 ## Limits (honest)
 
