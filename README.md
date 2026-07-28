@@ -75,7 +75,7 @@ Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbe
 - Not 100% breakage prediction — macros, dynamic SQL, and residual ambiguity land in **unknown**
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
-- **Showcase query history on the demo URN was seeded** — the datapack shipped no QUERY entities and `listQueries` is empty on our Quickstart (v1.5.0.6)
+- **Showcase query history on the demo URN was seeded** (official `listQueries` path works; seed file remains a fallback)
 - Write-back demo beat is the **`premortem_forecast` tag** (+ editable description); Document create works but Quickstart often does not index it
 
 ## License

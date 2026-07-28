@@ -3,8 +3,8 @@
   "column": "order_status",
   "dialect": "snowflake",
   "rank_by_exec_count": false,
-  "list_queries_indexed": false,
-  "note": "Showcase datapack shipped no QUERY entities; listQueries empty on Quickstart v1.5.0.6. Deduped seed for live fallback + demo beats (false-alarm decoy, honest UNKNOWN). Disclose seeded history in README/video.",
+  "list_queries_indexed": true,
+  "note": "Query history on the demo URN is seeded. Live prefers indexed listQueries; this file is fallback (or PREMORTEM_PREFER_SEED=1). Includes demo beats: false-alarm decoy, honest UNKNOWN, SELECT*. Disclose seeded history in README/video. If lineage is also seeded later, disclose that too.",
   "queries": [
     {
       "query_id": "hard_where_order_status",

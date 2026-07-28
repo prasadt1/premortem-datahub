@@ -9,7 +9,7 @@ from pathlib import Path
 
 from premortem.agent import rehearse
 from premortem.classify import classify_query
-from premortem.datahub_client import HttpDataHubClient, write_forecast_to_catalog
+from premortem.datahub_client import create_catalog_client, write_forecast_to_catalog
 from premortem.live import run_live_rehearsal
 from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
 from premortem.report import to_json, to_markdown
@@ -146,7 +146,7 @@ def main(argv: list[str] | None = None) -> None:
         # Binder-only is the default (classify.py). Heuristic adjudicate is opt-in:
         # frozen eval shows C+A net-negative vs C (bind accuracy 0.00 on residue).
         adjudicate = bool(args.adjudicate) and not args.no_adjudicate
-        client = HttpDataHubClient(
+        client = create_catalog_client(
             gms_url=args.gms,
             write_back_enabled=args.write_back,
         )
@@ -203,7 +203,7 @@ def main(argv: list[str] | None = None) -> None:
 
         if args.write_back:
             title = f"Premortem: {diff.kind} {diff.column}"
-            client = HttpDataHubClient(gms_url=args.gms, write_back_enabled=True)
+            client = create_catalog_client(gms_url=args.gms, write_back_enabled=True)
             ref = write_forecast_to_catalog(
                 client, urn=args.urn, title=title, body_md=md
             )

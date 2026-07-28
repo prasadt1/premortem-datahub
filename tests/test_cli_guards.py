@@ -25,7 +25,7 @@ def test_live_defaults_adjudicate_off():
     fake.downstream = []
     fake.query_count = 0
     fake.write_back_ref = None
-    with patch("premortem.cli.HttpDataHubClient"), patch(
+    with patch("premortem.cli.create_catalog_client"), patch(
         "premortem.cli.run_live_rehearsal", return_value=fake
     ) as run:
         main(["--live", "--rename", "order_status:order_state"])
@@ -40,7 +40,7 @@ def test_live_adjudicate_flag_opts_in():
     fake.downstream = []
     fake.query_count = 0
     fake.write_back_ref = None
-    with patch("premortem.cli.HttpDataHubClient"), patch(
+    with patch("premortem.cli.create_catalog_client"), patch(
         "premortem.cli.run_live_rehearsal", return_value=fake
     ) as run:
         main(["--live", "--rename", "order_status:order_state", "--adjudicate"])

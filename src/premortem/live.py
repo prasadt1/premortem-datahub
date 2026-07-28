@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from premortem.agent import rehearse
-from premortem.datahub_client import DataHubClient, write_forecast_to_catalog
+from premortem.catalog import CatalogClient, write_forecast_to_catalog
 from premortem.models import Forecast, SchemaDiff
 from premortem.report import to_json, to_markdown
 
@@ -33,7 +33,7 @@ class LiveRehearsalResult:
 
 
 def run_live_rehearsal(
-    client: DataHubClient,
+    client: CatalogClient,
     *,
     diff: SchemaDiff,
     dialect: str = "snowflake",

@@ -2,7 +2,8 @@
 
 Measures the classifier (and the adjudicated pipeline) against hand-labeled ground
 truth that was **committed before any classifier or binder tuning**. The labels never
-change after this freeze; only `RESULTS.md` gets added. If a label turns out to be
+change after this freeze; only `RESULTS.md` gets added (drafted after binder P0;
+B2/LLM row may update later). If a label turns out to be
 wrong, the erratum is documented in `RESULTS.md` — the label file stays as frozen.
 
 **Subject:** rename `analytics.order_history.order_status` → `order_state` (Snowflake).
