@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="1200" height="800" fill="#fcfcfb"/>
+
+  <text x="60" y="60" font-size="30" font-weight="700" fill="#0b0b0b">Not “12 dependents”. A verdict per query.</text>
+  <text x="60" y="94" font-size="18" fill="#52514e">For a rename every reference fails to compile — so the axis is what repairing it costs you, not whether it runs.</text>
+
+  <!-- HARD -->
+  <g>
+    <rect x="60" y="132" width="1080" height="140" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <rect x="60" y="132" width="6" height="140" rx="3" fill="#d03b3b"/>
+    <circle cx="106" cy="176" r="15" fill="#d03b3b"/>
+    <path d="M106 168 L106 180 M106 186 L106 186.5" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <text x="136" y="183" font-size="24" font-weight="700" fill="#0b0b0b">HARD</text>
+    <text x="136" y="212" font-size="17" fill="#52514e">The column’s value drives <tspan font-weight="600" fill="#0b0b0b">WHERE / JOIN / GROUP BY / ORDER BY / HAVING / window</tspan>.</text>
+    <text x="136" y="238" font-size="17" fill="#52514e">A careless repair changes which rows come back — and does it silently.</text>
+    <text x="136" y="262" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#898781">SELECT order_id FROM order_history WHERE order_status = 'COMPLETE'</text>
+  </g>
+
+  <!-- SOFT -->
+  <g>
+    <rect x="60" y="288" width="1080" height="118" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <rect x="60" y="288" width="6" height="118" rx="3" fill="#fab219"/>
+    <circle cx="106" cy="330" r="15" fill="#fab219"/>
+    <path d="M99 330 L113 330" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <text x="136" y="337" font-size="24" font-weight="700" fill="#0b0b0b">SOFT</text>
+    <text x="136" y="366" font-size="17" fill="#52514e">Reference is confined to the <tspan font-weight="600" fill="#0b0b0b">SELECT</tspan> list. Contained, mechanical rename.</text>
+    <text x="136" y="392" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#898781">SELECT order_status, order_id FROM order_history</text>
+  </g>
+
+  <!-- UNKNOWN -->
+  <g>
+    <rect x="60" y="422" width="1080" height="140" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <rect x="60" y="422" width="6" height="140" rx="3" fill="#898781"/>
+    <circle cx="106" cy="466" r="15" fill="#898781"/>
+    <text x="106" y="473" font-size="19" font-weight="700" fill="#ffffff" text-anchor="middle">?</text>
+    <text x="136" y="473" font-size="24" font-weight="700" fill="#0b0b0b">UNKNOWN <tspan font-size="17" font-weight="400" fill="#52514e">— needs a human</tspan></text>
+    <text x="136" y="502" font-size="17" fill="#52514e">Unparseable SQL, or a bare reference still ambiguous after resolution — two tables in scope</text>
+    <text x="136" y="528" font-size="17" fill="#52514e">both carry the column. <tspan font-weight="600" fill="#0b0b0b">I don’t guess.</tspan></text>
+    <text x="136" y="552" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#898781">SELECT o.order_id FROM order_history o JOIN shipments s … WHERE order_status = 'OPEN'</text>
+  </g>
+
+  <!-- CLEARED -->
+  <g>
+    <rect x="60" y="578" width="1080" height="140" rx="12" fill="#ffffff" stroke="#0ca30c" stroke-width="2"/>
+    <rect x="60" y="578" width="6" height="140" rx="3" fill="#0ca30c"/>
+    <circle cx="106" cy="622" r="15" fill="#0ca30c"/>
+    <path d="M99 622.5 L104 627.5 L113 616" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="136" y="629" font-size="24" font-weight="700" fill="#0b0b0b">CLEARED <tspan font-size="17" font-weight="400" fill="#52514e">— the false alarm nobody else names</tspan></text>
+    <text x="136" y="658" font-size="17" fill="#52514e">Same column name, different table. It shows up in your lineage list; it is not affected.</text>
+    <text x="136" y="684" font-size="17" fill="#52514e">Listed by name rather than folded into a count, because that is the finding.</text>
+    <text x="136" y="708" font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#898781">SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'</text>
+  </g>
+
+  <text x="60" y="762" font-size="16" fill="#52514e">Every verdict carries its evidence: the clause, and the table the reference actually binds to.</text>
+</svg>

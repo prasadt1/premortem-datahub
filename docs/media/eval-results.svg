@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="1200" height="800" fill="#fcfcfb"/>
+
+  <text x="60" y="60" font-size="30" font-weight="700" fill="#0b0b0b">Labelled and frozen before the classifier could pass them</text>
+  <text x="60" y="94" font-size="18" fill="#52514e">40 queries · labels pinned in commit <tspan font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">5709e88</tspan> · verified blind by three independent labellers, 40/40 unanimous</text>
+
+  <!-- ============ HARD precision ============ -->
+  <text x="60" y="156" font-size="20" font-weight="700" fill="#0b0b0b">HARD precision <tspan font-size="16" font-weight="400" fill="#52514e">— higher is better</tspan></text>
+  <text x="60" y="180" font-size="15" fill="#52514e">Of everything called breaking, how much really breaks. A check that cries wolf gets switched off within a week.</text>
+
+  <g stroke="#e1e0d9" stroke-width="1">
+    <line x1="360" y1="200" x2="360" y2="368"/>
+    <line x1="535" y1="200" x2="535" y2="368"/>
+    <line x1="710" y1="200" x2="710" y2="368"/>
+    <line x1="885" y1="200" x2="885" y2="368"/>
+    <line x1="1060" y1="200" x2="1060" y2="368"/>
+  </g>
+  <line x1="360" y1="368" x2="1060" y2="368" stroke="#c3c2b7" stroke-width="1.5"/>
+  <g font-size="13" fill="#898781" text-anchor="middle">
+    <text x="360" y="390">0</text><text x="535" y="390">0.25</text><text x="710" y="390">0.50</text><text x="885" y="390">0.75</text><text x="1060" y="390">1.00</text>
+  </g>
+
+  <g font-size="16" fill="#52514e" text-anchor="end">
+    <text x="344" y="228">Every dependent breaks</text>
+    <text x="344" y="286">Substring grep</text>
+    <text x="344" y="344" font-weight="700" fill="#0b0b0b">Premortem</text>
+  </g>
+  <g font-size="12" fill="#898781" text-anchor="end">
+    <text x="344" y="246">what a lineage list alone implies</text>
+  </g>
+
+  <rect x="360" y="208" width="280" height="26" rx="4" fill="#898781"/>
+  <text x="654" y="228" font-size="16" font-weight="700" fill="#52514e">0.40</text>
+  <rect x="360" y="266" width="308" height="26" rx="4" fill="#898781"/>
+  <text x="682" y="286" font-size="16" font-weight="700" fill="#52514e">0.44</text>
+  <rect x="360" y="324" width="700" height="26" rx="4" fill="#2a78d6"/>
+  <text x="1074" y="344" font-size="16" font-weight="700" fill="#0b0b0b">1.00</text>
+
+  <!-- ============ decoy false-positive rate ============ -->
+  <text x="60" y="470" font-size="20" font-weight="700" fill="#0b0b0b">False alarms on the decoy stratum <tspan font-size="16" font-weight="400" fill="#52514e">— lower is better</tspan></text>
+  <text x="60" y="494" font-size="15" fill="#52514e">Six queries that reference a same-named column belonging to a different table. None of them break.</text>
+
+  <g stroke="#e1e0d9" stroke-width="1">
+    <line x1="360" y1="514" x2="360" y2="682"/>
+    <line x1="535" y1="514" x2="535" y2="682"/>
+    <line x1="710" y1="514" x2="710" y2="682"/>
+    <line x1="885" y1="514" x2="885" y2="682"/>
+    <line x1="1060" y1="514" x2="1060" y2="682"/>
+  </g>
+  <line x1="360" y1="682" x2="1060" y2="682" stroke="#c3c2b7" stroke-width="1.5"/>
+  <g font-size="13" fill="#898781" text-anchor="middle">
+    <text x="360" y="704">0</text><text x="535" y="704">0.25</text><text x="710" y="704">0.50</text><text x="885" y="704">0.75</text><text x="1060" y="704">1.00</text>
+  </g>
+
+  <g font-size="16" fill="#52514e" text-anchor="end">
+    <text x="344" y="542">Every dependent breaks</text>
+    <text x="344" y="600">Substring grep</text>
+    <text x="344" y="658" font-weight="700" fill="#0b0b0b">Premortem</text>
+  </g>
+
+  <rect x="360" y="522" width="700" height="26" rx="4" fill="#d03b3b"/>
+  <text x="1074" y="542" font-size="16" font-weight="700" fill="#d03b3b">1.00</text>
+  <rect x="360" y="580" width="581" height="26" rx="4" fill="#d03b3b" opacity="0.7"/>
+  <text x="955" y="600" font-size="16" font-weight="700" fill="#d03b3b">0.83</text>
+  <rect x="360" y="638" width="4" height="26" rx="2" fill="#0ca30c"/>
+  <text x="378" y="658" font-size="16" font-weight="700" fill="#0ca30c">0.00 — zero false alarms</text>
+
+  <text x="60" y="760" font-size="16" fill="#52514e">Published with the misses left in: one classifier error stays unfixed, and my own adjudicator measured</text>
+  <text x="60" y="782" font-size="16" fill="#52514e">net-negative and ships disabled. Reproduce in under a minute — no DataHub required.</text>
+</svg>
