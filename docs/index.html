@@ -706,14 +706,99 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
         </figcaption>
       </figure>
       <p>
-        <strong>C+A is net-negative:</strong> heuristic adjudication binds 3 of 9
-        classifier UNKNOWNs with bind accuracy 0.00 — every bind wrong; live defaults
-        to <code>adjudicate=False</code>.
+        <strong>C+A is net-negative:</strong> the heuristic adjudicator binds 3 of 9
+        classifier UNKNOWNs with bind accuracy 0.00 — every bind wrong. It ships
+        disabled (<code>adjudicate=False</code> is the live default).
+      </p>
+      <p>
+        That component was replaced with an LLM adjudicator that runs only on the
+        genuinely ambiguous residue (q05, q17, q29 — bare column, ≥2 tables that
+        each carry it). It <strong>correctly declined all three</strong> rather than
+        guessing; their gold is already UNKNOWN, so there is no measurable lift on
+        the frozen eval and binder-only remains the live default. Responses are
+        committed in
+        <a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/llm_adjudicator_cache.json"><code>eval/llm_adjudicator_cache.json</code></a>
+        so <code>python eval/run_eval.py</code> reproduces the B2 row with no API key.
       </p>
       <p>
         <strong>Named C miss:</strong> q39 (<code>hard</code> → <code>soft</code>) in the
         subquery stratum — documented limitation, not tuned against the frozen labels.
+        Browse it in the <a href="eval-explorer.html">eval explorer</a>.
       </p>
+    </section>
+
+    <section aria-labelledby="realworld">
+      <h2 id="realworld">Against foreign SQL</h2>
+      <p>
+        Every frozen-eval number above comes from a corpus I wrote. To test
+        generality, I pointed the binder at
+        <a href="https://github.com/mozilla/bigquery-etl">mozilla/bigquery-etl</a>
+        (commit <code>717b6a1</code>) — 118 queries that mention
+        <code>clients_daily</code> and <code>client_id</code>. There are
+        <strong>no gold labels</strong>, so there is no accuracy, precision, or
+        recall claim — coverage and failure modes only.
+      </p>
+      <div class="stats" role="group" aria-label="Real-world observables">
+        <div class="stat">
+          <div class="n">84.7%</div>
+          <span class="l">parse rate<br />(18 Jinja / BQ / sqlglot gaps)</span>
+        </div>
+        <div class="stat">
+          <div class="n">86%</div>
+          <span class="l">UNKNOWN<br />(corrected distribution)</span>
+        </div>
+        <div class="stat">
+          <div class="n">11%</div>
+          <span class="l">CLEARED<br />(known non-subject tables only)</span>
+        </div>
+      </div>
+      <p>
+        The honest reading is favourable: pointed at a codebase where it lacks the
+        schemas, Premortem says <em>needs a human</em> rather than guessing. An
+        earlier unsound CLEARED rule had falsely cleared 74% of rows despite a 0.09
+        table-resolution rate — that defect is fixed and named in the report.
+      </p>
+      <p class="muted">
+        Limitation: 6 of the 13 CLEARED resolve to <code>clients_daily</code> while
+        the subject is <code>clients_daily_v6</code>. Correct at the table level, but
+        if that name is a view over the subject, a rename propagates through it.
+        Premortem reasons about tables, not view expansion.
+      </p>
+      <p>
+        Full write-up:
+        <a href="real-world-run.html">real-world run (HTML)</a>
+        ·
+        <a href="https://github.com/prasadt1/premortem-datahub/blob/main/docs/real-world-run.md">source markdown on GitHub</a>
+        ·
+        <a href="https://github.com/prasadt1/premortem-datahub/blob/main/docs/real-world-run-raw.json">raw JSON</a>
+      </p>
+    </section>
+
+    <section aria-labelledby="oss">
+      <h2 id="oss">Upstream contributions</h2>
+      <p>
+        Four issues filed against DataHub from this build (Quickstart v1.5.0.6,
+        <code>mcp-server-datahub</code> 0.6.0):
+      </p>
+      <ul class="links">
+        <li>
+          <a href="https://github.com/datahub-project/datahub/issues/18674">datahub#18674</a>
+          — <code>assertionRunEvent</code> rejects <code>schemaField</code> asserteeUrn
+          (column-scoped custom assertions cannot record run events on OSS)
+        </li>
+        <li>
+          <a href="https://github.com/acryldata/mcp-server-datahub/issues/151">mcp-server-datahub#151</a>
+          — Data Quality tools DISABLED on the OSS MCP server
+        </li>
+        <li>
+          <a href="https://github.com/datahub-project/datahub/issues/18675">datahub#18675</a>
+          — Documents create successfully but often miss Quickstart search
+        </li>
+        <li>
+          <a href="https://github.com/datahub-project/datahub/issues/18676">datahub#18676</a>
+          — <code>listQueries</code> empty until seeded and indexed
+        </li>
+      </ul>
     </section>
 
     <section aria-labelledby="links">
@@ -721,16 +806,9 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       <ul class="links">
         <li><a href="https://github.com/prasadt1/premortem-datahub">Repository</a></li>
         <li><a href="eval-explorer.html">Frozen eval explorer</a> — all 40 queries, gold vs binder verdict</li>
-        <li><a href="real-world-run.md">Real-world run</a> — mozilla/bigquery-etl observables (not the frozen eval)</li>
+        <li><a href="real-world-run.html">Real-world run</a> — mozilla/bigquery-etl observables</li>
         <li><a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a></li>
         <li><a href="https://github.com/prasadt1/premortem-datahub/tree/main/examples">examples/</a></li>
-        <li>
-          Filed OSS issues:
-          <a href="https://github.com/datahub-project/datahub/issues/18674">#18674</a>,
-          <a href="https://github.com/acryldata/mcp-server-datahub/issues/151">mcp#151</a>,
-          <a href="https://github.com/datahub-project/datahub/issues/18675">#18675</a>,
-          <a href="https://github.com/datahub-project/datahub/issues/18676">#18676</a>
-        </li>
         <li>Video demo: <em>to be added</em></li>
       </ul>
     </section>

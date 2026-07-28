@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Premortem — real-world run (mozilla/bigquery-etl)</title>
+  <meta name="description" content="Observables-only Premortem run on mozilla/bigquery-etl: parse rate, verdict distribution, no gold labels." />
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --surface: #fffcf7;
+      --ink: #1a1916;
+      --muted: #5c584f;
+      --line: #d9d4c8;
+      --accent: #1f4d3a;
+      --code-bg: #ece8df;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141311;
+        --surface: #1c1b18;
+        --ink: #f2efe7;
+        --muted: #a8a296;
+        --line: #3a372f;
+        --accent: #8fbfa6;
+        --code-bg: #26241f;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: var(--ui);
+      line-height: 1.55;
+      font-size: 1.02rem;
+    }
+    main { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    h1, h2 { font-family: var(--sans); letter-spacing: -0.02em; line-height: 1.15; }
+    h1 { font-size: clamp(1.75rem, 4vw, 2.25rem); margin: 0 0 0.5rem; }
+    h2 { font-size: 1.35rem; margin: 2.25rem 0 0.75rem; }
+    p { margin: 0.7rem 0; }
+    .muted { color: var(--muted); }
+    .nav { margin: 0 0 1.25rem; font-size: 0.92rem; }
+    a { color: var(--accent); }
+    .callout {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 0.85rem 1rem;
+      margin: 1rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      margin: 0.75rem 0 1rem;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.6rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--surface); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    pre {
+      margin: 0.5rem 0;
+      padding: 0.85rem 0.95rem;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+    code { font-family: var(--mono); font-size: 0.9em; }
+    ul { padding-left: 1.15rem; }
+    li { margin: 0.35rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="nav"><a href="index.html">← Premortem</a></p>
+    <h1>Real-world run</h1>
+    <p class="muted">mozilla/bigquery-etl · not the frozen eval</p>
+
+    <div class="callout">
+      <strong>No gold labels — no accuracy claim.</strong>
+      This report records observables only (parse rate, verdict distribution,
+      UNKNOWN reasons). It is not a substitute for
+      <a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a>.
+    </div>
+
+    <table>
+      <tbody>
+        <tr><th scope="row">Project</th><td><a href="https://github.com/mozilla/bigquery-etl">mozilla/bigquery-etl</a></td></tr>
+        <tr><th scope="row">Commit</th><td><code>717b6a14846a3a294049a6cab42168eaf4bb5b2c</code></td></tr>
+        <tr><th scope="row">Subject</th><td><code>clients_daily_v6</code> · column <code>client_id</code> · dialect <code>bigquery</code></td></tr>
+        <tr><th scope="row">Queries scored</th><td>118 (mention <code>clients_daily</code> and <code>client_id</code>; tests/ and mozfun excluded)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Parse rate</h2>
+    <p><strong>84.75%</strong> (100/118) non-parse-failure. Failures (18): Jinja templating, BigQuery scripting, sqlglot coverage gaps.</p>
+
+    <h2>Corrected verdict distribution</h2>
+    <p>
+      After fixing a false-CLEARED defect (clear only when the qualifier resolves to a
+      <em>known</em> non-subject table), most incomplete-schema references land in
+      UNKNOWN — the honest outcome when Premortem lacks the schemas.
+    </p>
+    <table>
+      <thead>
+        <tr><th>verdict</th><th class="num">count</th><th class="num">share</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>hard</td><td class="num">1</td><td class="num">0.8%</td></tr>
+        <tr><td>soft</td><td class="num">1</td><td class="num">0.8%</td></tr>
+        <tr><td>unknown</td><td class="num">102</td><td class="num">86.4%</td></tr>
+        <tr><td>cleared</td><td class="num">13</td><td class="num">11.0%</td></tr>
+        <tr><td>unaffected</td><td class="num">1</td><td class="num">0.8%</td></tr>
+      </tbody>
+    </table>
+
+    <h2>UNKNOWN breakdown</h2>
+    <table>
+      <thead>
+        <tr><th>reason bucket</th><th class="num">count</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>unresolvable_qualifier</td><td class="num">82</td></tr>
+        <tr><td>unparseable</td><td class="num">18</td></tr>
+        <tr><td>star</td><td class="num">2</td></tr>
+      </tbody>
+    </table>
+
+    <h2>View-expansion limitation</h2>
+    <p>
+      6 of the 13 CLEARED resolve to <code>clients_daily</code> while the subject is
+      <code>clients_daily_v6</code>. Correct at the table level, but if that name is a
+      view over the subject, a rename propagates through it. Premortem reasons about
+      tables, not view expansion.
+    </p>
+
+    <h2>Command</h2>
+    <pre><code>python tools/real_world_mozilla_run.py \
+  --repo /path/to/bigquery-etl \
+  --out-dir docs \
+  --sha 717b6a14846a3a294049a6cab42168eaf4bb5b2c</code></pre>
+
+    <h2>Source</h2>
+    <ul>
+      <li><a href="https://github.com/prasadt1/premortem-datahub/blob/main/docs/real-world-run.md">Full markdown on GitHub</a> (examples, correction note, defect flags)</li>
+      <li><a href="https://github.com/prasadt1/premortem-datahub/blob/main/docs/real-world-run-raw.json">Raw JSON</a></li>
+    </ul>
+  </main>
+</body>
+</html>

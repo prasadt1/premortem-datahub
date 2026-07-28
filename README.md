@@ -100,13 +100,14 @@ Details and versions: [`examples/OSS_ISSUES.md`](examples/OSS_ISSUES.md).
 - Camera assertion: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
 - MCP composition (filming): [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)
 
-Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md). Real-world observables (no labels): [`docs/real-world-run.md`](docs/real-world-run.md). Eval explorer: [prasadt1.github.io/premortem-datahub/eval-explorer.html](https://prasadt1.github.io/premortem-datahub/eval-explorer.html).
+Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md). Real-world observables (no labels): [HTML](https://prasadt1.github.io/premortem-datahub/real-world-run.html) · [markdown](https://github.com/prasadt1/premortem-datahub/blob/main/docs/real-world-run.md). Eval explorer: [prasadt1.github.io/premortem-datahub/eval-explorer.html](https://prasadt1.github.io/premortem-datahub/eval-explorer.html).
 
 ## Limits (honest)
 
 - Not 100% breakage prediction — macros, dynamic SQL, and residual ambiguity land in **unknown**
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
+- Premortem reasons about **tables, not view expansion** — a CLEARED bind to `clients_daily` while the subject is `clients_daily_v6` is correct at the table level, but a rename still propagates if that name is a view over the subject
 - The demo runs against a local DataHub Quickstart with the showcase-ecommerce datapack, extended with a synthetic `shipments` dataset, seeded query history, and seeded lineage. The accuracy numbers in [`eval/RESULTS.md`](eval/RESULTS.md) come from the frozen eval — not from this demo instance.
 - Write-back ladder (rung 1): custom **assertion** (platform `premortem`) + **`premortem_forecast` tag** + description. Document create may succeed without UI indexing on Quickstart.
 - OSS MCP: Data Quality mutation tools are DISABLED — assertion upsert stays on GraphQL / seeder; host still applies tag + description via DataHub MCP.

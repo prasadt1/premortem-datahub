@@ -391,6 +391,25 @@ def main() -> int:
         f"**{tr['resolution_rate_among_mentioned']}**)."
     )
     md.append("")
+    md.append("## View-expansion limitation")
+    md.append("")
+    cleared_to_clients_daily = sum(
+        1
+        for f in findings
+        if f["severity"] == "cleared"
+        and any(
+            p.strip() == "clients_daily"
+            for p in (f.get("evidence") or "").split(":", 1)[-1].split(",")
+        )
+    )
+    md.append(
+        f"{cleared_to_clients_daily} of the {verdicts.get('cleared', 0)} CLEARED "
+        f"resolve to `clients_daily` while the subject is `{subject}`. "
+        "Correct at the table level, but if that name is a view over the subject, "
+        "a rename propagates through it. Premortem reasons about tables, not "
+        "view expansion."
+    )
+    md.append("")
     md.append("## Concrete examples")
     md.append("")
     for i, ex in enumerate(examples[:5], 1):
