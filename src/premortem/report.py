@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from premortem.forecast import cleared_bind_table, is_cleared_finding
 from premortem.models import BreakSeverity, Forecast
 from premortem.rank import rank_findings
 
@@ -55,8 +56,30 @@ def to_markdown(
                 f"- {f.query_id} — [{f.evidence}] {f.sql_snippet[:120]}{extra}{reason}{note}"
             )
         lines.append("")
+
+    cleared = [
+        f
+        for f in ranked
+        if f.severity is BreakSeverity.UNAFFECTED and is_cleared_finding(f.evidence)
+    ]
     lines.append(
-        f"UNAFFECTED / no query evidence: {forecast.unaffected_lineage_count}"
+        "CLEARED (references a same-named column that binds elsewhere) "
+        f"({len(cleared)})"
+    )
+    if not cleared:
+        lines.append("- (none)")
+    for f in cleared:
+        bound = cleared_bind_table(f.evidence) or "?"
+        extra = ""
+        if use_exec_count and f.exec_count is not None:
+            extra = f"  (exec×{f.exec_count})"
+        lines.append(
+            f"- {f.query_id} — binds to `{bound}` — {f.sql_snippet[:120]}{extra}"
+        )
+    lines.append("")
+    lines.append(
+        f"No query evidence of `{d.column}` on subject: "
+        f"{forecast.unaffected_lineage_count}"
     )
     return "\n".join(lines).rstrip() + "\n"
 

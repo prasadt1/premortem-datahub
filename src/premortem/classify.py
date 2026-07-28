@@ -233,6 +233,7 @@ def classify_query(
     physical_all = _physical_tables_in_scope(tree, cte_sources)
 
     bound: list[tuple[str, set[str] | None]] = []
+    elsewhere: set[str] = set()
     for node in tree.find_all(exp.Column):
         name = (node.name or "").lower()
         if name != col:
@@ -271,7 +272,8 @@ def classify_query(
             )
 
         if subject not in resolved:
-            # Decoy / other-table reference — ignore
+            # Decoy / other-table reference — record for CLEARED rendering
+            elsewhere |= {t for t in resolved if t}
             continue
 
         if len(resolved) == 1:
@@ -322,9 +324,16 @@ def classify_query(
         )
 
     if not bound:
+        if elsewhere:
+            bound_to = ",".join(sorted(elsewhere))
+            return ClassifyResult(
+                severity=BreakSeverity.UNAFFECTED,
+                evidence=f"BOUND_ELSEWHERE:{bound_to}",
+                snippet=sql.strip()[:200],
+            )
         return ClassifyResult(
             severity=BreakSeverity.UNAFFECTED,
-            evidence="NONE",
+            evidence="NO_REFERENCE",
             snippet=sql.strip()[:200],
         )
 

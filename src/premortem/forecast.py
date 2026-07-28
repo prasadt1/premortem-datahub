@@ -6,6 +6,19 @@ from premortem.classify import classify_query
 from premortem.models import BreakFinding, BreakSeverity, Forecast, QueryRecord, SchemaDiff
 from premortem.rank import rank_findings
 
+CLEARED_PREFIX = "BOUND_ELSEWHERE:"
+
+
+def is_cleared_finding(evidence: str) -> bool:
+    """True when UNAFFECTED because the column binds to a non-subject table."""
+    return evidence.startswith(CLEARED_PREFIX)
+
+
+def cleared_bind_table(evidence: str) -> str | None:
+    if not is_cleared_finding(evidence):
+        return None
+    return evidence[len(CLEARED_PREFIX) :] or None
+
 
 def build_forecast(
     *,
@@ -17,9 +30,14 @@ def build_forecast(
     subject_table: str | None = None,
     tables: dict[str, list[str]] | None = None,
 ) -> Forecast:
-    """Classify each query against ``diff.column`` and assemble a Forecast."""
+    """Classify each query against ``diff.column`` and assemble a Forecast.
+
+    CLEARED decoys (UNAFFECTED + BOUND_ELSEWHERE) are emitted as findings so
+    the report can show false-alarm suppression. Pure NO_REFERENCE rows stay
+    as ``unaffected_lineage_count`` (no query evidence of the column).
+    """
     findings: list[BreakFinding] = []
-    unaffected = 0
+    no_reference = 0
     for q in queries:
         result = classify_query(
             q.sql,
@@ -28,8 +46,11 @@ def build_forecast(
             subject_table=subject_table,
             tables=tables,
         )
-        if result.severity is BreakSeverity.UNAFFECTED:
-            unaffected += 1
+        if (
+            result.severity is BreakSeverity.UNAFFECTED
+            and not is_cleared_finding(result.evidence)
+        ):
+            no_reference += 1
             continue
         findings.append(
             BreakFinding(
@@ -47,5 +68,5 @@ def build_forecast(
         diff=diff,
         lineage_dependent_count=lineage_dependent_count,
         findings=ranked,
-        unaffected_lineage_count=unaffected,
+        unaffected_lineage_count=no_reference,
     )

@@ -39,4 +39,5 @@ def test_build_forecast_classifies_mix():
     assert "HARD (1)" in md
     assert "SOFT (1)" in md
     assert "UNKNOWN / needs human (1)" in md
+    assert "No query evidence of `order_status` on subject: 1" in md
     assert "exec×" not in md

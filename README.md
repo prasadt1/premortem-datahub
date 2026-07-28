@@ -15,7 +15,7 @@ Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.
 | **HARD** | Column in `WHERE` / `JOIN` / `GROUP BY` / `ORDER BY` / `HAVING` / window — repair can change row counts or results |
 | **SOFT** | `SELECT`-list only — contained, mechanical rename downstream |
 | **UNKNOWN** | Unparseable SQL, bare column still ambiguous after schema resolution, `SELECT *` — needs a human; never guessed |
-| **UNAFFECTED** | No binding reference to the subject column on the subject dataset (incl. cleared false alarms) |
+| **UNAFFECTED** | No subject-bound reference — either **CLEARED** (same-named column binds elsewhere; listed) or no query evidence of the column (count) |
 
 Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON. I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
 

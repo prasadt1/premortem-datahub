@@ -56,7 +56,7 @@ No other C stratum misses on this run.
 
 With binder + `adjudicate=False` default:
 
-1. **Cleared false alarm** — `decoy_shipments_order_status` → UNAFFECTED
+1. **Cleared false alarm** — `decoy_shipments_order_status` → UNAFFECTED / `BOUND_ELSEWHERE:shipments`, rendered under **CLEARED**
 2. **Honest UNKNOWN** — `unknown_bare_two_tables` stays UNKNOWN (not emptied by the
    tautological adjudicator)
 

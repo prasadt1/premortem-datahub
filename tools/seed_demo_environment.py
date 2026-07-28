@@ -242,17 +242,14 @@ def verify() -> int:
     print(f"live queries={result.query_count} tables={list((result.tables or {}).keys())}")
     print(result.markdown)
 
-    # Find decoy / ambiguous by SQL shape (catalog names may vary)
-    decoy_ok = False
-    amb_ok = False
-    for f in result.forecast.findings:
-        sql = f.sql_snippet.lower()
-        if "shipments" in sql and "s.order_status" in sql.replace(" ", ""):
-            decoy_ok = False  # should be UNAFFECTED → not in findings
-        if "join shipments" in sql and "where order_status" in sql:
-            amb_ok = f.severity is BreakSeverity.UNKNOWN
+    # Both video beats must be visible artifacts in the markdown report.
+    if "CLEARED" not in result.markdown or "binds to `shipments`" not in result.markdown:
+        print("FAIL: cleared decoy row missing from report", file=sys.stderr)
+        return 1
+    if "unknown_bare_two_tables" not in result.markdown:
+        print("FAIL: honest UNKNOWN row missing from report", file=sys.stderr)
+        return 1
 
-    # Decoy must be UNAFFECTED → absent from findings; check via classify path
     from premortem.classify import classify_query
 
     tables = result.tables or {}
@@ -270,10 +267,13 @@ def verify() -> int:
         subject_table="order_history",
         tables=tables,
     )
-    print(f"decoy → {decoy.severity.value} (want unaffected)")
-    print(f"ambiguous → {amb.severity.value} (want unknown)")
+    print(f"decoy → {decoy.severity.value} evidence={decoy.evidence}")
+    print(f"ambiguous → {amb.severity.value}")
     if decoy.severity is not BreakSeverity.UNAFFECTED:
         print("FAIL: decoy beat", file=sys.stderr)
+        return 1
+    if not decoy.evidence.startswith("BOUND_ELSEWHERE:"):
+        print("FAIL: decoy missing BOUND_ELSEWHERE evidence", file=sys.stderr)
         return 1
     if amb.severity is not BreakSeverity.UNKNOWN:
         print("FAIL: ambiguous beat", file=sys.stderr)

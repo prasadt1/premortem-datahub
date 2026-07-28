@@ -155,6 +155,8 @@ def test_live_rehearsal_uses_sibling_resolution():
     by_id = {f.query_id: f for f in result.forecast.findings}
     assert by_id["narrowable"].severity is BreakSeverity.HARD
     assert by_id["ambiguous"].severity is BreakSeverity.UNKNOWN
-    assert "decoy" not in by_id  # UNAFFECTED
+    assert by_id["decoy"].severity is BreakSeverity.UNAFFECTED
+    assert by_id["decoy"].evidence.startswith("BOUND_ELSEWHERE:")
+    assert "shipments" in by_id["decoy"].evidence
     assert result.tables is not None
     assert "shipments" in result.tables

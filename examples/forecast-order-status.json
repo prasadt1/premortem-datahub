@@ -86,7 +86,17 @@
       "exec_count": null,
       "agent_note": null,
       "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
+    },
+    {
+      "query_id": "decoy_shipments_order_status",
+      "sql_snippet": "SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'",
+      "severity": "unaffected",
+      "column": "order_status",
+      "evidence": "BOUND_ELSEWHERE:shipments",
+      "exec_count": null,
+      "agent_note": null,
+      "unknown_reason": null
     }
   ],
-  "unaffected_lineage_count": 2
+  "unaffected_lineage_count": 1
 }

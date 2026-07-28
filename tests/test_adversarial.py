@@ -52,6 +52,8 @@ def test_decoy_qualified_other_table_should_be_unaffected():
         "qualified other-table order_status must not count as a hit on "
         f"analytics.order_history; got {r.severity.value} evidence={r.evidence}"
     )
+    assert r.evidence.startswith("BOUND_ELSEWHERE:")
+    assert "shipments" in r.evidence
 
 
 def test_decoy_unrelated_dataset_groupby_should_be_unaffected():
@@ -61,6 +63,8 @@ def test_decoy_unrelated_dataset_groupby_should_be_unaffected():
         "subject dataset not in scope → UNAFFECTED; "
         f"got {r.severity.value}"
     )
+    assert r.evidence.startswith("BOUND_ELSEWHERE:")
+    assert "tickets" in r.evidence
 
 
 # ---------------------------------------------------------------------------

@@ -16,4 +16,7 @@ SOFT (2)
 UNKNOWN / needs human (1)
 - unknown_bare_two_tables — [WHERE] SELECT o.order_id FROM order_history o JOIN shipments s ON o.order_id = s.order_id WHERE order_status = 'OPEN' — unqualified `order_status` with 2 tables in scope; needs human/agent
 
-UNAFFECTED / no query evidence: 2
+CLEARED (references a same-named column that binds elsewhere) (1)
+- decoy_shipments_order_status — binds to `shipments` — SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'
+
+No query evidence of `order_status` on subject: 1
