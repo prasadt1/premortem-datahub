@@ -109,8 +109,10 @@ def unknown_bucket(reason: str | None, evidence: str) -> str:
     r = (reason or "").lower()
     if "parse failed" in r or "sqlglot" in r:
         return "unparseable"
-    if "select *" in r or evidence == "SELECT_STAR":
+    if "select *" in r or evidence == "SELECT_STAR" or evidence == "STAR":
         return "star"
+    if "couldn't resolve qualifier" in r or "couldn't resolve table" in r:
+        return "unresolvable_qualifier"
     if "ambiguous" in r or "2 tables" in r or "needs human" in r or "unqualified" in r:
         return "unresolvable"
     if reason:
@@ -330,6 +332,23 @@ def main() -> int:
     md.append("")
     md.append(f"Raw output: [`docs/real-world-run-raw.json`](real-world-run-raw.json)")
     md.append("")
+    md.append("## Correction (CLEARED precondition)")
+    md.append("")
+    md.append(
+        "An earlier draft of this run reported CLEARED=87 alongside a "
+        "table-resolution rate of 0.09. Those numbers were logically inconsistent: "
+        "the binder was emitting `BOUND_ELSEWHERE` for *any* qualifier that was not "
+        "the subject — including BigQuery STRUCT paths (`client_info.client_id`), "
+        "UNNEST aliases, and unresolvable names. "
+        "**CLEARED now requires positive resolution to a known non-subject table "
+        "in the loaded schema map**; otherwise the verdict is UNKNOWN "
+        "(`couldn't resolve qualifier … — not guessing`). "
+        "Struct paths on the subject bind as HARD/SOFT by clause. "
+        "The distribution below is from the corrected classifier. "
+        "Most of the old false CLEAREDs become honest UNKNOWNs — the better story "
+        "when schemas are incomplete."
+    )
+    md.append("")
     md.append("## Parse rate")
     md.append("")
     md.append(
@@ -412,13 +431,10 @@ def main() -> int:
             if ev.startswith("BOUND_ELSEWHERE:"):
                 for t in ev.split(":", 1)[1].split(","):
                     t = t.strip()
-                    if t in {"client_info", "payload", "content", "parent"} or (
-                        t.endswith("_v1")
-                        and "clients_daily" not in t
-                        and "." not in t
-                    ):
+                    # Only flag if CLEARED target is not in the loaded schema map
+                    if t and t not in schemas:
                         flags.append(
-                            f"possible binder defect: CLEARED to non-table `{t}` "
+                            f"possible binder defect: CLEARED to non-loaded `{t}` "
                             f"in `{f['id']}` ({ev})"
                         )
                         break

@@ -54,17 +54,18 @@ are not sent to the model. Temperature-0 Claude CLI responses are committed in
 | metric | C binder | C+A heuristic | B2 LLM-on-residue |
 |---|---|---|---|
 | accuracy | **0.97** | 0.90 | **0.97** |
-| residue binds | — | 3/3 wrong | **0/3** (all left UNKNOWN) |
-| bind accuracy | — | 0.00 | n/a (no binds) |
+| residue decisions | — | 3/3 wrongly bound | **3/3 correctly declined** (left UNKNOWN) |
 
-The model preferred “cannot determine” on every residue case — correct against
-gold (`unknown`) and the opposite of the heuristic’s false confidence. B2 does
-**not** beat binder-only on the headline metrics (it ties). Live default stays
-**binder-only**; B2 ships available via cache but is not the default path.
+q05 / q17 / q29 are *genuinely undecidable* — their gold **is** `unknown`. The
+model correctly refused all three, which is the designed behavior (an
+adjudicator that can say “cannot determine” and does). Accuracy does not rise
+because the gold was already UNKNOWN; the LLM adds **no measurable lift** on
+this corpus, so it is not worth making a live dependency. Live default stays
+**binder-only**.
 
-“I tried the LLM on the residue and it refused to guess” is the published
-result — a second honest negative relative to the hope that an LLM would clear
-the UNKNOWN rate, and a positive relative to the heuristic.
+Relative to the heuristic’s false confidence this is a win; relative to the
+hope that an LLM would clear the UNKNOWN rate, it is an honest negative —
+published as such.
 
 ## Named C miss (do not “fix” from the answer key)
 

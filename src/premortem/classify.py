@@ -183,6 +183,26 @@ def _star_implies_unknown(
     return False
 
 
+def _unnest_aliases(tree: exp.Expression) -> set[str]:
+    """Aliases introduced by UNNEST(... ) AS x — not physical tables."""
+    out: set[str] = set()
+    for u in tree.find_all(exp.Unnest):
+        alias = u.args.get("alias")
+        if alias is None:
+            continue
+        for col_id in alias.args.get("columns") or []:
+            name = getattr(col_id, "name", None)
+            if name is None and hasattr(col_id, "this"):
+                inner = col_id.this
+                name = getattr(inner, "name", None) or getattr(inner, "this", None)
+            if name:
+                out.add(_base_name(str(name)))
+        an = getattr(alias, "name", None)
+        if an:
+            out.add(_base_name(str(an)))
+    return out
+
+
 def _resolve_column_tables(
     node: exp.Column, alias_map: dict[str, set[str]], physical_in_scope: set[str]
 ) -> set[str] | None:
@@ -209,7 +229,8 @@ def classify_query(
     - HARD: subject-bound ref in JOIN/WHERE/GROUP/ORDER/HAVING/PARTITION
     - SOFT: subject-bound ref only in SELECT list
     - UNKNOWN: parse failure; SELECT *; bare col with ≥2 candidate tables
-    - UNAFFECTED: no subject-bound reference (incl. cleared decoys)
+    - UNAFFECTED: no subject-bound reference (incl. CLEARED decoys that positively
+  resolve to a *known* non-subject table in ``tables``)
     """
     col = column.lower()
     subject = _base_name(subject_table) if subject_table else None
@@ -231,6 +252,7 @@ def classify_query(
     cte_sources = _cte_sources(tree)
     alias_map = _alias_map(tree, cte_sources)
     physical_all = _physical_tables_in_scope(tree, cte_sources)
+    unnest_aliases = _unnest_aliases(tree)
 
     bound: list[tuple[str, set[str] | None]] = []
     elsewhere: set[str] = set()
@@ -272,8 +294,52 @@ def classify_query(
             )
 
         if subject not in resolved:
-            # Decoy / other-table reference — record for CLEARED rendering
-            elsewhere |= {t for t in resolved if t}
+            # CLEARED requires positive resolution to a *known* non-subject table.
+            # Struct paths / UNNEST aliases / unresolvable names → not CLEARED.
+            known_elsewhere = {
+                t
+                for t in resolved
+                if t and t in schema_by_base and t != subject
+            }
+            unknown_quals = {
+                t for t in resolved if t and t not in schema_by_base
+            }
+            if unknown_quals:
+                for t in sorted(unknown_quals):
+                    if t in unnest_aliases:
+                        return ClassifyResult(
+                            severity=BreakSeverity.UNKNOWN,
+                            evidence=clause,
+                            unknown_reason=(
+                                f"couldn't resolve qualifier `{t}` — not guessing"
+                            ),
+                            snippet=sql.strip()[:200],
+                        )
+                    # FROM-table name we have no schema for
+                    if t in alias_map or t in physical_all:
+                        return ClassifyResult(
+                            severity=BreakSeverity.UNKNOWN,
+                            evidence=clause,
+                            unknown_reason=(
+                                f"couldn't resolve qualifier `{t}` — not guessing"
+                            ),
+                            snippet=sql.strip()[:200],
+                        )
+                    if subject not in scope_physical:
+                        return ClassifyResult(
+                            severity=BreakSeverity.UNKNOWN,
+                            evidence=clause,
+                            unknown_reason=(
+                                f"couldn't resolve qualifier `{t}` — not guessing"
+                            ),
+                            snippet=sql.strip()[:200],
+                        )
+                # Qualifier is not a FROM table / UNNEST alias, subject is in
+                # scope → treat as nested path (e.g. BigQuery STRUCT) on subject.
+                bound.append((clause, {subject}))
+                continue
+            if known_elsewhere:
+                elsewhere |= known_elsewhere
             continue
 
         if len(resolved) == 1:
