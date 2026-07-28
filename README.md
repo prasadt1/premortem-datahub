@@ -10,12 +10,16 @@ Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.
 
 ## First 60 seconds
 
-1. Install with the DataHub Kit + MCP extras, point at a local Quickstart, seed the demo env.
-2. Ask an agent (Claude Code with both MCP servers registered) to rehearse renaming `order_status` → `order_state` on ORDER_HISTORY.
-3. Watch the tool-call log: DataHub MCP for schema/lineage/queries, Premortem `rehearse_schema_change` for the forecast + `write_payload`.
-4. On write-back, the host applies that payload as-is — custom assertion (camera hero on the Quality tab), `premortem_forecast` tag, description — no recomputing.
+No DataHub, no Docker, no seeding — just Python 3.11+:
 
-Frozen classifier evidence (C accuracy **0.97**, HARD prec **1.00**, decoy FP **0.00**) lives in [`eval/RESULTS.md`](eval/RESULTS.md). The live demo instance is constructed (synthetic shipments, seeded queries/lineage); the eval is the measurement.
+```bash
+python3.11 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest -q
+python eval/run_eval.py
+```
+
+That reproduces the published numbers in [`eval/RESULTS.md`](eval/RESULTS.md): C accuracy **0.97**, HARD precision **1.00**, decoy FP **0.00**. The frozen eval is the measurement; the live demo below is a constructed instance for the video.
 
 ## What you get
 
@@ -28,17 +32,18 @@ Frozen classifier evidence (C accuracy **0.97**, HARD prec **1.00**, decoy FP **
 
 Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON. I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
 
-## Install
+## See it against a live catalog
 
-Python 3.11+:
+For the dual-MCP compose demo (local Quickstart + seed):
 
 ```bash
-python3.11 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev,datahub,mcp]"
-pytest -q
+python tools/seed_demo_environment.py
 ```
 
-Live catalog default is the **DataHub Agent Kit** (`PREMORTEM_CATALOG=kit`). Explicit GraphQL fallback: `PREMORTEM_CATALOG=graphql` or `--catalog graphql`. Dual-MCP filming config: [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md).
+Then register both MCP servers ([`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)) and ask an agent to rehearse renaming `order_status` → `order_state` on ORDER_HISTORY. Expect DataHub MCP for schema/lineage/queries, Premortem `rehearse_schema_change` for the forecast + `write_payload`, and the host applying that payload as-is — custom assertion (Quality tab), `premortem_forecast` tag, description.
+
+Live catalog default is the **DataHub Agent Kit** (`PREMORTEM_CATALOG=kit`). Explicit GraphQL fallback: `PREMORTEM_CATALOG=graphql` or `--catalog graphql`.
 
 ## Usage
 
@@ -72,11 +77,16 @@ premortem --live --rename order_status:order_state --write-back
 
 Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` when your GMS requires auth. Live defaults to binder-only (`adjudicate=False`); `--adjudicate` is opt-in and net-negative on the frozen eval.
 
-Seed / refresh the constructed demo (idempotent; exactly one camera assertion):
+## Open-source contributions
 
-```bash
-python tools/seed_demo_environment.py
-```
+Four issues filed from Quickstart / MCP integration friction (v1.5.0.6, `mcp-server-datahub` 0.6.0):
+
+1. [`assertionRunEvent` rejects `schemaField` asserteeUrn](https://github.com/datahub-project/datahub/issues/18674) — column-scoped custom assertions cannot record run events on OSS
+2. [Data Quality tools DISABLED on OSS MCP](https://github.com/acryldata/mcp-server-datahub/issues/151) — assertion mutations stay on GraphQL
+3. [Documents create but often miss Quickstart search](https://github.com/datahub-project/datahub/issues/18675) — write-back visibility is assertion + tag + description instead
+4. [`listQueries` empty until seeded + indexed](https://github.com/datahub-project/datahub/issues/18676) — populates after `createQuery`, not permanently broken
+
+Details and versions: [`examples/OSS_ISSUES.md`](examples/OSS_ISSUES.md).
 
 ## Demo corpus
 
@@ -87,7 +97,6 @@ python tools/seed_demo_environment.py
 - Demo env seeder: [`tools/seed_demo_environment.py`](tools/seed_demo_environment.py)
 - Camera assertion: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
 - MCP composition (filming): [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)
-- OSS Quickstart limits: [`examples/OSS_ISSUES.md`](examples/OSS_ISSUES.md)
 
 Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md).
 

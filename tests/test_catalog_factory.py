@@ -13,6 +13,8 @@ from premortem.catalog import (
 
 
 def test_factory_defaults_to_kit(monkeypatch):
+    pytest.importorskip("datahub")
+    pytest.importorskip("datahub_agent_context")
     monkeypatch.delenv("PREMORTEM_CATALOG", raising=False)
     monkeypatch.delenv("PREMORTEM_CATALOG_BACKEND", raising=False)
     client = create_catalog_client(gms_url="http://localhost:8080", write_back_enabled=False)
