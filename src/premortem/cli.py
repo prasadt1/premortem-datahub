@@ -99,12 +99,15 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument(
         "--adjudicate",
         action="store_true",
-        help="Upgrade UNKNOWN findings via agent (default on for --live)",
+        help=(
+            "Opt in to heuristic UNKNOWN adjudication (net-negative on frozen eval; "
+            "off by default — binder-only classify is the live path)"
+        ),
     )
     p.add_argument(
         "--no-adjudicate",
         action="store_true",
-        help="Disable adjudication (useful with --live)",
+        help="Explicitly disable adjudication (default; kept for clarity)",
     )
     p.add_argument(
         "--schema-fields",
@@ -140,9 +143,9 @@ def main(argv: list[str] | None = None) -> None:
         if not args.rename and not args.drop:
             p.error("--live requires --rename old:new or --drop column")
         diff = _parse_diff(args)
-        adjudicate = not args.no_adjudicate
-        if args.adjudicate:
-            adjudicate = True
+        # Binder-only is the default (classify.py). Heuristic adjudicate is opt-in:
+        # frozen eval shows C+A net-negative vs C (bind accuracy 0.00 on residue).
+        adjudicate = bool(args.adjudicate) and not args.no_adjudicate
         client = HttpDataHubClient(
             gms_url=args.gms,
             write_back_enabled=args.write_back,

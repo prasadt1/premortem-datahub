@@ -8,16 +8,6 @@
   "lineage_dependent_count": 1,
   "findings": [
     {
-      "query_id": "decoy_shipments_order_status",
-      "sql_snippet": "SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'",
-      "severity": "hard",
-      "column": "order_status",
-      "evidence": "WHERE",
-      "exec_count": null,
-      "agent_note": null,
-      "unknown_reason": null
-    },
-    {
       "query_id": "hard_qualified_join",
       "sql_snippet": "SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'OPEN'",
       "severity": "hard",
@@ -46,6 +36,16 @@
       "exec_count": null,
       "agent_note": null,
       "unknown_reason": null
+    },
+    {
+      "query_id": "star_over_subject",
+      "sql_snippet": "SELECT * FROM order_history WHERE order_total > 0",
+      "severity": "unknown",
+      "column": "order_status",
+      "evidence": "STAR",
+      "exec_count": null,
+      "agent_note": null,
+      "unknown_reason": "SELECT * may hide column references; needs schema expand or human"
     },
     {
       "query_id": "unknown_bare_two_tables",

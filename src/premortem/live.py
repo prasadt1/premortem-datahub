@@ -10,6 +10,17 @@ from premortem.models import Forecast, SchemaDiff
 from premortem.report import to_json, to_markdown
 
 
+def _subject_table_from_urn(urn: str) -> str | None:
+    """Best-effort dataset base name from a DataHub dataset URN."""
+    # urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91....order_history,PROD)
+    if "," in urn:
+        mid = urn.split(",", 1)[1]
+        name = mid.rsplit(",", 1)[0].strip()
+        if name:
+            return name.split(".")[-1]
+    return None
+
+
 @dataclass
 class LiveRehearsalResult:
     forecast: Forecast
@@ -27,7 +38,7 @@ def run_live_rehearsal(
     diff: SchemaDiff,
     dialect: str = "snowflake",
     use_exec_count: bool = False,
-    adjudicate: bool = True,
+    adjudicate: bool = False,
     write_back: bool = False,
     lineage_count_override: int | None = None,
 ) -> LiveRehearsalResult:
@@ -59,6 +70,8 @@ def run_live_rehearsal(
     )
     # Prefer bare field names for adjudication
     schema_for_agent = sorted({f.split(".")[-1] for f in fields})
+    subject_table = _subject_table_from_urn(diff.dataset_urn)
+    tables = {subject_table: schema_for_agent} if subject_table else None
 
     forecast = rehearse(
         diff=diff,
@@ -69,6 +82,8 @@ def run_live_rehearsal(
         schema_fields=schema_for_agent,
         lineage_neighbors=downstream,
         adjudicate=adjudicate,
+        subject_table=subject_table,
+        tables=tables,
     )
     md = to_markdown(forecast, use_exec_count=use_exec_count)
     js = to_json(forecast, use_exec_count=use_exec_count)

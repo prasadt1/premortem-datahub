@@ -163,6 +163,8 @@ def rehearse(
     lineage_neighbors: list[str] | None = None,
     adjudicate: bool = False,
     adjudicator: Adjudicator | None = None,
+    subject_table: str | None = None,
+    tables: dict[str, list[str]] | None = None,
 ) -> Forecast:
     """Classify → optional adjudicate → Forecast."""
     from premortem.forecast import build_forecast
@@ -173,6 +175,8 @@ def rehearse(
         lineage_dependent_count=lineage_dependent_count,
         dialect=dialect,
         use_exec_count=use_exec_count,
+        subject_table=subject_table,
+        tables=tables,
     )
     if not adjudicate:
         return forecast

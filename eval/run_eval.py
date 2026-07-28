@@ -55,9 +55,17 @@ def predict_b1(cases, column, **_):
     }
 
 
-def predict_classifier(cases, column, dialect, **_):
+def predict_classifier(cases, column, dialect, schema=None, **_):
+    subject = (schema or {}).get("subject", {}).get("dataset")
+    tables = (schema or {}).get("tables")
     return {
-        c["id"]: classify_query(c["sql"], column=column, dialect=dialect).severity.value
+        c["id"]: classify_query(
+            c["sql"],
+            column=column,
+            dialect=dialect,
+            subject_table=subject,
+            tables=tables,
+        ).severity.value
         for c in cases
     }
 
@@ -65,9 +73,7 @@ def predict_classifier(cases, column, dialect, **_):
 def predict_adjudicated(cases, column, dialect, schema):
     """Classifier + adjudication via the library's rehearse() entry point.
 
-    ADAPTER NOTE: today rehearse() accepts the subject's schema_fields only.
-    When the multi-table binder lands, thread the full table->columns fixture
-    (schema["tables"]) through here. The metrics below stay unchanged.
+    Threads the full table→columns fixture (schema["tables"]) into the binder.
     """
     subject = schema["subject"]
     diff = SchemaDiff(
@@ -84,6 +90,8 @@ def predict_adjudicated(cases, column, dialect, schema):
         dialect=dialect,
         schema_fields=subject_fields,
         adjudicate=True,
+        subject_table=subject["dataset"],
+        tables=schema["tables"],
     )
     by_id = {f.query_id: f.severity.value for f in forecast.findings}
     return {c["id"]: by_id.get(c["id"], "unaffected") for c in cases}
@@ -186,7 +194,9 @@ def main():
     runs = {
         "B0 every-dependent-breaks": predict_b0(cases),
         "B1 substring-grep": predict_b1(cases, column=column),
-        "C classifier": predict_classifier(cases, column=column, dialect=dialect),
+        "C classifier": predict_classifier(
+            cases, column=column, dialect=dialect, schema=schema
+        ),
         "C+A adjudicated": predict_adjudicated(cases, column=column, dialect=dialect, schema=schema),
     }
     results = {name: score(cases, preds) for name, preds in runs.items()}

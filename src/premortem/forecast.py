@@ -14,12 +14,20 @@ def build_forecast(
     lineage_dependent_count: int = 0,
     dialect: str = "snowflake",
     use_exec_count: bool = False,
+    subject_table: str | None = None,
+    tables: dict[str, list[str]] | None = None,
 ) -> Forecast:
     """Classify each query against ``diff.column`` and assemble a Forecast."""
     findings: list[BreakFinding] = []
     unaffected = 0
     for q in queries:
-        result = classify_query(q.sql, column=diff.column, dialect=dialect)
+        result = classify_query(
+            q.sql,
+            column=diff.column,
+            dialect=dialect,
+            subject_table=subject_table,
+            tables=tables,
+        )
         if result.severity is BreakSeverity.UNAFFECTED:
             unaffected += 1
             continue
