@@ -1,4 +1,4 @@
-"""Factory for catalog backends — GraphQL default; Kit is a post-spike swap."""
+"""Factory for catalog backends — Kit default; GraphQL explicit fallback."""
 
 from __future__ import annotations
 
@@ -11,6 +11,17 @@ from premortem.catalog.kit import KitCatalogClient
 from premortem.catalog.protocol import CatalogClient
 
 BACKENDS = frozenset({"graphql", "kit", "fake"})
+
+
+def _resolve_backend_name(backend: str | None) -> str:
+    """Prefer PREMORTEM_CATALOG, then PREMORTEM_CATALOG_BACKEND, default kit."""
+    if backend:
+        return backend.lower()
+    for key in ("PREMORTEM_CATALOG", "PREMORTEM_CATALOG_BACKEND"):
+        val = os.environ.get(key)
+        if val:
+            return val.lower()
+    return "kit"
 
 
 def create_catalog_client(
@@ -27,14 +38,10 @@ def create_catalog_client(
 
     Backend selection (first match wins):
     1. Explicit ``backend=`` argument
-    2. ``PREMORTEM_CATALOG_BACKEND`` env (graphql | kit | fake)
-    3. Default ``graphql``
-
-    ``kit`` raises ``KitBackendNotReady`` until spikes S1–S3 land and the SDK
-    adapter is filled in — intentional fail-fast so stage-1 cannot silently
-    depend on an empty shell.
+    2. ``PREMORTEM_CATALOG`` or ``PREMORTEM_CATALOG_BACKEND`` env
+    3. Default ``kit`` (stage-1 surface). Use ``graphql`` as explicit fallback.
     """
-    name = (backend or os.environ.get("PREMORTEM_CATALOG_BACKEND") or "graphql").lower()
+    name = _resolve_backend_name(backend)
     if name not in BACKENDS:
         raise ValueError(
             f"Unknown catalog backend {name!r}; expected one of {sorted(BACKENDS)}"
@@ -44,7 +51,6 @@ def create_catalog_client(
             write_back_enabled=write_back_enabled
         )
     if name == "kit":
-        # Constructor raises KitBackendNotReady until wired.
         return KitCatalogClient(
             gms_url=gms_url,
             token=token,

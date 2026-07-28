@@ -114,6 +114,12 @@ def main(argv: list[str] | None = None) -> None:
         help="Comma-separated schema fields for offline adjudication",
     )
     p.add_argument(
+        "--catalog",
+        choices=["kit", "graphql", "fake"],
+        default=None,
+        help="Catalog backend (default: kit; set PREMORTEM_CATALOG=graphql to force GraphQL)",
+    )
+    p.add_argument(
         "--gms",
         default=os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080"),
         help="GMS URL for --live / --write-back",
@@ -147,6 +153,7 @@ def main(argv: list[str] | None = None) -> None:
         # frozen eval shows C+A net-negative vs C (bind accuracy 0.00 on residue).
         adjudicate = bool(args.adjudicate) and not args.no_adjudicate
         client = create_catalog_client(
+            backend=args.catalog,
             gms_url=args.gms,
             write_back_enabled=args.write_back,
         )
@@ -205,7 +212,9 @@ def main(argv: list[str] | None = None) -> None:
 
         if args.write_back:
             title = f"Premortem: {diff.kind} {diff.column}"
-            client = create_catalog_client(gms_url=args.gms, write_back_enabled=True)
+            client = create_catalog_client(
+                backend=args.catalog, gms_url=args.gms, write_back_enabled=True
+            )
             ref = write_forecast_to_catalog(
                 client, urn=args.urn, title=title, body_md=md
             )

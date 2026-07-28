@@ -8,6 +8,15 @@ When I propose renaming or dropping a column, Impact Analysis already tells me *
 
 Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.0).
 
+## First 60 seconds
+
+1. Install with the DataHub Kit + MCP extras, point at a local Quickstart, seed the demo env.
+2. Ask an agent (Claude Code with both MCP servers registered) to rehearse renaming `order_status` → `order_state` on ORDER_HISTORY.
+3. Watch the tool-call log: DataHub MCP for schema/lineage/queries, Premortem `rehearse_schema_change` for the forecast + `write_payload`.
+4. On write-back, the host applies that payload as-is — custom assertion (camera hero on the Quality tab), `premortem_forecast` tag, description — no recomputing.
+
+Frozen classifier evidence (C accuracy **0.97**, HARD prec **1.00**, decoy FP **0.00**) lives in [`eval/RESULTS.md`](eval/RESULTS.md). The live demo instance is constructed (synthetic shipments, seeded queries/lineage); the eval is the measurement.
+
 ## What you get
 
 | Output | Meaning (remediation blast radius) |
@@ -25,9 +34,11 @@ Python 3.11+:
 
 ```bash
 python3.11 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev,datahub,mcp]"
 pytest -q
 ```
+
+Live catalog default is the **DataHub Agent Kit** (`PREMORTEM_CATALOG=kit`). Explicit GraphQL fallback: `PREMORTEM_CATALOG=graphql` or `--catalog graphql`. Dual-MCP filming config: [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md).
 
 ## Usage
 
@@ -59,7 +70,13 @@ premortem --live --drop order_status \
 premortem --live --rename order_status:order_state --write-back
 ```
 
-Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` when your GMS requires auth.
+Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` when your GMS requires auth. Live defaults to binder-only (`adjudicate=False`); `--adjudicate` is opt-in and net-negative on the frozen eval.
+
+Seed / refresh the constructed demo (idempotent; exactly one camera assertion):
+
+```bash
+python tools/seed_demo_environment.py
+```
 
 ## Demo corpus
 
@@ -68,7 +85,9 @@ Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` 
 - Offline sample: [`examples/forecast-offline.md`](examples/forecast-offline.md)
 - Live fallback seed: [`examples/seeded_queries.json`](examples/seeded_queries.json)
 - Demo env seeder: [`tools/seed_demo_environment.py`](tools/seed_demo_environment.py)
-- S2 assertion probe note: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
+- Camera assertion: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
+- MCP composition (filming): [`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)
+- OSS Quickstart limits: [`examples/OSS_ISSUES.md`](examples/OSS_ISSUES.md)
 
 Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md).
 
@@ -78,7 +97,8 @@ Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbe
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
 - The demo runs against a local DataHub Quickstart with the showcase-ecommerce datapack, extended with a synthetic `shipments` dataset, seeded query history, and seeded lineage. The accuracy numbers in [`eval/RESULTS.md`](eval/RESULTS.md) come from the frozen eval — not from this demo instance.
-- Write-back demo beat is the **`premortem_forecast` tag** (+ editable description); Document create works but Quickstart often does not index it
+- Write-back ladder (rung 1): custom **assertion** (platform `premortem`) + **`premortem_forecast` tag** + description. Document create may succeed without UI indexing on Quickstart.
+- OSS MCP: Data Quality mutation tools are DISABLED — assertion upsert stays on GraphQL / seeder; host still applies tag + description via DataHub MCP.
 - When running a DataHub MCP server on camera, set `DATAHUB_TELEMETRY_ENABLED=false` so `track.datahubproject.io` timeouts do not scroll the logs
 
 ## License

@@ -6,11 +6,11 @@ Idempotent against http://localhost:8080 (or DATAHUB_GMS_URL):
 1. Snowflake ``analytics.shipments`` dataset (+ schema with ``order_status``)
 2. Lineage: shipments / order_details / order_details_replica ← ORDER_HISTORY
 3. QUERY entities for decoy + truly-ambiguous demo beats
-4. Custom assertion on ``order_status`` with a FAILURE result (S2 UI check)
+4. Exactly one camera-ready custom assertion (stable URN, upsert not append)
 
 Usage:
-  python scripts/seed_demo_environment.py
-  python scripts/seed_demo_environment.py --verify-only
+  python tools/seed_demo_environment.py
+  python tools/seed_demo_environment.py --verify-only
 """
 
 from __future__ import annotations
@@ -42,6 +42,7 @@ from premortem.catalog import create_catalog_client
 from premortem.cli import DEMO_URN
 from premortem.live import run_live_rehearsal
 from premortem.models import BreakSeverity, SchemaDiff
+from premortem.write_payload import CAMERA_ASSERTION_URN, assertion_copy
 
 GMS = os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080").rstrip("/")
 
@@ -65,6 +66,9 @@ AMBIGUOUS_SQL = (
 )
 
 ASSERTION_URN_FILE = Path(__file__).resolve().parents[1] / "examples" / "s2_assertion_urn.txt"
+FORECAST_URL = (
+    "https://github.com/prasadt1/premortem-datahub/blob/main/examples/forecast-order-status.md"
+)
 
 
 def gql(query: str, variables: dict | None = None) -> dict:
@@ -142,7 +146,50 @@ def update_lineage() -> None:
     print(f"updateLineage → {data.get('updateLineage')}")
 
 
+def rest_delete_entity(urn: str) -> None:
+    """Hard-delete an entity (custom assertions are not deletable via GraphQL)."""
+    body = json.dumps({"urn": urn}).encode("utf-8")
+    req = urllib.request.Request(
+        GMS + "/entities?action=delete",
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        resp.read()
+
+
+def prune_probe_assertions() -> None:
+    """Leave at most the stable camera assertion URN."""
+    data = gql(
+        """
+        query($urn: String!) {
+          dataset(urn: $urn) {
+            assertions(start: 0, count: 50) { assertions { urn } }
+          }
+        }
+        """,
+        {"urn": DEMO_URN},
+    )
+    rows = (((data.get("dataset") or {}).get("assertions") or {}).get("assertions")) or []
+    for row in rows:
+        urn = row.get("urn")
+        if not urn or urn == CAMERA_ASSERTION_URN:
+            continue
+        print(f"prune assertion {urn}")
+        rest_delete_entity(urn)
+
+
 def create_query(name: str, sql: str) -> str:
+    # Idempotent: skip create when a query with this name already exists for DEMO_URN.
+    client = create_catalog_client(
+        backend="graphql", gms_url=GMS, write_back_enabled=False
+    )
+    existing = {q.query_id for q in client.get_dataset_queries(DEMO_URN)}
+    if name in existing:
+        print(f"createQuery skip (exists) {name}")
+        return name
+
     data = gql(
         """
         mutation($input: CreateQueryInput!) {
@@ -166,35 +213,71 @@ def create_query(name: str, sql: str) -> str:
 
 
 def upsert_assertion() -> str:
-    # Note: passing fieldPath makes asserteeUrn a schemaField on this Quickstart,
-    # and reportAssertionResult then fails validation (requires dataset). Keep
-    # column in description/properties; Prasad still checks UI render.
+    """Idempotent camera assertion — stable URN, upsert not append.
+
+    OSS limitation: do not set fieldPath; assertionRunEvent rejects schemaField
+    asserteeUrn. Column lives in description + result properties.
+    """
+    prune_probe_assertions()
+
+    # Build product copy from a live rehearsal when possible.
+    try:
+        client = create_catalog_client(gms_url=GMS, write_back_enabled=False)
+        diff = SchemaDiff(
+            dataset_urn=DEMO_URN,
+            kind="rename",
+            column="order_status",
+            new_column="order_state",
+        )
+        result = run_live_rehearsal(client, diff=diff, adjudicate=False)
+        assertion = assertion_copy(result.forecast)
+        assertion["external_url"] = FORECAST_URL
+        description = assertion["description"]
+        title_type = assertion["type"]
+    except Exception as exc:  # noqa: BLE001
+        print(f"assertion copy fallback ({exc})")
+        description = (
+            "Schema rehearsal: rename order_status → order_state. "
+            "Premortem HARD/SOFT/UNKNOWN/CLEARED forecast. "
+            "Column: order_status (dataset-scoped — OSS fieldPath limitation)."
+        )
+        title_type = "Premortem schema rehearsal"
+
     data = gql(
         """
-        mutation($input: UpsertCustomAssertionInput!) {
-          upsertCustomAssertion(input: $input) { urn }
+        mutation($urn: String, $input: UpsertCustomAssertionInput!) {
+          upsertCustomAssertion(urn: $urn, input: $input) { urn }
         }
         """,
         {
+            "urn": CAMERA_ASSERTION_URN,
             "input": {
                 "entityUrn": DEMO_URN,
-                "type": "Premortem schema rehearsal",
-                "description": (
-                    "Premortem S2 probe on column order_status — rename would break "
-                    "HARD dependents (UI visibility check)."
-                ),
+                "type": title_type,
+                "description": description,
                 "platform": {"name": "premortem"},
                 "logic": "premortem --live --rename order_status:order_state",
+                "externalUrl": FORECAST_URL,
             },
         },
     )
-    urn = ((data.get("upsertCustomAssertion") or {}).get("urn")) or ""
-    if not urn:
-        raise RuntimeError(f"upsertCustomAssertion returned no urn: {data}")
+    urn = ((data.get("upsertCustomAssertion") or {}).get("urn")) or CAMERA_ASSERTION_URN
     print(f"upsertCustomAssertion → {urn}")
     ASSERTION_URN_FILE.parent.mkdir(parents=True, exist_ok=True)
     ASSERTION_URN_FILE.write_text(urn + "\n", encoding="utf-8")
-    time.sleep(2)
+
+    # Wait until the assertion is readable before reporting a result.
+    for _ in range(10):
+        time.sleep(1)
+        probe = gql(
+            "query($urn: String!) { assertion(urn: $urn) { urn } }",
+            {"urn": urn},
+        )
+        if (probe.get("assertion") or {}).get("urn"):
+            break
+    else:
+        raise RuntimeError(f"assertion {urn} not readable after upsert")
+
     ok = gql(
         """
         mutation($urn: String!, $result: AssertionResultInput!) {
@@ -206,18 +289,31 @@ def upsert_assertion() -> str:
             "result": {
                 "timestampMillis": int(time.time() * 1000),
                 "type": "FAILURE",
+                "externalUrl": FORECAST_URL,
                 "properties": [
                     {"key": "source", "value": "premortem"},
                     {"key": "column", "value": "order_status"},
-                    {
-                        "key": "note",
-                        "value": "S2 UI visibility probe — Prasad confirm in Quickstart UI",
-                    },
                 ],
             },
         },
     )
     print(f"reportAssertionResult FAILURE → {ok.get('reportAssertionResult')}")
+
+    # Guard: exactly one assertion on the demo dataset.
+    listed = gql(
+        """
+        query($urn: String!) {
+          dataset(urn: $urn) {
+            assertions(start: 0, count: 50) { total assertions { urn } }
+          }
+        }
+        """,
+        {"urn": DEMO_URN},
+    )
+    total = (((listed.get("dataset") or {}).get("assertions") or {}).get("total")) or 0
+    print(f"assertion count on demo dataset: {total}")
+    if total != 1:
+        raise RuntimeError(f"expected exactly 1 assertion on demo URN, got {total}")
     return str(urn)
 
 
