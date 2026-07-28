@@ -5,11 +5,21 @@
     "column": "order_status",
     "new_column": "order_state"
   },
-  "lineage_dependent_count": 0,
+  "lineage_dependent_count": 3,
   "findings": [
     {
       "query_id": "emitter_hard_where",
       "sql_snippet": "SELECT order_id FROM order_history WHERE order_status = 'COMPLETE'",
+      "severity": "hard",
+      "column": "order_status",
+      "evidence": "WHERE",
+      "exec_count": null,
+      "agent_note": null,
+      "unknown_reason": null
+    },
+    {
+      "query_id": "emitter_unknown_bare",
+      "sql_snippet": "SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'",
       "severity": "hard",
       "column": "order_status",
       "evidence": "WHERE",
@@ -38,6 +48,16 @@
       "unknown_reason": null
     },
     {
+      "query_id": "unknown_bare_join",
+      "sql_snippet": "SELECT o.order_id, c.customer_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'",
+      "severity": "hard",
+      "column": "order_status",
+      "evidence": "WHERE",
+      "exec_count": null,
+      "agent_note": null,
+      "unknown_reason": null
+    },
+    {
       "query_id": "emitter_soft_select",
       "sql_snippet": "SELECT order_status, order_id FROM order_history",
       "severity": "soft",
@@ -58,18 +78,8 @@
       "unknown_reason": null
     },
     {
-      "query_id": "emitter_unknown_bare",
-      "sql_snippet": "SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'",
-      "severity": "unknown",
-      "column": "order_status",
-      "evidence": "WHERE",
-      "exec_count": null,
-      "agent_note": null,
-      "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
-    },
-    {
-      "query_id": "unknown_bare_join",
-      "sql_snippet": "SELECT o.order_id, c.customer_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'",
+      "query_id": "unknown_bare_two_tables",
+      "sql_snippet": "SELECT o.order_id FROM order_history o JOIN shipments s ON o.order_id = s.order_id WHERE order_status = 'OPEN'",
       "severity": "unknown",
       "column": "order_status",
       "evidence": "WHERE",
@@ -78,5 +88,5 @@
       "unknown_reason": "unqualified `order_status` with 2 tables in scope; needs human/agent"
     }
   ],
-  "unaffected_lineage_count": 1
+  "unaffected_lineage_count": 2
 }

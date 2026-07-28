@@ -124,6 +124,25 @@ class GraphqlCatalogClient:
         # Self-edges (dataset listed as its own DownstreamOf) are not dependents.
         return filter_self_urn(urn, out)
 
+    def search_datasets(self, query: str, *, limit: int = 20) -> list[str]:
+        data = self._post(
+            """
+            query($q: String!, $count: Int!) {
+              search(input: { type: DATASET, query: $q, start: 0, count: $count }) {
+                searchResults { entity { urn } }
+              }
+            }
+            """,
+            {"q": query, "count": limit},
+        )
+        rows = ((data.get("search") or {}).get("searchResults")) or []
+        out: list[str] = []
+        for row in rows:
+            entity = row.get("entity") or {}
+            if entity.get("urn"):
+                out.append(entity["urn"])
+        return out
+
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:
         # Prefer catalog listQueries when indexed; seed is fallback / PREMORTEM_PREFER_SEED.
         if self._force_seed():

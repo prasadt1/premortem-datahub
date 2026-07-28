@@ -4,7 +4,7 @@
   "dialect": "snowflake",
   "rank_by_exec_count": false,
   "list_queries_indexed": true,
-  "note": "Query history on the demo URN is seeded. Live prefers indexed listQueries; this file is fallback (or PREMORTEM_PREFER_SEED=1). Includes demo beats: false-alarm decoy, honest UNKNOWN, SELECT*. Disclose seeded history in README/video. If lineage is also seeded later, disclose that too.",
+  "note": "Query history + lineage on the demo URN are seeded (see tools/seed_demo_environment.py). Live prefers indexed listQueries; this file is fallback. Disclose seeded history and lineage in README/video. Eval numbers are separate (eval/RESULTS.md).",
   "queries": [
     {
       "query_id": "hard_where_order_status",

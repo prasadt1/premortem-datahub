@@ -17,16 +17,22 @@ class FakeCatalogClient:
         downstream: list[str] | None = None,
         queries: list[QueryRecord] | None = None,
         write_back_enabled: bool = False,
+        search_index: dict[str, list[str]] | None = None,
     ) -> None:
         self.fields = list(fields or [])
         self.downstream = list(downstream or [])
         self.queries = list(queries or [])
         self.write_back_enabled = write_back_enabled
+        self.search_index = dict(search_index or {})
         self.saved_docs: list[tuple[str, str, str]] = []
         self.added_tags: list[tuple[str, list[str]]] = []
         self.descriptions: list[tuple[str, str]] = []
+        # Optional per-URN schemas for sibling resolution tests.
+        self.schemas_by_urn: dict[str, list[str]] = {}
 
     def list_schema_fields(self, urn: str) -> list[str]:
+        if urn in self.schemas_by_urn:
+            return list(self.schemas_by_urn[urn])
         return list(self.fields)
 
     def get_downstream(self, urn: str, column: str | None = None) -> list[str]:
@@ -34,6 +40,13 @@ class FakeCatalogClient:
 
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:
         return dedupe_queries_by_sql([q.model_copy() for q in self.queries])
+
+    def search_datasets(self, query: str, *, limit: int = 20) -> list[str]:
+        q = query.lower()
+        # Fake index: optional ``search_index`` map name→urns, else empty.
+        index = getattr(self, "search_index", {}) or {}
+        hits = index.get(q) or index.get(query) or []
+        return list(hits)[:limit]
 
     def _require_write_back(self) -> None:
         if not self.write_back_enabled:

@@ -26,6 +26,10 @@ from premortem.catalog.protocol import (
     WriteBackDisabledError,
 )
 from premortem.catalog.queries import dedupe_queries_by_sql, filter_self_urn, normalize_sql
+from premortem.catalog.resolve import (
+    extract_physical_table_names,
+    resolve_sibling_schemas,
+)
 
 
 def write_forecast_to_catalog(
@@ -57,7 +61,9 @@ __all__ = [
     "WriteBackDisabledError",
     "create_catalog_client",
     "dedupe_queries_by_sql",
+    "extract_physical_table_names",
     "filter_self_urn",
     "normalize_sql",
+    "resolve_sibling_schemas",
     "write_forecast_to_catalog",
 ]

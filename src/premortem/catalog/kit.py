@@ -45,6 +45,9 @@ class KitCatalogClient:
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:  # pragma: no cover
         raise KitBackendNotReady("Kit backend not ready")
 
+    def search_datasets(self, query: str, *, limit: int = 20) -> list[str]:  # pragma: no cover
+        raise KitBackendNotReady("Kit backend not ready")
+
     def save_forecast_document(self, urn: str, title: str, body_md: str) -> str:  # pragma: no cover
         raise KitBackendNotReady("Kit backend not ready")
 

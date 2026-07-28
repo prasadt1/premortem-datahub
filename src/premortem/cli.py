@@ -166,6 +166,8 @@ def main(argv: list[str] | None = None) -> None:
         print(
             f"# live urn={diff.dataset_urn}\n"
             f"# schema_fields={result.schema_fields}\n"
+            f"# sibling_tables={list((result.tables or {}).keys())}\n"
+            f"# unresolved={result.unresolved_tables or []}\n"
             f"# queries={result.query_count} downstream={len(result.downstream)}\n"
         )
         _emit(result.markdown, result.json_text, args)

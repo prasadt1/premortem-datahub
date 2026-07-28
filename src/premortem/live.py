@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from premortem.agent import rehearse
 from premortem.catalog import CatalogClient, write_forecast_to_catalog
+from premortem.catalog.resolve import resolve_sibling_schemas
 from premortem.models import Forecast, SchemaDiff
 from premortem.report import to_json, to_markdown
 
@@ -30,6 +31,8 @@ class LiveRehearsalResult:
     downstream: list[str]
     query_count: int
     write_back_ref: str | None = None
+    tables: dict[str, list[str]] | None = None
+    unresolved_tables: list[str] | None = None
 
 
 def run_live_rehearsal(
@@ -71,7 +74,20 @@ def run_live_rehearsal(
     # Prefer bare field names for adjudication
     schema_for_agent = sorted({f.split(".")[-1] for f in fields})
     subject_table = _subject_table_from_urn(diff.dataset_urn)
-    tables = {subject_table: schema_for_agent} if subject_table else None
+
+    tables: dict[str, list[str]] | None = None
+    unresolved: list[str] = []
+    if subject_table:
+        sibling = resolve_sibling_schemas(
+            client,
+            subject_urn=diff.dataset_urn,
+            subject_table=subject_table,
+            subject_fields=schema_for_agent,
+            sql_statements=[q.sql for q in queries],
+            dialect=dialect,
+        )
+        tables = sibling.tables
+        unresolved = sibling.unresolved
 
     forecast = rehearse(
         diff=diff,
@@ -103,4 +119,6 @@ def run_live_rehearsal(
         downstream=downstream,
         query_count=len(queries),
         write_back_ref=ref,
+        tables=tables,
+        unresolved_tables=unresolved,
     )

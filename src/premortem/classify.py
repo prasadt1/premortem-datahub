@@ -285,7 +285,18 @@ def classify_query(
                 t for t in candidates if t in schema_by_base and col in schema_by_base[t]
             }
             missing = {t for t in candidates if t not in schema_by_base}
-            candidates = with_col | missing
+            if missing:
+                return ClassifyResult(
+                    severity=BreakSeverity.UNKNOWN,
+                    evidence=clause,
+                    unknown_reason=(
+                        "couldn't resolve table "
+                        + ", ".join(sorted(missing))
+                        + " — not guessing"
+                    ),
+                    snippet=sql.strip()[:200],
+                )
+            candidates = with_col
         if len(candidates) >= 2:
             return ClassifyResult(
                 severity=BreakSeverity.UNKNOWN,

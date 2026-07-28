@@ -67,16 +67,19 @@ Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` 
 - [`examples/forecast-drop-order-status.md`](examples/forecast-drop-order-status.md)
 - Offline sample: [`examples/forecast-offline.md`](examples/forecast-offline.md)
 - Live fallback seed: [`examples/seeded_queries.json`](examples/seeded_queries.json)
+- Demo env seeder: [`tools/seed_demo_environment.py`](tools/seed_demo_environment.py)
+- S2 assertion probe note: [`examples/S2_ASSERTION.md`](examples/S2_ASSERTION.md)
 
-Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): `eval/`.
+Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): [`eval/RESULTS.md`](eval/RESULTS.md).
 
 ## Limits (honest)
 
 - Not 100% breakage prediction — macros, dynamic SQL, and residual ambiguity land in **unknown**
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
-- **Showcase query history on the demo URN was seeded** (official `listQueries` path works; seed file remains a fallback)
+- The demo runs against a local DataHub Quickstart with the showcase-ecommerce datapack, extended with a synthetic `shipments` dataset, seeded query history, and seeded lineage. The accuracy numbers in [`eval/RESULTS.md`](eval/RESULTS.md) come from the frozen eval — not from this demo instance.
 - Write-back demo beat is the **`premortem_forecast` tag** (+ editable description); Document create works but Quickstart often does not index it
+- When running a DataHub MCP server on camera, set `DATAHUB_TELEMETRY_ENABLED=false` so `track.datahubproject.io` timeouts do not scroll the logs
 
 ## License
 
