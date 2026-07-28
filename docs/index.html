@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Premortem — how it breaks, before you merge</title>
+  <meta name="description" content="Schema-change rehearsal for DataHub: HARD / SOFT / UNKNOWN / CLEARED from query history. Frozen eval: accuracy 0.97, HARD precision 1.00, decoy FP 0.00." />
+  <style>
+    :root {
+      --bg: #f7f5f1;
+      --surface: #fffcf7;
+      --ink: #1a1916;
+      --muted: #5c584f;
+      --line: #d9d4c8;
+      --accent: #1f4d3a;
+      --hard-bg: #f3e0dc;
+      --hard-ink: #7a2e22;
+      --soft-bg: #e4ebe3;
+      --soft-ink: #2f4f38;
+      --unknown-bg: #efe6d4;
+      --unknown-ink: #6a5220;
+      --cleared-bg: #dde7ef;
+      --cleared-ink: #243f55;
+      --code-bg: #ece8df;
+      --shadow: 0 1px 0 rgba(26, 25, 22, 0.06);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --ui: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141311;
+        --surface: #1c1b18;
+        --ink: #f2efe7;
+        --muted: #a8a296;
+        --line: #3a372f;
+        --accent: #8fbfa6;
+        --hard-bg: #3a221e;
+        --hard-ink: #f0b5aa;
+        --soft-bg: #223028;
+        --soft-ink: #b5d0bc;
+        --unknown-bg: #32291a;
+        --unknown-ink: #e0c789;
+        --cleared-bg: #1d2a35;
+        --cleared-ink: #a9c6de;
+        --code-bg: #26241f;
+        --shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(31, 77, 58, 0.08), transparent 60%),
+        radial-gradient(900px 400px at 100% 0%, rgba(122, 46, 34, 0.06), transparent 55%),
+        var(--bg);
+      font-family: var(--ui);
+      line-height: 1.55;
+      font-size: 1.02rem;
+    }
+    main {
+      max-width: 46rem;
+      margin: 0 auto;
+      padding: 2.25rem 1.25rem 4rem;
+    }
+    h1, h2 {
+      font-family: var(--sans);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 2.75rem); margin: 0 0 0.5rem; }
+    h2 { font-size: 1.45rem; margin: 2.75rem 0 0.85rem; }
+    p { margin: 0.75rem 0; color: var(--ink); }
+    .muted { color: var(--muted); }
+    .tagline {
+      font-family: var(--sans);
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+    }
+    .lede { font-size: 1.05rem; max-width: 40rem; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 1.5rem 0 1rem;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 0.9rem 0.85rem;
+      min-width: 0;
+    }
+    .stat .n {
+      font-family: var(--sans);
+      font-size: clamp(1.55rem, 4vw, 2rem);
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat .l {
+      display: block;
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .reproduce {
+      margin: 0.5rem 0 0;
+      padding: 1rem 1.05rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .reproduce p { margin: 0 0 0.65rem; font-size: 0.95rem; }
+    pre {
+      margin: 0;
+      padding: 0.85rem 0.95rem;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.45;
+      white-space: pre;
+    }
+    figure { margin: 1rem 0 0.25rem; }
+    figure img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      background: #fcfcfb;
+    }
+    figcaption {
+      margin-top: 0.65rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    .forecast {
+      margin-top: 0.75rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .forecast-head {
+      padding: 0.95rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .forecast-head strong { display: block; font-family: var(--sans); font-size: 1.05rem; }
+    .forecast-head span { color: var(--muted); font-size: 0.9rem; }
+    .note {
+      display: inline-block;
+      margin-top: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      padding: 0.2rem 0.45rem;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--line);
+      align-items: start;
+    }
+    .row:last-child { border-bottom: 0; }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.22rem 0.4rem;
+      border-radius: 0.2rem;
+      text-align: center;
+      width: 100%;
+    }
+    .badge.hard { background: var(--hard-bg); color: var(--hard-ink); }
+    .badge.soft { background: var(--soft-bg); color: var(--soft-ink); }
+    .badge.unknown { background: var(--unknown-bg); color: var(--unknown-ink); }
+    .badge.cleared { background: var(--cleared-bg); color: var(--cleared-ink); }
+    .qid { font-weight: 600; font-size: 0.92rem; margin: 0 0 0.25rem; word-break: break-word; }
+    .sql {
+      margin: 0.35rem 0 0;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: var(--ink);
+      background: var(--code-bg);
+      padding: 0.45rem 0.55rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .reason { margin: 0.35rem 0 0; font-size: 0.88rem; color: var(--muted); }
+    .section-count {
+      margin: 0;
+      padding: 0.55rem 1rem 0;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    ul.links {
+      padding-left: 1.1rem;
+      margin: 0.5rem 0 0;
+    }
+    ul.links li { margin: 0.35rem 0; }
+    a { color: var(--accent); }
+    footer {
+      margin-top: 2.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; gap: 0.35rem; }
+      .badge { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Premortem</h1>
+      <p class="tagline">how it breaks, before you merge</p>
+      <p class="lede">
+        A schema-change rehearsal agent for DataHub. Starting from Impact Analysis,
+        it reads warehouse SQL from query history and forecasts how each consumer
+        breaks — HARD, SOFT, UNKNOWN, or CLEARED — then writes the forecast back
+        into the catalog.
+      </p>
+      <div class="stats" role="group" aria-label="Frozen eval headline metrics">
+        <div class="stat">
+          <div class="n">1.00</div>
+          <span class="l">HARD precision<br />(C classifier)</span>
+        </div>
+        <div class="stat">
+          <div class="n">0.00</div>
+          <span class="l">decoy false alarms<br />(C classifier)</span>
+        </div>
+        <div class="stat">
+          <div class="n">0.97</div>
+          <span class="l">accuracy<br />(C classifier)</span>
+        </div>
+      </div>
+      <div class="reproduce">
+        <p><strong>Reproduce in under a minute, no DataHub required.</strong></p>
+        <pre><code>pip install -e ".[dev]"
+pytest -q
+python eval/run_eval.py</code></pre>
+      </div>
+    </header>
+
+    <section aria-labelledby="binding">
+      <h2 id="binding">The binding problem</h2>
+      <figure>
+        <img src="media/binding-problem.png" width="1800" height="1200" alt="Two tables carry a column called order_status; only one of them is the subject of the change. Name matching flags the wrong one as breaking; resolving what the reference binds to clears it." />
+        <figcaption>
+          The whole product in one picture. <code>order_status</code> exists on two tables.
+          A check that matches column names calls this query breaking; Premortem resolves
+          the alias to <code>shipments</code>, sees it isn’t the table being changed, and
+          clears it by name. That single distinction took decoy false positives from 0.50 to 0.00.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section aria-labelledby="forecast">
+      <h2 id="forecast">A real forecast, rendered</h2>
+      <p class="muted">
+        Sample output from the constructed demo instance (not interactive) —
+        rename <code>order_status</code> → <code>order_state</code> on
+        <code>ORDER_HISTORY</code>, Impact Analysis baseline 3 downstream dependents.
+      </p>
+      <div class="forecast" aria-label="Sample forecast output">
+        <div class="forecast-head">
+          <strong>Schema rehearsal: order_status → rename to order_state</strong>
+          <span>Impact Analysis baseline: 3 downstream dependents</span>
+          <div class="note">Sample output · demo instance · not a live form</div>
+        </div>
+
+        <p class="section-count">HARD (5)</p>
+        <div class="row">
+          <span class="badge hard">HARD</span>
+          <div>
+            <p class="qid">emitter_hard_where</p>
+            <pre class="sql">SELECT order_id FROM order_history WHERE order_status = 'COMPLETE'</pre>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge hard">HARD</span>
+          <div>
+            <p class="qid">emitter_unknown_bare</p>
+            <pre class="sql">SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'</pre>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge hard">HARD</span>
+          <div>
+            <p class="qid">hard_qualified_join</p>
+            <pre class="sql">SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'OPEN'</pre>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge hard">HARD</span>
+          <div>
+            <p class="qid">hard_where_order_status</p>
+            <pre class="sql">SELECT order_id, customer_id FROM order_history WHERE order_status = 'COMPLETE'</pre>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge hard">HARD</span>
+          <div>
+            <p class="qid">unknown_bare_join</p>
+            <pre class="sql">SELECT o.order_id, c.customer_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'</pre>
+          </div>
+        </div>
+
+        <p class="section-count">SOFT (2)</p>
+        <div class="row">
+          <span class="badge soft">SOFT</span>
+          <div>
+            <p class="qid">emitter_soft_select</p>
+            <pre class="sql">SELECT order_status, order_id FROM order_history</pre>
+          </div>
+        </div>
+        <div class="row">
+          <span class="badge soft">SOFT</span>
+          <div>
+            <p class="qid">soft_select_order_status</p>
+            <pre class="sql">SELECT order_status, order_id, order_total FROM order_history</pre>
+          </div>
+        </div>
+
+        <p class="section-count">UNKNOWN (1)</p>
+        <div class="row">
+          <span class="badge unknown">UNKNOWN</span>
+          <div>
+            <p class="qid">unknown_bare_two_tables</p>
+            <pre class="sql">SELECT o.order_id FROM order_history o JOIN shipments s ON o.order_id = s.order_id WHERE order_status = 'OPEN'</pre>
+            <p class="reason">unqualified <code>order_status</code> with 2 tables in scope; needs human/agent</p>
+          </div>
+        </div>
+
+        <p class="section-count">CLEARED (1)</p>
+        <div class="row">
+          <span class="badge cleared">CLEARED</span>
+          <div>
+            <p class="qid">decoy_shipments_order_status</p>
+            <p class="reason">binds to <code>shipments</code></p>
+            <pre class="sql">SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="composition">
+      <h2 id="composition">Composition</h2>
+      <p>
+        One agent session registers two MCP servers: DataHub’s for schema, lineage,
+        and query history (and for write-back), Premortem’s for
+        <code>rehearse_schema_change</code>. The host applies the returned
+        <code>write_payload</code> as-is — no recomputing.
+      </p>
+      <figure>
+        <img src="media/dual-mcp-flow.png" width="1800" height="1200" alt="One agent session with two MCP servers: DataHub supplies schema, lineage and query history and receives the write-back; Premortem runs the rehearsal and returns a write payload." />
+        <figcaption>
+          DataHub supplies the context and receives the result. Premortem only rehearses —
+          the classifier underneath touches no catalog and calls no model.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section aria-labelledby="numbers">
+      <h2 id="numbers">The numbers</h2>
+      <figure>
+        <img src="media/eval-results.png" width="1800" height="1200" alt="HARD precision: every-dependent-breaks 0.40, substring grep 0.44, Premortem 1.00. Decoy false-alarm rate: every-dependent-breaks 1.00, substring grep 0.83, Premortem 0.00." />
+        <figcaption>
+          Measured against the same frozen forty queries. Full table in
+          <a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a>.
+        </figcaption>
+      </figure>
+      <p>
+        <strong>C+A is net-negative:</strong> heuristic adjudication binds 3 of 9
+        classifier UNKNOWNs with bind accuracy 0.00 — every bind wrong; live defaults
+        to <code>adjudicate=False</code>.
+      </p>
+      <p>
+        <strong>Named C miss:</strong> q39 (<code>hard</code> → <code>soft</code>) in the
+        subquery stratum — documented limitation, not tuned against the frozen labels.
+      </p>
+    </section>
+
+    <section aria-labelledby="links">
+      <h2 id="links">Links</h2>
+      <ul class="links">
+        <li><a href="https://github.com/prasadt1/premortem-datahub">Repository</a></li>
+        <li><a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a></li>
+        <li><a href="https://github.com/prasadt1/premortem-datahub/tree/main/examples">examples/</a></li>
+        <li>
+          Filed OSS issues:
+          <a href="https://github.com/datahub-project/datahub/issues/18674">#18674</a>,
+          <a href="https://github.com/acryldata/mcp-server-datahub/issues/151">mcp#151</a>,
+          <a href="https://github.com/datahub-project/datahub/issues/18675">#18675</a>,
+          <a href="https://github.com/datahub-project/datahub/issues/18676">#18676</a>
+        </li>
+        <li>Video demo: <em>to be added</em></li>
+      </ul>
+    </section>
+
+    <footer>
+      The demo runs against a local DataHub Quickstart with the showcase-ecommerce
+      datapack, extended with a synthetic <code>shipments</code> dataset, seeded query
+      history, and seeded lineage. The accuracy numbers in
+      <a href="https://github.com/prasadt1/premortem-datahub/blob/main/eval/RESULTS.md">eval/RESULTS.md</a>
+      come from the frozen eval — not from this demo instance.
+    </footer>
+  </main>
+</body>
+</html>

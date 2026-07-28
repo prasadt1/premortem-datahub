@@ -8,6 +8,8 @@ When I propose renaming or dropping a column, Impact Analysis already tells me *
 
 Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.0).
 
+**Demo page (no install):** [prasadt1.github.io/premortem-datahub](https://prasadt1.github.io/premortem-datahub/)
+
 ## First 60 seconds
 
 No DataHub, no Docker, no seeding — just Python 3.11+:
