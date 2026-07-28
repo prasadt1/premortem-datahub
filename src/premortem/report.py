@@ -6,7 +6,12 @@ from premortem.models import BreakSeverity, Forecast
 from premortem.rank import rank_findings
 
 
-def to_markdown(forecast: Forecast, *, use_exec_count: bool) -> str:
+def to_markdown(
+    forecast: Forecast,
+    *,
+    use_exec_count: bool,
+    baseline_source: str = "measured",
+) -> str:
     ranked = rank_findings(forecast.findings, use_exec_count=use_exec_count)
     d = forecast.diff
     change = (
@@ -14,10 +19,20 @@ def to_markdown(forecast: Forecast, *, use_exec_count: bool) -> str:
         if d.kind == "rename"
         else f"drop {d.column}"
     )
+    if baseline_source == "user-supplied":
+        baseline = (
+            f"Impact Analysis baseline: {forecast.lineage_dependent_count} "
+            f"downstream dependents (baseline: user-supplied)"
+        )
+    else:
+        baseline = (
+            f"Impact Analysis baseline: {forecast.lineage_dependent_count} "
+            f"downstream dependents"
+        )
     lines = [
         f"Schema rehearsal: {change}",
         "",
-        f"Impact Analysis baseline: {forecast.lineage_dependent_count} downstream dependents",
+        baseline,
         "",
     ]
     for sev in (BreakSeverity.HARD, BreakSeverity.SOFT, BreakSeverity.UNKNOWN):

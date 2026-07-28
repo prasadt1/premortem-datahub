@@ -4,41 +4,50 @@
   "dialect": "snowflake",
   "rank_by_exec_count": false,
   "list_queries_indexed": false,
-  "note": "Showcase datapack had no QUERY entities. Seeded via REST emitter. listQueries/search empty on this Quickstart \u2014 fetch by query_urn via GraphQL entity(urn:) or use sql field in this file.",
+  "note": "Showcase datapack shipped no QUERY entities; listQueries empty on Quickstart v1.5.0.6. Deduped seed for live fallback + demo beats (false-alarm decoy, honest UNKNOWN). Disclose seeded history in README/video.",
   "queries": [
     {
       "query_id": "hard_where_order_status",
-      "query_urn": "urn:li:query:72db3c47-18a6-45de-bf65-ed6f0c00c20e",
       "sql": "SELECT order_id, customer_id FROM order_history WHERE order_status = 'COMPLETE'",
       "expected": "hard",
       "exec_count": null
     },
     {
       "query_id": "soft_select_order_status",
-      "query_urn": "urn:li:query:a84d40bf-e312-4537-8cb1-fbf24a7e99a0",
       "sql": "SELECT order_status, order_id, order_total FROM order_history",
       "expected": "soft",
       "exec_count": null
     },
     {
-      "query_id": "unknown_bare_join",
-      "query_urn": "urn:li:query:76637ce9-37ab-4580-b40f-9154a6bcbc4d",
-      "sql": "SELECT o.order_id, c.customer_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE order_status = 'OPEN'",
-      "expected": "unknown",
-      "exec_count": null
-    },
-    {
       "query_id": "hard_qualified_join",
-      "query_urn": "urn:li:query:1d55abca-e133-4031-aab8-adeb47af94d2",
       "sql": "SELECT o.order_id FROM order_history o JOIN customers c ON o.customer_id = c.customer_id WHERE o.order_status = 'OPEN'",
       "expected": "hard",
       "exec_count": null
     },
     {
       "query_id": "unaffected_total",
-      "query_urn": "urn:li:query:3398e749-dd51-444e-b737-73ae29d43f39",
       "sql": "SELECT order_id FROM order_history WHERE order_total > 100",
       "expected": "unaffected",
+      "exec_count": null
+    },
+    {
+      "query_id": "decoy_shipments_order_status",
+      "sql": "SELECT s.shipment_id FROM shipments s WHERE s.order_status = 'SHIPPED'",
+      "expected": "unaffected",
+      "exec_count": null,
+      "demo_beat": "cleared_false_alarm"
+    },
+    {
+      "query_id": "unknown_bare_two_tables",
+      "sql": "SELECT o.order_id, s.shipment_id FROM order_history o JOIN shipments s ON o.order_id = s.order_id WHERE order_status = 'OPEN'",
+      "expected": "unknown",
+      "exec_count": null,
+      "demo_beat": "honest_unknown"
+    },
+    {
+      "query_id": "star_over_subject",
+      "sql": "SELECT * FROM order_history WHERE order_total > 0",
+      "expected": "unknown",
       "exec_count": null
     }
   ]

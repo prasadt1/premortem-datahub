@@ -132,6 +132,11 @@ def main(argv: list[str] | None = None) -> None:
     if args.live:
         if args.queries_dir:
             p.error("--live and --queries-dir are mutually exclusive")
+        if args.lineage_count is not None:
+            p.error(
+                "--lineage-count cannot be used with --live "
+                "(baseline must be measured from get_downstream; never hand-set)"
+            )
         if not args.rename and not args.drop:
             p.error("--live requires --rename old:new or --drop column")
         diff = _parse_diff(args)
@@ -150,7 +155,7 @@ def main(argv: list[str] | None = None) -> None:
                 use_exec_count=args.use_exec_count,
                 adjudicate=adjudicate,
                 write_back=args.write_back,
-                lineage_count_override=args.lineage_count,
+                lineage_count_override=None,
             )
         except RuntimeError as exc:
             print(f"live rehearsal failed: {exc}", file=sys.stderr)
@@ -173,7 +178,8 @@ def main(argv: list[str] | None = None) -> None:
             if args.schema_fields
             else [diff.column]
         )
-        lineage_count = args.lineage_count if args.lineage_count is not None else 0
+        user_supplied = args.lineage_count is not None
+        lineage_count = args.lineage_count if user_supplied else 0
         forecast = rehearse(
             diff=diff,
             queries=queries,
@@ -183,7 +189,12 @@ def main(argv: list[str] | None = None) -> None:
             schema_fields=fields,
             adjudicate=args.adjudicate and not args.no_adjudicate,
         )
-        md = to_markdown(forecast, use_exec_count=args.use_exec_count)
+        baseline_source = "user-supplied" if user_supplied else "measured"
+        md = to_markdown(
+            forecast,
+            use_exec_count=args.use_exec_count,
+            baseline_source=baseline_source,
+        )
         js = to_json(forecast, use_exec_count=args.use_exec_count)
         _emit(md, js, args)
 

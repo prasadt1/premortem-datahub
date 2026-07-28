@@ -1,6 +1,6 @@
 Schema rehearsal: order_status → rename to order_state
 
-Impact Analysis baseline: 12 downstream dependents
+Impact Analysis baseline: 12 downstream dependents (baseline: user-supplied)
 
 HARD (4)
 - hard_groupby — [GROUP] SELECT id, COUNT(*) AS n

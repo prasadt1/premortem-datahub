@@ -193,6 +193,12 @@ class HttpDataHubClient:
         return out
 
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:
+        # Showcase seed may declare list_queries_indexed=false — prefer the
+        # disclosed corpus over a half-indexed Quickstart that returns dupes.
+        seeded = self._queries_from_seed(urn)
+        if seeded and self._seed_prefers_file():
+            return seeded
+
         # Prefer indexed listQueries when Gate 2 search works.
         try:
             data = self._post(
@@ -230,7 +236,18 @@ class HttpDataHubClient:
         except GraphqlError:
             pass
 
-        return self._queries_from_seed(urn)
+        return seeded
+
+    def _seed_prefers_file(self) -> bool:
+        if os.environ.get("PREMORTEM_PREFER_SEED", "").lower() in {"1", "true", "yes"}:
+            return True
+        if not self.seed_path or not self.seed_path.is_file():
+            return False
+        try:
+            payload = json.loads(self.seed_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return False
+        return payload.get("list_queries_indexed") is False
 
     def _queries_from_seed(self, urn: str) -> list[QueryRecord]:
         if not self.seed_path or not self.seed_path.is_file():

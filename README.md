@@ -4,18 +4,18 @@
 
 Premortem is a schema-change rehearsal agent for [DataHub](https://datahub.com/).
 
-When I propose renaming or dropping a column, Impact Analysis already tells me *what’s connected*. Premortem starts from that map and goes one layer deeper: it reads real warehouse SQL from query history and forecasts *how* each consumer breaks — **hard**, **soft**, or **unknown** — then optionally writes the forecast back into the catalog.
+When I propose renaming or dropping a column, Impact Analysis already tells me *what’s connected*. Premortem starts from that map and goes one layer deeper: it reads warehouse SQL from query history and forecasts *how* each consumer breaks — **hard**, **soft**, or **unknown** — then optionally writes the forecast back into the catalog so the next person (or agent) inherits it.
 
 Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.0).
 
 ## What you get
 
-| Output | Meaning |
-|--------|---------|
-| **HARD** | Column used in `JOIN` / `WHERE` / `GROUP BY` / `ORDER BY` / … — query likely fails or filters wrong |
-| **SOFT** | Column only projected in `SELECT` — shape/semantics drift |
-| **UNKNOWN** | Unparseable SQL, bare column with multiple tables in scope, or not enough evidence — needs a human (or agent adjudication) |
-| **UNAFFECTED** | No reference to the column in that query |
+| Output | Meaning (remediation blast radius) |
+|--------|--------------------------------------|
+| **HARD** | Column in `WHERE` / `JOIN` / `GROUP BY` / `ORDER BY` / `HAVING` / window — repair can change row counts or results |
+| **SOFT** | `SELECT`-list only — contained, mechanical rename downstream |
+| **UNKNOWN** | Unparseable SQL, bare column still ambiguous after schema resolution, `SELECT *` — needs a human; never guessed |
+| **UNAFFECTED** | No binding reference to the subject column on the subject dataset (incl. cleared false alarms) |
 
 Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON. I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
 
@@ -37,7 +37,7 @@ Classify one query:
 premortem --sql-file tests/fixtures/queries/hard_where.sql --column order_status
 ```
 
-Rehearse a rename over a folder of SQL (offline fixtures or exported history):
+Offline folder of SQL (optional user-supplied baseline is labeled in the report):
 
 ```bash
 premortem --queries-dir tests/fixtures/queries \
@@ -46,17 +46,7 @@ premortem --queries-dir tests/fixtures/queries \
   --out examples/forecast-offline.md
 ```
 
-Upgrade UNKNOWN findings with the agent binder (heuristic by default — no API key):
-
-```bash
-premortem --queries-dir tests/fixtures/queries \
-  --rename order_status:order_state \
-  --lineage-count 12 \
-  --adjudicate \
-  --schema-fields id,order_status,customer_id
-```
-
-Live against DataHub (Quickstart + showcase demo URN; adjudication on by default):
+Live against DataHub (measured baseline only — `--lineage-count` is rejected with `--live`):
 
 ```bash
 premortem --live --rename order_status:order_state \
@@ -69,40 +59,24 @@ premortem --live --drop order_status \
 premortem --live --rename order_status:order_state --write-back
 ```
 
-Drop is the same pipeline:
-
-```bash
-premortem --queries-dir tests/fixtures/queries --drop order_status
-```
-
-Write the forecast back to DataHub (tag / description / document on your instance):
-
-```bash
-premortem --queries-dir tests/fixtures/queries \
-  --rename order_status:order_state \
-  --urn 'urn:li:dataset:(…)' \
-  --write-back
-```
-
 Set `DATAHUB_GMS_URL` (default `http://localhost:8080`) and `DATAHUB_GMS_TOKEN` when your GMS requires auth.
 
 ## Demo corpus
 
-Live forecasts (from Quickstart `ORDER_HISTORY.order_status`):
-
-- [`examples/forecast-order-status.md`](examples/forecast-order-status.md)
+- [`examples/forecast-order-status.md`](examples/forecast-order-status.md) / [`.json`](examples/forecast-order-status.json)
 - [`examples/forecast-drop-order-status.md`](examples/forecast-drop-order-status.md)
-- [`examples/forecast-order-status.json`](examples/forecast-order-status.json)
+- Offline sample: [`examples/forecast-offline.md`](examples/forecast-offline.md)
+- Live fallback seed: [`examples/seeded_queries.json`](examples/seeded_queries.json)
 
-Offline sample: [`examples/forecast-offline.md`](examples/forecast-offline.md).
-
-Frozen SQL fixtures under `tests/fixtures/queries/` drive the deterministic sqlglot classifier. Seeded query corpus for live fallback: [`examples/seeded_queries.json`](examples/seeded_queries.json).
+Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbers): `eval/`.
 
 ## Limits (honest)
 
-- Not 100% breakage prediction — macros, dynamic SQL, and ambiguous bindings land in **unknown**
+- Not 100% breakage prediction — macros, dynamic SQL, and residual ambiguity land in **unknown**
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
+- **Showcase query history on the demo URN was seeded** — the datapack shipped no QUERY entities and `listQueries` is empty on our Quickstart (v1.5.0.6)
+- Write-back demo beat is the **`premortem_forecast` tag** (+ editable description); Document create works but Quickstart often does not index it
 
 ## License
 

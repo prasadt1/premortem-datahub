@@ -41,5 +41,23 @@ def test_markdown_omits_exec_when_none():
     )
     md = to_markdown(forecast, use_exec_count=False)
     assert "Impact Analysis baseline: 12" in md
+    assert "baseline: user-supplied" not in md
     assert "exec×" not in md
     assert "HARD (1)" in md
+
+
+def test_markdown_marks_user_supplied_baseline():
+    forecast = Forecast(
+        diff=SchemaDiff(
+            dataset_urn="urn:li:dataset:demo",
+            kind="rename",
+            column="order_status",
+            new_column="order_state",
+        ),
+        lineage_dependent_count=12,
+        findings=[_f("q1", BreakSeverity.HARD)],
+    )
+    md = to_markdown(
+        forecast, use_exec_count=False, baseline_source="user-supplied"
+    )
+    assert "Impact Analysis baseline: 12 downstream dependents (baseline: user-supplied)" in md
