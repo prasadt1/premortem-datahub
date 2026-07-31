@@ -27,6 +27,10 @@ An earlier draft of this run reported CLEARED=87 alongside a table-resolution ra
 
 **84.75%** (100/118) statements produced a non-parse-failure verdict. Parse failures: **18** (typically heavy Jinja, BigQuery scripting, or sqlglot coverage gaps).
 
+## What this run measures
+
+This is **missing-schema** behavior. With schemas present (a real DataHub-connected warehouse), narrowable references bind instead of abstaining; the 11% CLEARED below are qualified references to known non-subject tables.
+
 Example parse failures:
 
 - `bigquery_etl/glam/templates/histogram_bucket_counts_v1.sql` - sqlglot parse failed: Invalid expression / Unexpected token. Line 4, Col: 4.

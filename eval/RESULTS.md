@@ -7,6 +7,12 @@ Harness is an adapter; this file records measurement against that freeze.
 Measured on binder commit `94949ba` (+ catalog facade thereafter does not change
 classifier numbers). Re-run: `python eval/run_eval.py`.
 
+**Discipline:** the binder was developed against `tests/` fixtures; the frozen forty
+queries were never tuning targets. Measurement only: `python eval/run_eval.py`.
+
+Corpus: **n=40**. Label provenance: three independent blind **LLM labeling runs**
+(corpus + schema fixture + taxonomy only) agreed with the authored labels **40/40** —
+see [`eval/README.md`](README.md).
 ## Headline metrics
 
 | run | accuracy | HARD prec | HARD rec | UNKNOWN rate | decoy FP |
@@ -16,6 +22,12 @@ classifier numbers). Re-run: `python eval/run_eval.py`.
 | **C classifier (binder)** | **0.97** | **1.00** | **0.94** | 0.23 | **0.00** |
 | C+A adjudicated (heuristic) | 0.90 | 0.88 | 0.94 | 0.15 | 0.00 |
 | B2 LLM-on-residue (cached) | 0.97 | 1.00 | 0.94 | 0.23 | 0.00 |
+
+**How to read the binder row.** Accuracy **0.97** is **39/40** — truncated, not rounded.
+HARD precision **1.00** is over **n=15** predicted HARD (15/15 true positives; the one miss
+is a gold HARD scored SOFT — q39 — so it never enters the precision denominator).
+HARD recall **0.94** is 15/16 gold HARD. Decoy FP **0.00** is over the **n=6** decoy
+stratum. UNKNOWN rate 0.23 is 9/40.
 
 Before/after the multi-table binder (freeze baseline → binder):
 

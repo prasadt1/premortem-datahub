@@ -23,7 +23,7 @@ pytest -q
 python eval/run_eval.py
 ```
 
-That reproduces the published numbers in [`eval/RESULTS.md`](eval/RESULTS.md): C accuracy **0.97**, HARD precision **1.00**, decoy FP **0.00**. The frozen eval is the measurement; the live demo below is a constructed instance for the video.
+That reproduces the published numbers in [`eval/RESULTS.md`](eval/RESULTS.md): Premortem (binder) accuracy **0.97** (**39/40**, truncated), HARD precision **1.00** (n=15), decoy FP **0.00** (n=6). The frozen eval is the measurement; the live demo below is a constructed instance for the video.
 
 ## What you get
 
@@ -32,7 +32,7 @@ That reproduces the published numbers in [`eval/RESULTS.md`](eval/RESULTS.md): C
 | **HARD** | Column in `WHERE` / `JOIN` / `GROUP BY` / `ORDER BY` / `HAVING` / window — repair can change row counts or results |
 | **SOFT** | `SELECT`-list only — contained, mechanical rename downstream |
 | **UNKNOWN** | Unparseable SQL, bare column still ambiguous after schema resolution, `SELECT *` — needs a human; never guessed |
-| **UNAFFECTED** | No subject-bound reference — either **CLEARED** (same-named column binds elsewhere; listed) or no query evidence of the column (count) |
+| **UNAFFECTED** | No subject-bound reference — either **CLEARED** (the named subset: same-named column binds elsewhere; listed) or no query evidence of the column (count) |
 
 Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON. I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
 
@@ -45,9 +45,9 @@ pip install -e ".[dev,datahub,mcp]"
 python tools/seed_demo_environment.py
 ```
 
-Then register both MCP servers ([`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)) and ask an agent to rehearse renaming `order_status` → `order_state` on ORDER_HISTORY. Expect DataHub MCP for schema/lineage/queries, Premortem `rehearse_schema_change` for the forecast + `write_payload`, and the host applying that payload as-is — custom assertion (Quality tab), `premortem_forecast` tag, description.
+Then register both MCP servers ([`examples/MCP_COMPOSITION.md`](examples/MCP_COMPOSITION.md)) and ask an agent to rehearse renaming `order_status` → `order_state` on ORDER_HISTORY. Expect **DataHub Agent Context Kit** / DataHub MCP for schema/lineage/queries, Premortem `rehearse_schema_change` for the forecast + `write_payload`, and the host applying that payload as-is: **tag + description via DataHub MCP mutations; custom assertion via GraphQL** (OSS MCP Data Quality tools are DISABLED — [#151](https://github.com/acryldata/mcp-server-datahub/issues/151)). Result: Quality-tab assertion (`platform=premortem`) + `premortem_forecast` tag + description.
 
-Live catalog default is the **DataHub Agent Kit** (`PREMORTEM_CATALOG=kit`). Explicit GraphQL fallback: `PREMORTEM_CATALOG=graphql` or `--catalog graphql`.
+Live catalog default is the **DataHub Agent Context Kit** (`PREMORTEM_CATALOG=kit`). Explicit GraphQL fallback: `PREMORTEM_CATALOG=graphql` or `--catalog graphql`. The live path needs **query history** on the subject dataset (stock Quickstart does not; the demo seeder creates it).
 
 ## Usage
 

@@ -46,14 +46,15 @@
 
   <path d="M788 340 L832 340" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
 
+  <!-- Verdict colors match verdict-taxonomy.svg: HARD #d03b3b, SOFT #fab219, UNKNOWN #898781, CLEARED #0ca30c -->
   <rect x="840" y="240" width="300" height="200" rx="12" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
   <text x="860" y="274" font-size="13" font-weight="600" fill="#eb6834" letter-spacing="0.6">4 - FORECAST</text>
   <text x="860" y="310" font-size="18" font-weight="700" fill="#0b0b0b">Per-query verdicts</text>
   <text x="860" y="342" font-size="15" fill="#52514e">Under the lineage baseline:</text>
   <text x="860" y="372" font-size="15" font-weight="700" fill="#d03b3b">HARD</text>
-  <text x="920" y="372" font-size="15" font-weight="700" fill="#0ca30c">SOFT</text>
-  <text x="980" y="372" font-size="15" font-weight="700" fill="#b8860b">UNKNOWN</text>
-  <text x="860" y="398" font-size="15" font-weight="700" fill="#2a78d6">CLEARED</text>
+  <text x="930" y="372" font-size="15" font-weight="700" fill="#fab219">SOFT</text>
+  <text x="1000" y="372" font-size="15" font-weight="700" fill="#898781">UNKNOWN</text>
+  <text x="860" y="398" font-size="15" font-weight="700" fill="#0ca30c">CLEARED</text>
   <text x="860" y="430" font-size="15" fill="#52514e">+ ready-to-apply write_payload</text>
 
   <path d="M990 448 L990 500" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
@@ -61,9 +62,9 @@
   <rect x="60" y="508" width="1080" height="168" rx="12" fill="#ffffff" stroke="#0ca30c" stroke-width="2"/>
   <text x="88" y="544" font-size="13" font-weight="600" fill="#0ca30c" letter-spacing="0.6">5 - WRITE-BACK - NEXT PERSON INHERITS IT</text>
   <text x="88" y="580" font-size="19" font-weight="700" fill="#0b0b0b">DataHub Quality tab - custom assertion - premortem_forecast tag - description</text>
-  <text x="88" y="614" font-size="16" fill="#52514e">Host agent applies the payload through DataHub's own mutation tools. Premortem never writes the catalog itself.</text>
+  <text x="88" y="614" font-size="16" fill="#52514e">Tag + description via DataHub MCP mutations; assertion via GraphQL (OSS MCP DQ tools disabled - issue #151).</text>
   <text x="88" y="646" font-size="16" fill="#52514e">Secondary user: platform engineer who opens the dataset later and sees the rehearsal already there.</text>
 
-  <text x="60" y="728" font-size="16" fill="#52514e">Compose with any DataHub (local Quickstart or your GMS). Judges verify the claim without a catalog:</text>
+  <text x="60" y="728" font-size="16" fill="#52514e">Compose with any DataHub that has query history. Judges verify the claim without a catalog:</text>
   <text x="60" y="760" font-size="18" font-weight="700" fill="#0b0b0b">prasadt1.github.io/premortem-datahub  -  python eval/run_eval.py -&gt; 0.97 / 1.00 / 0.00</text>
 </svg>

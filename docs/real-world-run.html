@@ -105,6 +105,13 @@
     <h2>Parse rate</h2>
     <p><strong>84.75%</strong> (100/118) non-parse-failure. Failures (18): Jinja templating, BigQuery scripting, sqlglot coverage gaps.</p>
 
+    <h2>What this run measures</h2>
+    <p>
+      This is <strong>missing-schema</strong> behavior. With schemas present (a real
+      DataHub-connected warehouse), narrowable references bind instead of abstaining;
+      the 11% CLEARED below are qualified references to known non-subject tables.
+    </p>
+
     <h2>Corrected verdict distribution</h2>
     <p>
       After fixing a false-CLEARED defect (clear only when the qualifier resolves to a

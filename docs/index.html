@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Premortem — how it breaks, before you merge</title>
-  <meta name="description" content="Schema-change rehearsal for DataHub: HARD / SOFT / UNKNOWN / CLEARED from query history. Frozen eval: accuracy 0.97, HARD precision 1.00, decoy FP 0.00." />
+  <meta name="description" content="Schema-change rehearsal for DataHub: HARD / SOFT / UNKNOWN / CLEARED from query history. Frozen eval: accuracy 0.97 (39/40), HARD precision 1.00, decoy FP 0.00." />
   <style>
     :root {
       --bg: #f7f5f1;
@@ -462,15 +462,15 @@
       <div class="stats" role="group" aria-label="Frozen eval headline metrics">
         <div class="stat">
           <div class="n">1.00</div>
-          <span class="l">HARD precision<br />(C classifier)</span>
+          <span class="l">HARD precision<br />(Premortem binder · n=15)</span>
         </div>
         <div class="stat">
           <div class="n">0.00</div>
-          <span class="l">decoy false alarms<br />(C classifier)</span>
+          <span class="l">decoy false alarms<br />(Premortem binder · n=6)</span>
         </div>
         <div class="stat">
           <div class="n">0.97</div>
-          <span class="l">accuracy<br />(C classifier)</span>
+          <span class="l">accuracy<br />(39/40 · truncated)</span>
         </div>
       </div>
       <div class="reproduce">
@@ -493,8 +493,10 @@ python eval/run_eval.py</code></pre>
       <figure>
         <img src="media/customer-journey.png" width="1800" height="1200" alt="Customer journey: PR trigger, Impact Analysis today, ask the agent, per-query forecast, write-back to the Quality tab." />
         <figcaption>
-          Five steps from trigger to write-back. The live catalog path is bring-your-own
-          DataHub; the measurement path is the frozen eval on this page’s reproduce block.
+          Five steps from trigger to write-back. Live path: bring-your-own DataHub with
+          <strong>query history</strong> on the subject (stock Quickstart needs seeding —
+          that is why the demo seeder exists). Measurement path: frozen eval on this page’s
+          reproduce block. CLEARED is the named subset of UNAFFECTED.
         </figcaption>
       </figure>
     </section>
@@ -617,7 +619,10 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       </p>
       <figure>
         <img src="media/verdict-taxonomy.png" width="1800" height="1200" alt="HARD, SOFT, UNKNOWN, and CLEARED each illustrated with a real query shape." />
-        <figcaption>Verdict taxonomy — remediation blast radius, not “breaks vs still runs.”</figcaption>
+        <figcaption>
+          Four named outcomes on the page; CLEARED is the named subset of UNAFFECTED
+          (same-named column binds elsewhere). Full taxonomy in the diagram.
+        </figcaption>        <figcaption>Verdict taxonomy — remediation blast radius, not “breaks vs still runs.”</figcaption>
       </figure>
       <div class="forecast" aria-label="Sample forecast output">
         <div class="forecast-head">
@@ -704,10 +709,16 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
     <section aria-labelledby="composition">
       <h2 id="composition">Composition</h2>
       <p>
-        One agent session registers two MCP servers: DataHub’s for schema, lineage,
-        and query history (and for write-back), Premortem’s for
-        <code>rehearse_schema_change</code>. The host applies the returned
-        <code>write_payload</code> as-is — no recomputing.
+        One agent session registers two MCP servers. Live reads use the
+        <strong>DataHub Agent Context Kit</strong> (schema, lineage, query history).
+        Premortem’s server runs <code>rehearse_schema_change</code> and returns a
+        forecast plus <code>write_payload</code>. The host applies that payload as-is:
+        <strong>tag + description via DataHub MCP mutations; the custom assertion
+        (<code>platform=premortem</code>) via GraphQL</strong> — OSS MCP Data Quality
+        tools are DISABLED
+        (<a href="https://github.com/acryldata/mcp-server-datahub/issues/151">#151</a>).
+        Result on the Quality tab: assertion + <code>premortem_forecast</code> tag +
+        description — no recomputing.
       </p>
       <figure>
         <img src="media/dual-mcp-flow.png" width="1800" height="1200" alt="One agent session with two MCP servers: DataHub supplies schema, lineage and query history and receives the write-back; Premortem runs the rehearsal and returns a write payload." />
@@ -762,7 +773,7 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       </p>
       <div class="stats" role="group" aria-label="Real-world observables">
         <div class="stat">
-          <div class="n">84.7%</div>
+          <div class="n">84.75%</div>
           <span class="l">parse rate<br />(18 Jinja / BQ / sqlglot gaps)</span>
         </div>
         <div class="stat">
@@ -775,10 +786,13 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
         </div>
       </div>
       <p>
-        The honest reading is favourable: pointed at a codebase where it lacks the
-        schemas, Premortem says <em>needs a human</em> rather than guessing. An
-        earlier unsound CLEARED rule had falsely cleared 74% of rows despite a 0.09
-        table-resolution rate — that defect is fixed and named in the report.
+        This run measures <strong>missing-schema</strong> behavior. With schemas present
+        (a real DataHub-connected warehouse), narrowable references bind instead of
+        abstaining; the 11% CLEARED here are qualified references to known non-subject
+        tables. Pointed at a codebase where it lacks the schemas, Premortem says
+        <em>needs a human</em> rather than guessing. An earlier unsound CLEARED rule
+        had falsely cleared 74% of rows despite a 0.09 table-resolution rate — that
+        defect is fixed and named in the report.
       </p>
       <p class="muted">
         Limitation: 6 of the 13 CLEARED resolve to <code>clients_daily</code> while

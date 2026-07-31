@@ -49,16 +49,19 @@ Baselines: **B0** every-IA-dependent-breaks (the bar Impact Analysis alone impli
 
 1. Labels authored per the approved taxonomy (remediation blast radius; spec §1) with a
    sha256 recorded before any external review.
-2. **Three independent labelers** labeled all 40 queries blind — given only the corpus,
-   the schema fixture, and the taxonomy; barred from the rest of the repo. Result:
-   **40/40 agreement with the authored labels, from all three** (no adjudication needed).
+2. **Three independent blind LLM labeling runs** labeled all 40 queries — each given
+   only the corpus, the schema fixture, and the taxonomy; barred from the rest of the
+   repo (including authored labels and classifier code). Result: **40/40 agreement with
+   the authored labels, from all three** (no adjudication needed). Disclosed as LLM
+   runs, not human labelers — still a genuine blind-agreement check.
 3. A parse sweep confirmed exactly the four `unparseable`-stratum files fail
    `sqlglot.parse_one(..., read="snowflake")` (sqlglot 30.13.0) and the other 36 parse.
 4. A leakage check against `tests/fixtures/queries/` and `examples/seeded_queries.json`
    flagged three near-duplicates of the demo seed corpus (q01, q03, q10); all three were
    rewritten to structurally distinct SQL (same stratum and gold role) and re-verified
-   blind by three fresh labelers. Rule: `tests/` locks behavior, `eval/` measures it,
-   the demo seed is neither — no shared SQL across the three.
+   blind by three fresh LLM labeling runs. Rule: `tests/` locks behavior, `eval/` measures it,
+   the demo seed is neither — no shared SQL across the three. The binder was developed
+   against `tests/` fixtures; the frozen forty were never tuning targets.
 
 ## Documented taxonomy decisions (from independent-labeler review)
 
