@@ -6,8 +6,9 @@ Diagrams for the README, the Devpost article, and the submission gallery.
 
 | File | What it shows | Used in |
 |---|---|---|
+| `customer-journey` | Persona + five-step path from PR to Quality-tab write-back | Devpost inline · gallery · Pages |
 | `binding-problem` | Two tables carry `order_status`; name matching flags the wrong one, binding clears it | Devpost inline · gallery · README |
-| `verdict-taxonomy` | HARD / SOFT / UNKNOWN / CLEARED, each with a real query | gallery |
+| `verdict-taxonomy` | HARD / SOFT / UNKNOWN / CLEARED, each with a real query | Devpost inline · gallery |
 | `dual-mcp-flow` | DataHub's MCP server and Premortem's in one agent session | Devpost inline · gallery |
 | `eval-results` | HARD precision and decoy false-alarm rate vs both baselines | Devpost inline · gallery |
 
@@ -15,7 +16,7 @@ Diagrams for the README, the Devpost article, and the submission gallery.
 
 ```bash
 cd docs/media
-for f in binding-problem dual-mcp-flow eval-results verdict-taxonomy; do
+for f in customer-journey binding-problem dual-mcp-flow eval-results verdict-taxonomy; do
   rsvg-convert -w 1800 -h 1200 -b '#fcfcfb' "$f.svg" -o "$f.png"
 done
 ```

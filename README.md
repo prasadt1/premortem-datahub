@@ -10,6 +10,8 @@ Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.
 
 **Demo page (no install):** [prasadt1.github.io/premortem-datahub](https://prasadt1.github.io/premortem-datahub/)
 
+Primary user: a data engineer about to merge a column rename. Premortem composes with DataHub (library + MCP) — bring your own catalog for the live path; the frozen eval needs none.
+
 ## First 60 seconds
 
 No DataHub, no Docker, no seeding — just Python 3.11+:

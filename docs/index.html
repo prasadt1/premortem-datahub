@@ -481,6 +481,24 @@ python eval/run_eval.py</code></pre>
       </div>
     </header>
 
+    <section aria-labelledby="who">
+      <h2 id="who">Who it is for</h2>
+      <p>
+        Primary user: a <strong>data / analytics engineer</strong> about to merge a
+        column rename — “Can I ship this on Friday?” Secondary: a platform engineer
+        who later opens the dataset and inherits the forecast. Premortem composes
+        with DataHub via MCP; it is not a UI fork and not a hosted catalog you must
+        stand up to judge the claim.
+      </p>
+      <figure>
+        <img src="media/customer-journey.png" width="1800" height="1200" alt="Customer journey: PR trigger, Impact Analysis today, ask the agent, per-query forecast, write-back to the Quality tab." />
+        <figcaption>
+          Five steps from trigger to write-back. The live catalog path is bring-your-own
+          DataHub; the measurement path is the frozen eval on this page’s reproduce block.
+        </figcaption>
+      </figure>
+    </section>
+
     <section aria-labelledby="binding">
       <h2 id="binding">The binding problem</h2>
       <figure>
@@ -597,6 +615,10 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
         rename <code>order_status</code> → <code>order_state</code> on
         <code>ORDER_HISTORY</code>, Impact Analysis baseline 3 downstream dependents.
       </p>
+      <figure>
+        <img src="media/verdict-taxonomy.png" width="1800" height="1200" alt="HARD, SOFT, UNKNOWN, and CLEARED each illustrated with a real query shape." />
+        <figcaption>Verdict taxonomy — remediation blast radius, not “breaks vs still runs.”</figcaption>
+      </figure>
       <div class="forecast" aria-label="Sample forecast output">
         <div class="forecast-head">
           <strong>Schema rehearsal: order_status → rename to order_state</strong>
