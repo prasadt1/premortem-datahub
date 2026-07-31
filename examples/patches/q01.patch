@@ -1,0 +1,5 @@
+--- a/q01.sql
++++ b/q01.sql
+@@ -1 +1 @@
+-SELECT order_id FROM analytics.order_history WHERE order_status <> 'CANCELLED' AND order_total > 500
++SELECT order_id FROM analytics.order_history WHERE order_state <> 'CANCELLED' AND order_total > 500

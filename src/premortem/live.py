@@ -9,6 +9,7 @@ from premortem.catalog import CatalogClient, write_forecast_to_catalog
 from premortem.catalog.resolve import resolve_sibling_schemas
 from premortem.models import Forecast, SchemaDiff
 from premortem.report import to_json, to_markdown
+from premortem.rewrite import RepairItem, build_repairs
 
 
 def _subject_table_from_urn(urn: str) -> str | None:
@@ -33,6 +34,8 @@ class LiveRehearsalResult:
     write_back_ref: str | None = None
     tables: dict[str, list[str]] | None = None
     unresolved_tables: list[str] | None = None
+    repairs: list[RepairItem] | None = None
+    subject_table: str | None = None
 
 
 def run_live_rehearsal(
@@ -104,6 +107,14 @@ def run_live_rehearsal(
     md = to_markdown(forecast, use_exec_count=use_exec_count)
     js = to_json(forecast, use_exec_count=use_exec_count)
 
+    repairs = build_repairs(
+        forecast=forecast,
+        queries=queries,
+        dialect=dialect,
+        subject_table=subject_table,
+        tables=tables,
+    )
+
     ref = None
     if write_back:
         title = f"Premortem: {diff.kind} {diff.column}"
@@ -121,4 +132,6 @@ def run_live_rehearsal(
         write_back_ref=ref,
         tables=tables,
         unresolved_tables=unresolved,
+        repairs=repairs,
+        subject_table=subject_table,
     )

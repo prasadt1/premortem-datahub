@@ -101,6 +101,7 @@ def rehearse_schema_change_impl(
         "markdown": result.markdown,
         "findings": findings,
         "write_payload": payload,
+        "repairs": [r.as_dict() for r in (result.repairs or [])],
     }
 
 
@@ -156,7 +157,8 @@ if mcp is not None:
         new_name: str | None = "order_state",
         adjudicate: str = "binder",
     ) -> str:
-        """Rehearse a schema change: HARD/SOFT/UNKNOWN/CLEARED forecast + write_payload.
+        """Rehearse a schema change: HARD/SOFT/UNKNOWN/CLEARED forecast + write_payload
+        + repairs (HARD/SOFT patches; CLEARED/UNKNOWN refused).
 
         On-camera tool. adjudicate='binder' (default) uses classify-only.
         Host applies write_payload via DataHub MCP — do not recompute.

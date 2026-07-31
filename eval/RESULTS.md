@@ -97,10 +97,33 @@ With binder + `adjudicate=False` default:
 2. **Honest UNKNOWN** — `unknown_bare_two_tables` stays UNKNOWN (not emptied by the
    tautological adjudicator)
 
+## Repair round-trip (does not touch the freeze)
+
+`python eval/run_repair_roundtrip.py` rewrites every binder HARD/SOFT corpus query
+(`order_status` → `order_state`), then re-classifies: old column → UNAFFECTED; new
+column → original severity. CLEARED / UNKNOWN / SELECT * / incomplete-with-star are
+**refused** (no patch) — the honesty identity extended into repair. Labels, schema,
+and corpus stay byte-identical.
+
+| metric | n |
+|---|---:|
+| patched (eligible) | 22 |
+| round-trip pass | **22/22** |
+| refused | 18 |
+| — ambiguous / parse / UNKNOWN | 7 |
+| — CLEARED (binds elsewhere) | 4 |
+| — no subject-bound reference | 4 |
+| — SELECT * over subject | 2 |
+| — incomplete (HARD + CTE star) | 1 |
+
+Kill criterion met: **100%** of emitted patches round-trip. Sample diffs:
+[`examples/patches/`](../examples/patches/).
+
 ## Reproduce
 
 ```bash
 python eval/run_eval.py
+python eval/run_repair_roundtrip.py
 # or
 python eval/run_eval.py --json
 ```

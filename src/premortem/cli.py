@@ -13,6 +13,7 @@ from premortem.datahub_client import create_catalog_client, write_forecast_to_ca
 from premortem.live import run_live_rehearsal
 from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
 from premortem.report import to_json, to_markdown
+from premortem.rewrite import build_repairs, emit_patches_to_dir
 
 DEMO_URN = (
     "urn:li:dataset:(urn:li:dataPlatform:snowflake,"
@@ -124,6 +125,22 @@ def main(argv: list[str] | None = None) -> None:
         default=os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080"),
         help="GMS URL for --live / --write-back",
     )
+    p.add_argument(
+        "--emit-patches",
+        metavar="DIR",
+        help=(
+            "Write unified diffs for HARD/SOFT repairs into DIR "
+            "(CLEARED/UNKNOWN refused — no patch files)"
+        ),
+    )
+    p.add_argument(
+        "--subject-table",
+        help="Offline binder: subject table base name (required for accurate --emit-patches)",
+    )
+    p.add_argument(
+        "--tables-json",
+        help="Offline binder: JSON object mapping table → column list (for --emit-patches)",
+    )
     args = p.parse_args(argv)
 
     if args.sql_file:
@@ -178,6 +195,13 @@ def main(argv: list[str] | None = None) -> None:
             f"# queries={result.query_count} downstream={len(result.downstream)}\n"
         )
         _emit(result.markdown, result.json_text, args)
+        if args.emit_patches:
+            n = emit_patches_to_dir(result.repairs or [], args.emit_patches)
+            refused = sum(1 for r in (result.repairs or []) if r.action == "refuse")
+            print(
+                f"wrote {n} patches to {args.emit_patches} "
+                f"({refused} refused — CLEARED/UNKNOWN/STAR/drop)"
+            )
         if result.write_back_ref:
             print(f"write-back ok → {result.write_back_ref}")
         return
@@ -192,6 +216,13 @@ def main(argv: list[str] | None = None) -> None:
         )
         user_supplied = args.lineage_count is not None
         lineage_count = args.lineage_count if user_supplied else 0
+        tables = None
+        if args.tables_json:
+            import json
+
+            tables = json.loads(Path(args.tables_json).read_text(encoding="utf-8"))
+            if isinstance(tables, dict) and "tables" in tables:
+                tables = tables["tables"]
         forecast = rehearse(
             diff=diff,
             queries=queries,
@@ -200,6 +231,8 @@ def main(argv: list[str] | None = None) -> None:
             use_exec_count=args.use_exec_count,
             schema_fields=fields,
             adjudicate=args.adjudicate and not args.no_adjudicate,
+            subject_table=args.subject_table,
+            tables=tables,
         )
         baseline_source = "user-supplied" if user_supplied else "measured"
         md = to_markdown(
@@ -209,6 +242,21 @@ def main(argv: list[str] | None = None) -> None:
         )
         js = to_json(forecast, use_exec_count=args.use_exec_count)
         _emit(md, js, args)
+
+        if args.emit_patches:
+            repairs = build_repairs(
+                forecast=forecast,
+                queries=queries,
+                dialect=args.dialect,
+                subject_table=args.subject_table,
+                tables=tables,
+            )
+            n = emit_patches_to_dir(repairs, args.emit_patches)
+            refused = sum(1 for r in repairs if r.action == "refuse")
+            print(
+                f"wrote {n} patches to {args.emit_patches} "
+                f"({refused} refused — CLEARED/UNKNOWN/STAR/drop)"
+            )
 
         if args.write_back:
             title = f"Premortem: {diff.kind} {diff.column}"

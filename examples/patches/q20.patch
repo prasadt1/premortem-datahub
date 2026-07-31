@@ -1,0 +1,5 @@
+--- a/q20.sql
++++ b/q20.sql
+@@ -1 +1 @@
+-SELECT order_status AS current_state, order_id FROM analytics.order_history
++SELECT order_state AS current_state, order_id FROM analytics.order_history

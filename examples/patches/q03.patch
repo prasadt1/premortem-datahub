@@ -1,0 +1,5 @@
+--- a/q03.sql
++++ b/q03.sql
+@@ -1 +1 @@
+-SELECT customer_id, order_status, created_at FROM analytics.order_history
++SELECT customer_id, order_state, created_at FROM analytics.order_history
