@@ -37,6 +37,7 @@ class BreakFinding(BaseModel):
     exec_count: int | None = None
     agent_note: str | None = None
     unknown_reason: str | None = None
+    unknown_kind: str | None = None
 
 
 class Forecast(BaseModel):

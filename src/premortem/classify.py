@@ -37,6 +37,7 @@ class ClassifyResult:
     evidence: str
     unknown_reason: str | None = None
     snippet: str = ""
+    unknown_kind: str | None = None
 
 
 @dataclass
@@ -51,6 +52,7 @@ class BindingAnalysis:
     subject_bound_nodes: list[exp.Column] = field(default_factory=list)
     elsewhere: frozenset[str] = frozenset()
     dialect: str = "snowflake"
+    unknown_kind: str | None = None
 
     def to_classify_result(self) -> ClassifyResult:
         return ClassifyResult(
@@ -58,6 +60,7 @@ class BindingAnalysis:
             evidence=self.evidence,
             unknown_reason=self.unknown_reason,
             snippet=self.snippet,
+            unknown_kind=self.unknown_kind,
         )
 
 
@@ -246,6 +249,7 @@ def _unknown(
     reason: str,
     snippet: str,
     dialect: str,
+    kind: str,
     tree: exp.Expression | None = None,
 ) -> BindingAnalysis:
     return BindingAnalysis(
@@ -255,6 +259,7 @@ def _unknown(
         snippet=snippet,
         tree=tree,
         dialect=dialect,
+        unknown_kind=kind,
     )
 
 
@@ -283,6 +288,7 @@ def analyze_bindings(
             reason=f"sqlglot parse failed: {exc}",
             snippet=snippet,
             dialect=dialect,
+            kind="parse",
         )
 
     cte_sources = _cte_sources(tree)
@@ -315,6 +321,7 @@ def analyze_bindings(
                     ),
                     snippet=snippet,
                     dialect=dialect,
+                    kind="ambiguous_bare",
                     tree=tree,
                 )
             bound.append((clause, node))
@@ -328,6 +335,7 @@ def analyze_bindings(
                 ),
                 snippet=snippet,
                 dialect=dialect,
+                kind="unbound",
                 tree=tree,
             )
 
@@ -350,6 +358,7 @@ def analyze_bindings(
                             ),
                             snippet=snippet,
                             dialect=dialect,
+                            kind="unresolvable_qualifier",
                             tree=tree,
                         )
                     if t in alias_map or t in physical_all:
@@ -360,6 +369,7 @@ def analyze_bindings(
                             ),
                             snippet=snippet,
                             dialect=dialect,
+                            kind="unresolvable_qualifier",
                             tree=tree,
                         )
                     if subject not in scope_physical:
@@ -370,6 +380,7 @@ def analyze_bindings(
                             ),
                             snippet=snippet,
                             dialect=dialect,
+                            kind="unresolvable_qualifier",
                             tree=tree,
                         )
                 bound.append((clause, node))
@@ -398,6 +409,7 @@ def analyze_bindings(
                     ),
                     snippet=snippet,
                     dialect=dialect,
+                    kind="unresolved_table",
                     tree=tree,
                 )
             candidates = with_col
@@ -410,6 +422,7 @@ def analyze_bindings(
                 ),
                 snippet=snippet,
                 dialect=dialect,
+                kind="ambiguous_bare",
                 tree=tree,
             )
         if subject in candidates:
@@ -423,6 +436,7 @@ def analyze_bindings(
             reason="SELECT * may hide column references; needs schema expand or human",
             snippet=snippet,
             dialect=dialect,
+            kind="star",
             tree=tree,
         )
 

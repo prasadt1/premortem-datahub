@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from premortem.catalog.graphql import FORECAST_TAG_ID, FORECAST_TAG_URN
+from premortem.description_merge import merge_premortem_description
 from premortem.forecast import is_cleared_finding
 from premortem.models import BreakSeverity, Forecast
 
@@ -72,12 +73,21 @@ def build_write_payload(
     *,
     markdown: str,
     external_url: str | None = None,
+    existing_description: str | None = None,
 ) -> dict:
-    """Payload for the host agent — apply via DataHub MCP mutations as-is."""
+    """Payload for the host agent — apply via DataHub MCP mutations as-is.
+
+    Description markdown is merged into any existing curated text: a previous
+    ``<!-- premortem:forecast -->`` block is replaced; everything else is kept.
+    Host still applies the returned string verbatim (operation=replace of the
+    full merged description).
+    """
     assertion = assertion_copy(forecast)
     if external_url is not None:
         assertion["external_url"] = external_url
     title = assertion["title"]
+    section = f"## {title}\n\n{markdown}"
+    merged = merge_premortem_description(existing_description, section)
     return {
         "assertion": assertion,
         "tag": {
@@ -90,6 +100,6 @@ def build_write_payload(
         "description": {
             "entity_urn": forecast.diff.dataset_urn,
             "operation": "replace",
-            "markdown": f"## {title}\n\n{markdown}",
+            "markdown": merged,
         },
     }

@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass
 from premortem.agent import rehearse
 from premortem.catalog import CatalogClient
 from premortem.live import run_live_rehearsal
+from premortem.forecast import is_cleared_finding
 from premortem.models import BreakSeverity, Forecast, QueryRecord, SchemaDiff
 
 _SEVERITY_RANK = {
@@ -73,9 +74,7 @@ def evaluate_gate(
     for f in forecast.findings:
         key = f.severity.value
         counts[key] = counts.get(key, 0) + 1
-        if f.severity is BreakSeverity.UNAFFECTED and f.evidence.startswith(
-            "BOUND_ELSEWHERE:"
-        ):
+        if f.severity is BreakSeverity.UNAFFECTED and is_cleared_finding(f.evidence):
             counts["cleared"] = counts.get("cleared", 0) + 1
         row = {
             "query_id": f.query_id,

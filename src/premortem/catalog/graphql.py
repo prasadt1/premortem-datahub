@@ -171,6 +171,26 @@ class GraphqlCatalogClient:
                 out.append(u)
         return out
 
+    def get_description(self, urn: str) -> str:
+        """Editable properties description when present; else empty string."""
+        data = self._post(
+            """
+            query($urn: String!) {
+              dataset(urn: $urn) {
+                editableProperties { description }
+                properties { description }
+              }
+            }
+            """,
+            {"urn": urn},
+        )
+        ds = data.get("dataset") or {}
+        editable = ((ds.get("editableProperties") or {}).get("description")) or ""
+        if editable:
+            return str(editable)
+        props = ((ds.get("properties") or {}).get("description")) or ""
+        return str(props)
+
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:
         # Prefer catalog listQueries when indexed; seed is fallback / PREMORTEM_PREFER_SEED.
         if self._force_seed():
@@ -351,12 +371,15 @@ class GraphqlCatalogClient:
 
         tag = self.ensure_forecast_tag()
         self.add_tags(urn, [tag])
-        header = f"## {title}\n\n"
-        footer = (
-            "\n\n---\n_Premortem schema rehearsal "
+        from premortem.description_merge import merge_premortem_description
+
+        section = (
+            f"## {title}\n\n{body_md.rstrip()}\n\n"
+            "---\n_Premortem schema rehearsal "
             "(hard / soft / unknown). Tag: premortem_forecast._"
         )
-        self.update_description(urn, header + body_md + footer)
+        merged = merge_premortem_description(self.get_description(urn), section)
+        self.update_description(urn, merged)
         refs.append(f"description+tag:{tag}")
         return " | ".join(refs)
 

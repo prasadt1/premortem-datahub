@@ -61,6 +61,7 @@ def build_forecast(
                 evidence=result.evidence,
                 exec_count=q.exec_count,
                 unknown_reason=result.unknown_reason,
+                unknown_kind=result.unknown_kind,
             )
         )
     ranked = rank_findings(findings, use_exec_count=use_exec_count)

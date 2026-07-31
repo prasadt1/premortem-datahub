@@ -72,7 +72,11 @@ def rehearse_schema_change_impl(
         adjudicate=do_adjudicate,
         write_back=False,
     )
-    payload = build_write_payload(result.forecast, markdown=result.markdown)
+    payload = build_write_payload(
+        result.forecast,
+        markdown=result.markdown,
+        existing_description=client.get_description(diff.dataset_urn),
+    )
     findings = []
     for f in result.forecast.findings:
         findings.append(
@@ -82,6 +86,7 @@ def rehearse_schema_change_impl(
                 "evidence": f.evidence,
                 "sql_snippet": f.sql_snippet,
                 "unknown_reason": f.unknown_reason,
+                "unknown_kind": f.unknown_kind,
                 "cleared": is_cleared_finding(f.evidence),
             }
         )
@@ -105,15 +110,28 @@ def rehearse_schema_change_impl(
     }
 
 
-def explain_finding_impl(*, query_id: str, dataset: str = DEMO_URN) -> dict[str, Any]:
-    """Evidence detail for one query_id from a fresh binder rehearsal."""
-    result = rehearse_schema_change_impl(dataset=dataset)
+def explain_finding_impl(
+    *,
+    query_id: str,
+    dataset: str = DEMO_URN,
+    change_kind: str = "rename",
+    column: str = "order_status",
+    new_name: str | None = "order_state",
+) -> dict[str, Any]:
+    """Evidence detail for one query_id from a binder rehearsal of the same change."""
+    result = rehearse_schema_change_impl(
+        dataset=dataset,
+        change_kind=change_kind,
+        column=column,
+        new_name=new_name,
+    )
     for f in result["findings"]:
         if f["query_id"] == query_id:
-            return {"query_id": query_id, "finding": f}
+            return {"query_id": query_id, "finding": f, "change": result["change"]}
     return {
         "query_id": query_id,
         "finding": None,
+        "change": result["change"],
         "note": "query_id not in latest rehearsal findings "
         "(may be NO_REFERENCE / no query evidence)",
     }
@@ -175,10 +193,23 @@ if mcp is not None:
         )
 
     @mcp.tool()
-    def explain_finding(query_id: str, dataset: str = DEMO_URN) -> str:
-        """Detail one finding by query_id. Never on camera."""
+    def explain_finding(
+        query_id: str,
+        dataset: str = DEMO_URN,
+        change_kind: str = "rename",
+        column: str = "order_status",
+        new_name: str | None = "order_state",
+    ) -> str:
+        """Detail one finding by query_id for the same change as rehearse. Never on camera."""
         return json.dumps(
-            explain_finding_impl(query_id=query_id, dataset=dataset), indent=2
+            explain_finding_impl(
+                query_id=query_id,
+                dataset=dataset,
+                change_kind=change_kind,
+                column=column,
+                new_name=new_name,
+            ),
+            indent=2,
         )
 
     @mcp.tool()

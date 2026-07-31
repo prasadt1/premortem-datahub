@@ -1,8 +1,9 @@
 """LLM adjudicator for genuine multi-table residue only (B2).
 
 Deterministic binder runs first. This adjudicator only considers UNKNOWN
-findings whose reason is unqualified column + >=2 in-scope tables that each
-carry the column. Parse failures and SELECT * stay UNKNOWN.
+findings whose ``unknown_kind`` is ``ambiguous_bare`` (unqualified column +
+>=2 in-scope tables that each carry the column). Parse failures and SELECT *
+stay UNKNOWN.
 
 Temperature 0. Responses are cached so ``eval/run_eval.py`` reproduces the B2
 row with no API key.
@@ -13,7 +14,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import re
 import subprocess
 from pathlib import Path
 from typing import Any, Callable
@@ -21,24 +21,21 @@ from typing import Any, Callable
 from premortem.agent import Adjudication
 from premortem.models import BreakFinding, BreakSeverity
 
-RESIDUE_RE = re.compile(
-    r"unqualified `[^`]+` with (\d+) tables in scope", re.IGNORECASE
-)
-
 
 def is_genuine_residue(finding: BreakFinding) -> bool:
     """Bare column, >=2 candidate tables — not parse failure, not STAR."""
     if finding.severity is not BreakSeverity.UNKNOWN:
         return False
+    # Prefer structured kind (stable under prose rewording).
+    if finding.unknown_kind is not None:
+        return finding.unknown_kind == "ambiguous_bare"
+    # Legacy fallback for findings built without unknown_kind.
     reason = finding.unknown_reason or ""
     if "parse failed" in reason.lower():
         return False
     if finding.evidence in {"PARSE", "STAR"} or "SELECT *" in reason:
         return False
-    m = RESIDUE_RE.search(reason)
-    if not m:
-        return False
-    return int(m.group(1)) >= 2
+    return "tables in scope" in reason.lower()
 
 
 def cache_key(*, sql: str, column: str, candidate_tables: dict[str, list[str]]) -> str:

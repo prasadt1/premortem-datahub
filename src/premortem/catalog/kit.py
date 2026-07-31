@@ -201,6 +201,17 @@ class KitCatalogClient:
         )
         return gql.get_owners(urn)
 
+    def get_description(self, urn: str) -> str:
+        from premortem.catalog.graphql import GraphqlCatalogClient
+
+        gql = GraphqlCatalogClient(
+            gms_url=self.gms_url,
+            token=self.token,
+            write_back_enabled=False,
+            seed_path=str(self.seed_path) if self.seed_path else None,
+        )
+        return gql.get_description(urn)
+
     def ensure_forecast_tag(self) -> str:
         """Best-effort create of the Premortem forecast tag; return URN."""
         self._require_write_back()
@@ -236,10 +247,13 @@ class KitCatalogClient:
         self._require_write_back()
         tag = self.ensure_forecast_tag()
         self.add_tags(urn, [tag])
-        header = f"## {title}\n\n"
-        footer = (
-            "\n\n---\n_Premortem schema rehearsal "
+        from premortem.description_merge import merge_premortem_description
+
+        section = (
+            f"## {title}\n\n{body_md.rstrip()}\n\n"
+            "---\n_Premortem schema rehearsal "
             "(hard / soft / unknown / cleared). Tag: premortem_forecast._"
         )
-        self.update_description(urn, header + body_md + footer)
+        merged = merge_premortem_description(self.get_description(urn), section)
+        self.update_description(urn, merged)
         return f"description+tag:{tag}"

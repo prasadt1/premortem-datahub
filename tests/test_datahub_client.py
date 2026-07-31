@@ -77,6 +77,13 @@ def test_http_save_forecast_falls_back_to_tag_and_description():
             return {"batchAddTags": True}
         if "updateDescription" in query:
             return {"updateDescription": True}
+        if "editableProperties" in query or "properties { description }" in query:
+            return {
+                "dataset": {
+                    "editableProperties": {"description": "Keep me."},
+                    "properties": {"description": ""},
+                }
+            }
         raise AssertionError(query)
 
     with patch.object(client, "_post", side_effect=fake_post):
@@ -102,6 +109,13 @@ def test_http_save_forecast_also_updates_description_when_doc_ok():
             return {"batchAddTags": True}
         if "updateDescription" in query:
             return {"updateDescription": True}
+        if "editableProperties" in query or "properties { description }" in query:
+            return {
+                "dataset": {
+                    "editableProperties": {"description": ""},
+                    "properties": {"description": ""},
+                }
+            }
         raise AssertionError(query)
 
     with patch.object(client, "_post", side_effect=fake_post):

@@ -24,6 +24,8 @@ import time
 import urllib.request
 from pathlib import Path
 
+from urllib.parse import urlparse
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
@@ -49,6 +51,25 @@ from premortem.models import BreakSeverity, SchemaDiff
 from premortem.write_payload import CAMERA_ASSERTION_URN, assertion_copy
 
 GMS = os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080").rstrip("/")
+
+
+def require_local_gms(*, allow_remote: bool) -> None:
+    """Refuse hard-deletes / mutations against a shared GMS unless explicitly allowed."""
+    host = (urlparse(GMS).hostname or "").lower()
+    local = host in {"localhost", "127.0.0.1", "::1"}
+    print(f"seed target GMS host={host or '(none)'} url={GMS}")
+    if local:
+        return
+    if allow_remote:
+        print(
+            f"WARNING: --allow-remote set; mutating non-localhost GMS at {GMS}",
+            file=sys.stderr,
+        )
+        return
+    raise SystemExit(
+        f"refusing to mutate non-localhost DataHub at {GMS} "
+        f"(host={host!r}). Pass --allow-remote if you really mean it."
+    )
 
 SHIPMENTS_URN = (
     "urn:li:dataset:(urn:li:dataPlatform:snowflake,"
@@ -424,8 +445,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--verify-only", action="store_true")
     ap.add_argument("--skip-assertion", action="store_true")
+    ap.add_argument(
+        "--allow-remote",
+        action="store_true",
+        help="Permit mutations when DATAHUB_GMS_URL is not localhost (dangerous)",
+    )
     args = ap.parse_args()
     if not args.verify_only:
+        require_local_gms(allow_remote=args.allow_remote)
         emit_shipments_dataset()
         update_lineage()
         emit_owners()

@@ -221,18 +221,42 @@ def build_repairs(
 
 def emit_patches_to_dir(repairs: list[RepairItem], directory: str) -> int:
     """Write ``*.patch`` files for patched items. Returns count written."""
+    import re
     from pathlib import Path
 
-    root = Path(directory)
+    def _safe_id(query_id: str) -> str:
+        cleaned = re.sub(r"[^A-Za-z0-9._-]", "_", query_id)
+        cleaned = cleaned.strip("._") or "query"
+        if cleaned in {".", ".."} or ".." in cleaned:
+            cleaned = "query"
+        return cleaned[:128]
+
+    root = Path(directory).resolve()
     root.mkdir(parents=True, exist_ok=True)
     n = 0
     for item in repairs:
         if item.action != "patch" or not item.unified_diff:
             continue
-        (root / f"{item.query_id}.patch").write_text(item.unified_diff, encoding="utf-8")
+        safe = _safe_id(item.query_id)
+        patch_path = (root / f"{safe}.patch").resolve()
+        try:
+            patch_path.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(
+                f"refusing path escape for query_id={item.query_id!r}"
+            ) from exc
+        patch_path.write_text(item.unified_diff, encoding="utf-8")
         if item.rewritten_sql is not None:
-            (root / f"{item.query_id}.rewritten.sql").write_text(
-                item.rewritten_sql + ("\n" if not item.rewritten_sql.endswith("\n") else ""),
+            sql_path = (root / f"{safe}.rewritten.sql").resolve()
+            try:
+                sql_path.relative_to(root)
+            except ValueError as exc:
+                raise ValueError(
+                    f"refusing path escape for query_id={item.query_id!r}"
+                ) from exc
+            sql_path.write_text(
+                item.rewritten_sql
+                + ("\n" if not item.rewritten_sql.endswith("\n") else ""),
                 encoding="utf-8",
             )
         n += 1

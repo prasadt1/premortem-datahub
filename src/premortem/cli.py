@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from premortem.agent import rehearse
+from premortem.catalog.protocol import CatalogError
 from premortem.classify import classify_query
 from premortem.datahub_client import create_catalog_client, write_forecast_to_catalog
 from premortem.gate import parse_fail_on, run_live_gate, run_offline_gate
@@ -20,6 +21,15 @@ DEMO_URN = (
     "urn:li:dataset:(urn:li:dataPlatform:snowflake,"
     "b2fd91.order_entry_db.analytics.order_history,PROD)"
 )
+
+_GMS_HINT = (
+    "can't reach DataHub at {url} — the no-catalog path is "
+    "python eval/run_eval.py"
+)
+
+
+def _gms_unreachable_message(url: str, exc: BaseException) -> str:
+    return f"{_GMS_HINT.format(url=url)}\n({type(exc).__name__}: {exc})"
 
 
 def _load_queries_from_dir(path: Path) -> list[QueryRecord]:
@@ -111,6 +121,26 @@ def _gate_main(argv: list[str]) -> int:
         except RuntimeError as exc:
             print(f"gate failed: {exc}", file=sys.stderr)
             return 2
+        except (CatalogError, ConnectionError, TimeoutError, OSError) as exc:
+            print(_gms_unreachable_message(args.gms, exc), file=sys.stderr)
+            return 2
+        except Exception as exc:  # noqa: BLE001
+            msg = str(exc).lower()
+            if any(
+                t in msg
+                for t in (
+                    "connection",
+                    "refused",
+                    "failed to establish",
+                    "nodename",
+                    "name or service",
+                    "max retries",
+                    "timed out",
+                )
+            ):
+                print(_gms_unreachable_message(args.gms, exc), file=sys.stderr)
+                return 2
+            raise
     else:
         import json
 
@@ -275,6 +305,26 @@ def main(argv: list[str] | None = None) -> None:
         except RuntimeError as exc:
             print(f"live rehearsal failed: {exc}", file=sys.stderr)
             sys.exit(1)
+        except (CatalogError, ConnectionError, TimeoutError, OSError) as exc:
+            print(_gms_unreachable_message(args.gms, exc), file=sys.stderr)
+            sys.exit(2)
+        except Exception as exc:  # noqa: BLE001 — judge-facing connection failures
+            msg = str(exc).lower()
+            if any(
+                t in msg
+                for t in (
+                    "connection",
+                    "refused",
+                    "failed to establish",
+                    "nodename",
+                    "name or service",
+                    "max retries",
+                    "timed out",
+                )
+            ):
+                print(_gms_unreachable_message(args.gms, exc), file=sys.stderr)
+                sys.exit(2)
+            raise
         print(
             f"# live urn={diff.dataset_urn}\n"
             f"# schema_fields={result.schema_fields}\n"

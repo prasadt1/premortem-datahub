@@ -18,6 +18,12 @@ _SEVERITY_ORDER = (
 )
 
 
+def owner_label(urn: str) -> str:
+    """Bare name for camera; URN secondary in backticks."""
+    bare = urn.rsplit(":", 1)[-1] if ":" in urn else urn
+    return f"{bare} (`{urn}`)"
+
+
 @dataclass(frozen=True)
 class NotifyTarget:
     urn: str
@@ -111,7 +117,7 @@ def notify_markdown(targets: list[NotifyTarget]) -> str:
             continue
         lines.append(f"{sev.upper()} priority")
         for t in group:
-            owners = ", ".join(f"`{o}`" for o in t.owners)
+            owners = ", ".join(owner_label(o) for o in t.owners)
             lines.append(f"- `{t.urn}` ({t.role}) → {owners}")
         lines.append("")
 

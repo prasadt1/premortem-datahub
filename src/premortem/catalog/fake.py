@@ -29,6 +29,7 @@ class FakeCatalogClient:
         self.saved_docs: list[tuple[str, str, str]] = []
         self.added_tags: list[tuple[str, list[str]]] = []
         self.descriptions: list[tuple[str, str]] = []
+        self.description_by_urn: dict[str, str] = {}
         # Optional per-URN schemas for sibling resolution tests.
         self.schemas_by_urn: dict[str, list[str]] = {}
 
@@ -53,6 +54,9 @@ class FakeCatalogClient:
     def get_owners(self, urn: str) -> list[str]:
         return list(self.owners.get(urn, []))
 
+    def get_description(self, urn: str) -> str:
+        return self.description_by_urn.get(urn, "")
+
     def _require_write_back(self) -> None:
         if not self.write_back_enabled:
             raise WriteBackDisabledError(
@@ -72,6 +76,7 @@ class FakeCatalogClient:
     def update_description(self, urn: str, description: str) -> None:
         self._require_write_back()
         self.descriptions.append((urn, description))
+        self.description_by_urn[urn] = description
 
 
 # Backward-compatible alias

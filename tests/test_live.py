@@ -67,4 +67,4 @@ def test_live_rehearsal_rejects_missing_column():
         run_live_rehearsal(client, diff=diff, adjudicate=False)
         assert False, "expected RuntimeError"
     except RuntimeError as e:
-        assert "not in schema" in str(e) or "no queries" in str(e) or "no schema" in str(e)
+        assert "not in schema" in str(e)

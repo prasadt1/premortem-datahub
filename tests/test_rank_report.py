@@ -94,7 +94,7 @@ def test_markdown_renders_cleared_decoy_section():
     md = to_markdown(forecast, use_exec_count=False)
     assert "CLEARED (references a same-named column that binds elsewhere) (1)" in md
     assert "decoy_shipments_order_status — binds to `shipments`" in md
-    assert "unknown_bare_two_tables" not in md or "UNKNOWN" in md
+    assert "unknown_bare" in md
     assert "UNKNOWN / needs human (1)" in md
     assert "No query evidence of `order_status` on subject: 1" in md
     assert "UNAFFECTED / no query evidence" not in md
