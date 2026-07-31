@@ -8,6 +8,7 @@ from premortem.agent import rehearse
 from premortem.catalog import CatalogClient, write_forecast_to_catalog
 from premortem.catalog.resolve import resolve_sibling_schemas
 from premortem.models import Forecast, SchemaDiff
+from premortem.notify import build_notify
 from premortem.report import to_json, to_markdown
 from premortem.rewrite import RepairItem, build_repairs
 
@@ -104,7 +105,13 @@ def run_live_rehearsal(
         subject_table=subject_table,
         tables=tables,
     )
-    md = to_markdown(forecast, use_exec_count=use_exec_count)
+    notify = build_notify(
+        client,
+        subject_urn=diff.dataset_urn,
+        downstream=downstream,
+        forecast=forecast,
+    )
+    md = to_markdown(forecast, use_exec_count=use_exec_count, notify=notify)
     js = to_json(forecast, use_exec_count=use_exec_count)
 
     repairs = build_repairs(

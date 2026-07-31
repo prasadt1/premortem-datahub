@@ -1,0 +1,38 @@
+# Premortem merge gate — drop into any repo that owns warehouse SQL.
+#
+# Fails the job when Premortem scores HARD findings against the renamed column.
+# Offline mode (no DataHub): point --queries-dir at the SQL under review and
+# --tables-json at a schema map (eval/schema.json shape works).
+#
+# Live mode: set DATAHUB_GMS_URL (+ token) and use --live instead of --queries-dir.
+
+name: premortem-schema-gate
+
+on:
+  pull_request:
+    paths:
+      - "**.sql"
+      - "eval/schema.json"
+      - "examples/**"
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Premortem
+        run: pip install -e ".[dev]"
+
+      - name: Run merge gate (fail on HARD)
+        run: |
+          premortem gate \
+            --queries-dir eval/corpus \
+            --rename order_status:order_state \
+            --subject-table order_history \
+            --tables-json eval/schema.json \
+            --fail-on hard

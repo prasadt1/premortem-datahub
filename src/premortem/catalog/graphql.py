@@ -143,6 +143,34 @@ class GraphqlCatalogClient:
                 out.append(entity["urn"])
         return out
 
+    def get_owners(self, urn: str) -> list[str]:
+        """CorpUser / CorpGroup URNs from Ownership aspect; empty if none recorded."""
+        data = self._post(
+            """
+            query($urn: String!) {
+              dataset(urn: $urn) {
+                ownership {
+                  owners {
+                    owner {
+                      ... on CorpUser { urn }
+                      ... on CorpGroup { urn }
+                    }
+                  }
+                }
+              }
+            }
+            """,
+            {"urn": urn},
+        )
+        owners = (((data.get("dataset") or {}).get("ownership") or {}).get("owners")) or []
+        out: list[str] = []
+        for row in owners:
+            owner = (row or {}).get("owner") or {}
+            u = owner.get("urn")
+            if u:
+                out.append(u)
+        return out
+
     def get_dataset_queries(self, urn: str) -> list[QueryRecord]:
         # Prefer catalog listQueries when indexed; seed is fallback / PREMORTEM_PREFER_SEED.
         if self._force_seed():

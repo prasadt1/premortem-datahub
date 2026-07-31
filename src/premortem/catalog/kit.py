@@ -189,6 +189,18 @@ class KitCatalogClient:
                 out.append(row["urn"])
         return out
 
+    def get_owners(self, urn: str) -> list[str]:
+        """Ownership is not a first-class Kit read — GraphQL fallback."""
+        from premortem.catalog.graphql import GraphqlCatalogClient
+
+        gql = GraphqlCatalogClient(
+            gms_url=self.gms_url,
+            token=self.token,
+            write_back_enabled=False,
+            seed_path=str(self.seed_path) if self.seed_path else None,
+        )
+        return gql.get_owners(urn)
+
     def ensure_forecast_tag(self) -> str:
         """Best-effort create of the Premortem forecast tag; return URN."""
         self._require_write_back()

@@ -10,6 +10,7 @@ from pathlib import Path
 from premortem.agent import rehearse
 from premortem.classify import classify_query
 from premortem.datahub_client import create_catalog_client, write_forecast_to_catalog
+from premortem.gate import parse_fail_on, run_live_gate, run_offline_gate
 from premortem.live import run_live_rehearsal
 from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
 from premortem.report import to_json, to_markdown
@@ -48,6 +49,89 @@ def _parse_diff(args: argparse.Namespace) -> SchemaDiff:
     raise SystemExit("require --rename old:new or --drop column")
 
 
+def _gate_main(argv: list[str]) -> int:
+    """``premortem gate`` — CI exit code + JSON summary on stdout."""
+    p = argparse.ArgumentParser(
+        prog="premortem gate",
+        description=(
+            "Merge gate: exit 0 when no findings meet --fail-on; "
+            "non-zero otherwise. JSON summary on stdout."
+        ),
+    )
+    p.add_argument("--live", action="store_true", help="Run against DataHub")
+    p.add_argument("--queries-dir", help="Offline: directory of *.sql")
+    p.add_argument("--urn", default=DEMO_URN)
+    p.add_argument("--rename", help="old:new column rename")
+    p.add_argument("--drop", help="column to drop")
+    p.add_argument("--dialect", default="snowflake")
+    p.add_argument(
+        "--fail-on",
+        default="hard",
+        help="Comma list: hard | hard,unknown | hard,soft,unknown (default: hard)",
+    )
+    p.add_argument(
+        "--subject-table",
+        help="Offline binder: subject table base name",
+    )
+    p.add_argument(
+        "--tables-json",
+        help="Offline binder: JSON tables map (or eval/schema.json shape)",
+    )
+    p.add_argument(
+        "--catalog",
+        choices=["kit", "graphql", "fake"],
+        default=None,
+    )
+    p.add_argument(
+        "--gms",
+        default=os.environ.get("DATAHUB_GMS_URL", "http://localhost:8080"),
+    )
+    args = p.parse_args(argv)
+
+    try:
+        fail_on = parse_fail_on(args.fail_on)
+    except ValueError as exc:
+        p.error(str(exc))
+
+    if args.live and args.queries_dir:
+        p.error("--live and --queries-dir are mutually exclusive")
+    if not args.live and not args.queries_dir:
+        p.error("require --live or --queries-dir")
+    if not args.rename and not args.drop:
+        p.error("require --rename old:new or --drop column")
+
+    diff = _parse_diff(args)
+
+    if args.live:
+        client = create_catalog_client(backend=args.catalog, gms_url=args.gms)
+        try:
+            summary = run_live_gate(
+                client, diff=diff, fail_on=fail_on, dialect=args.dialect
+            )
+        except RuntimeError as exc:
+            print(f"gate failed: {exc}", file=sys.stderr)
+            return 2
+    else:
+        import json
+
+        tables = None
+        if args.tables_json:
+            raw = json.loads(Path(args.tables_json).read_text(encoding="utf-8"))
+            tables = raw["tables"] if isinstance(raw, dict) and "tables" in raw else raw
+        queries = _load_queries_from_dir(Path(args.queries_dir))
+        summary = run_offline_gate(
+            diff=diff,
+            queries=queries,
+            fail_on=fail_on,
+            dialect=args.dialect,
+            subject_table=args.subject_table,
+            tables=tables,
+        )
+
+    print(summary.to_json())
+    return summary.exit_code
+
+
 def _emit(forecast_md: str, forecast_js: str, args: argparse.Namespace) -> None:
     if args.out:
         Path(args.out).write_text(forecast_md, encoding="utf-8")
@@ -60,6 +144,10 @@ def _emit(forecast_md: str, forecast_js: str, args: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
+    argv_list = list(sys.argv[1:] if argv is None else argv)
+    if argv_list and argv_list[0] == "gate":
+        raise SystemExit(_gate_main(argv_list[1:]))
+
     p = argparse.ArgumentParser(
         prog="premortem",
         description="Schema-change rehearsal (offline / live DataHub / write-back)",
@@ -141,7 +229,7 @@ def main(argv: list[str] | None = None) -> None:
         "--tables-json",
         help="Offline binder: JSON object mapping table → column list (for --emit-patches)",
     )
-    args = p.parse_args(argv)
+    args = p.parse_args(argv_list)
 
     if args.sql_file:
         if not args.column:
@@ -281,7 +369,10 @@ def main(argv: list[str] | None = None) -> None:
         "    premortem --live --rename order_status:order_state "
         "--out examples/forecast-order-status.md\n"
         "    premortem --live --drop order_status --out examples/forecast-drop-order-status.md\n"
-        "    … --write-back   # tag + description on the dataset"
+        "    … --write-back   # tag + description on the dataset\n"
+        "  Merge gate (CI):\n"
+        "    premortem gate --queries-dir eval/corpus --rename order_status:order_state "
+        "--subject-table order_history --tables-json eval/schema.json --fail-on hard"
     )
 
 

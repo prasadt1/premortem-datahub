@@ -166,7 +166,7 @@ def rewrite_sql(
     )
     if residual.severity is not BreakSeverity.UNAFFECTED:
         reason = (
-            "incomplete repair — SELECT * still may hide the column"
+            "cannot verify completeness (star may still reference the old column)"
             if residual.evidence == "STAR"
             else (
                 "incomplete repair — residual reference remains "

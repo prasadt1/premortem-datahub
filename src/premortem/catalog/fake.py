@@ -18,12 +18,14 @@ class FakeCatalogClient:
         queries: list[QueryRecord] | None = None,
         write_back_enabled: bool = False,
         search_index: dict[str, list[str]] | None = None,
+        owners: dict[str, list[str]] | None = None,
     ) -> None:
         self.fields = list(fields or [])
         self.downstream = list(downstream or [])
         self.queries = list(queries or [])
         self.write_back_enabled = write_back_enabled
         self.search_index = dict(search_index or {})
+        self.owners = {k: list(v) for k, v in (owners or {}).items()}
         self.saved_docs: list[tuple[str, str, str]] = []
         self.added_tags: list[tuple[str, list[str]]] = []
         self.descriptions: list[tuple[str, str]] = []
@@ -47,6 +49,9 @@ class FakeCatalogClient:
         index = getattr(self, "search_index", {}) or {}
         hits = index.get(q) or index.get(query) or []
         return list(hits)[:limit]
+
+    def get_owners(self, urn: str) -> list[str]:
+        return list(self.owners.get(urn, []))
 
     def _require_write_back(self) -> None:
         if not self.write_back_enabled:

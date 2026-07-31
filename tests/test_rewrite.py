@@ -142,7 +142,10 @@ def test_cte_star_plus_hard_refuses_incomplete_patch():
         tables=TABLES,
     )
     assert item.action == "refuse"
-    assert item.reason and "incomplete" in item.reason.lower()
+    assert item.reason and (
+        "cannot verify completeness" in item.reason.lower()
+        or "incomplete" in item.reason.lower()
+    )
 
 
 def test_drop_refuses_no_new_name():

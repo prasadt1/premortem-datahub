@@ -101,20 +101,26 @@ With binder + `adjudicate=False` default:
 
 `python eval/run_repair_roundtrip.py` rewrites every binder HARD/SOFT corpus query
 (`order_status` → `order_state`), then re-classifies: old column → UNAFFECTED; new
-column → original severity. CLEARED / UNKNOWN / SELECT * / incomplete-with-star are
-**refused** (no patch) — the honesty identity extended into repair. Labels, schema,
-and corpus stay byte-identical.
+column → original severity. CLEARED / UNKNOWN / SELECT * / cannot-verify-under-star
+are **refused** (no patch) — the honesty identity extended into repair. Labels,
+schema, and corpus stay byte-identical.
+
+q25 (HARD WHERE + CTE `SELECT *`) is refused as *"cannot verify completeness
+(star may still reference the old column)"* — the rename of the enumerated ref may
+be semantically complete, but under a star we cannot attest that, and this product
+does not ship unverified patches.
 
 | metric | n |
 |---|---:|
 | patched (eligible) | 22 |
 | round-trip pass | **22/22** |
 | refused | 18 |
-| — ambiguous / parse / UNKNOWN | 7 |
+| — ambiguous binding | 3 |
+| — does not parse | 4 |
 | — CLEARED (binds elsewhere) | 4 |
 | — no subject-bound reference | 4 |
 | — SELECT * over subject | 2 |
-| — incomplete (HARD + CTE star) | 1 |
+| — cannot verify completeness (star) | 1 |
 
 Kill criterion met: **100%** of emitted patches round-trip. Sample diffs:
 [`examples/patches/`](../examples/patches/).

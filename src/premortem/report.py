@@ -4,6 +4,7 @@ import json
 
 from premortem.forecast import cleared_bind_table, is_cleared_finding
 from premortem.models import BreakSeverity, Forecast
+from premortem.notify import NotifyTarget, notify_markdown
 from premortem.rank import rank_findings
 
 
@@ -12,6 +13,7 @@ def to_markdown(
     *,
     use_exec_count: bool,
     baseline_source: str = "measured",
+    notify: list[NotifyTarget] | None = None,
 ) -> str:
     ranked = rank_findings(forecast.findings, use_exec_count=use_exec_count)
     d = forecast.diff
@@ -77,6 +79,12 @@ def to_markdown(
             f"- {f.query_id} — binds to `{bound}` — {f.sql_snippet[:120]}{extra}"
         )
     lines.append("")
+
+    if notify is not None:
+        lines.append("Notify (who to warn before Friday)")
+        lines.append(notify_markdown(notify).rstrip())
+        lines.append("")
+
     lines.append(
         f"No query evidence of `{d.column}` on subject: "
         f"{forecast.unaffected_lineage_count}"

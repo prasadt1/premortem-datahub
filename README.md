@@ -25,6 +25,21 @@ python eval/run_eval.py
 
 That reproduces the published numbers in [`eval/RESULTS.md`](eval/RESULTS.md): Premortem (binder) accuracy **0.97** (**39/40**, truncated), HARD precision **1.00** (n=15), decoy FP **0.00** (n=6). The frozen eval is the measurement; the live demo below is a constructed instance for the video.
 
+## Merge gate (CI)
+
+Make “before you merge” literal — exit code + JSON, no GitHub App:
+
+```bash
+premortem gate \
+  --queries-dir path/to/sql \
+  --rename order_status:order_state \
+  --subject-table order_history \
+  --tables-json eval/schema.json \
+  --fail-on hard
+```
+
+Exit **0** when clean; **1** when any finding meets `--fail-on` (`hard`, `hard,unknown`, …). Worked workflow: [`examples/ci/premortem-gate.yml`](examples/ci/premortem-gate.yml). Live: add `--live` (and drop `--queries-dir`) against your GMS.
+
 ## What you get
 
 | Output | Meaning (remediation blast radius) |

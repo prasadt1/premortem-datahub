@@ -5,8 +5,9 @@ Idempotent against http://localhost:8080 (or DATAHUB_GMS_URL):
 
 1. Snowflake ``analytics.shipments`` dataset (+ schema with ``order_status``)
 2. Lineage: shipments / order_details / order_details_replica ← ORDER_HISTORY
-3. QUERY entities for decoy + truly-ambiguous demo beats
-4. Exactly one camera-ready custom assertion (stable URN, upsert not append)
+3. Ownership aspects on order_history / shipments / order_details (Notify demo)
+4. QUERY entities for decoy + truly-ambiguous demo beats
+5. Exactly one camera-ready custom assertion (stable URN, upsert not append)
 
 Usage:
   python tools/seed_demo_environment.py
@@ -32,6 +33,9 @@ from datahub.metadata.schema_classes import (
     AuditStampClass,
     DatasetPropertiesClass,
     OtherSchemaClass,
+    OwnerClass,
+    OwnershipClass,
+    OwnershipTypeClass,
     SchemaFieldClass,
     SchemaFieldDataTypeClass,
     SchemaMetadataClass,
@@ -127,6 +131,34 @@ def emit_shipments_dataset() -> None:
         )
     emitter.flush()
     print(f"emitted dataset+schema {SHIPMENTS_URN}")
+
+
+def emit_owners() -> None:
+    """Seed Ownership aspects so the Notify section shows real names on camera."""
+    emitter = DatahubRestEmitter(gms_server=GMS)
+    now = int(time.time() * 1000)
+    stamp = AuditStampClass(time=now, actor="urn:li:corpuser:premortem")
+    assignments = [
+        (DEMO_URN, ["urn:li:corpuser:alex_orders"]),
+        (SHIPMENTS_URN, ["urn:li:corpuser:sam_logistics"]),
+        (ORDER_DETAILS_URN, ["urn:li:corpuser:jordan_analytics"]),
+    ]
+    for urn, owner_urns in assignments:
+        ownership = OwnershipClass(
+            owners=[
+                OwnerClass(owner=o, type=OwnershipTypeClass.TECHNICAL_OWNER)
+                for o in owner_urns
+            ],
+            lastModified=stamp,
+        )
+        emitter.emit(
+            MetadataChangeProposalWrapper(entityUrn=urn, aspect=ownership)
+        )
+    emitter.flush()
+    print(
+        "emitted owners → order_history/alex_orders, "
+        "shipments/sam_logistics, order_details/jordan_analytics"
+    )
 
 
 def update_lineage() -> None:
@@ -396,6 +428,7 @@ def main() -> int:
     if not args.verify_only:
         emit_shipments_dataset()
         update_lineage()
+        emit_owners()
         create_query("decoy_shipments_order_status", DECOY_SQL)
         create_query("unknown_bare_two_tables", AMBIGUOUS_SQL)
         if not args.skip_assertion:
