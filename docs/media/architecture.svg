@@ -35,7 +35,7 @@
   <path d="M230 180 L230 208" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
   <path d="M600 182 L600 208" stroke="#eb6834" stroke-width="2.5" marker-end="url(#aro)"/>
   <path d="M970 180 L970 208" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="600" y="200" font-size="11" fill="#898781" text-anchor="middle">all call the same library</text>
+  <text x="415" y="200" font-size="11" fill="#898781" text-anchor="middle">all call the same library</text>
 
   <!-- ========== 2. CORE ========== -->
   <rect x="60" y="210" width="1080" height="250" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2"/>
