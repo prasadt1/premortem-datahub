@@ -247,13 +247,12 @@ class KitCatalogClient:
         self._require_write_back()
         tag = self.ensure_forecast_tag()
         self.add_tags(urn, [tag])
-        from premortem.description_merge import merge_premortem_description
-
-        section = (
-            f"## {title}\n\n{body_md.rstrip()}\n\n"
-            "---\n_Premortem schema rehearsal "
-            "(hard / soft / unknown / cleared). Tag: premortem_forecast._"
+        from premortem.description_merge import (
+            forecast_description_section,
+            merge_premortem_description,
         )
+
+        section = forecast_description_section(title=title, body_md=body_md)
         merged = merge_premortem_description(self.get_description(urn), section)
         self.update_description(urn, merged)
         return f"description+tag:{tag}"

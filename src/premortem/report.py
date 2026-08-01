@@ -8,6 +8,12 @@ from premortem.notify import NotifyTarget, notify_markdown
 from premortem.rank import rank_findings
 
 
+def _safe_inline(text: str, *, limit: int = 120) -> str:
+    """Collapse whitespace and strip backticks so snippets cannot break markdown."""
+    collapsed = " ".join(text.split())[:limit].replace("`", "")
+    return collapsed
+
+
 def to_markdown(
     forecast: Forecast,
     *,
@@ -52,10 +58,19 @@ def to_markdown(
             extra = ""
             if use_exec_count and f.exec_count is not None:
                 extra = f"  (exec×{f.exec_count})"
-            reason = f" — {f.unknown_reason}" if f.unknown_reason else ""
-            note = f" — agent: {f.agent_note}" if f.agent_note else ""
+            snip = _safe_inline(f.sql_snippet)
+            reason = (
+                f" — {_safe_inline(f.unknown_reason, limit=200)}"
+                if f.unknown_reason
+                else ""
+            )
+            note = (
+                f" — agent: {_safe_inline(f.agent_note, limit=200)}"
+                if f.agent_note
+                else ""
+            )
             lines.append(
-                f"- {f.query_id} — [{f.evidence}] {f.sql_snippet[:120]}{extra}{reason}{note}"
+                f"- {f.query_id} — [{f.evidence}] `{snip}`{extra}{reason}{note}"
             )
         lines.append("")
 
@@ -75,8 +90,9 @@ def to_markdown(
         extra = ""
         if use_exec_count and f.exec_count is not None:
             extra = f"  (exec×{f.exec_count})"
+        snip = _safe_inline(f.sql_snippet)
         lines.append(
-            f"- {f.query_id} — binds to `{bound}` — {f.sql_snippet[:120]}{extra}"
+            f"- {f.query_id} — binds to `{bound}` — `{snip}`{extra}"
         )
     lines.append("")
 

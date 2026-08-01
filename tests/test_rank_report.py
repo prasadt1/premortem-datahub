@@ -96,5 +96,6 @@ def test_markdown_renders_cleared_decoy_section():
     assert "decoy_shipments_order_status — binds to `shipments`" in md
     assert "unknown_bare" in md
     assert "UNKNOWN / needs human (1)" in md
+    assert "`SELECT" in md or "SELECT" in md  # snippet wrapped or collapsed
     assert "No query evidence of `order_status` on subject: 1" in md
     assert "UNAFFECTED / no query evidence" not in md

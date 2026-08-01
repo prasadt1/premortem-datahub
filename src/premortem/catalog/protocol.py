@@ -23,10 +23,6 @@ class GraphqlError(CatalogError):
     """GraphQL transport / schema error (legacy name kept for callers)."""
 
 
-class KitBackendNotReady(CatalogError):
-    """Kit SDK backend selected before spikes S1/S3 wire it up."""
-
-
 class CatalogClient(Protocol):
     """Access-layer interface for schema, lineage, query history, and write-back."""
 

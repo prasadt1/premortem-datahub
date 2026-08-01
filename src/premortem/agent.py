@@ -5,14 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Protocol
 
-from premortem.classify import classify_query
+from premortem.classify import HARD_CLAUSES, classify_query
 from premortem.models import BreakFinding, BreakSeverity, Forecast, QueryRecord, SchemaDiff
 from premortem.rank import rank_findings
-
-
-HARD_EVIDENCE = frozenset(
-    {"WHERE", "JOIN", "GROUP", "ORDER", "HAVING", "PARTITION", "QUALIFY"}
-)
 
 
 @dataclass
@@ -60,7 +55,7 @@ class HeuristicAdjudicator:
             )
 
         clauses = {c.strip().upper() for c in finding.evidence.split(",") if c.strip()}
-        if clauses & HARD_EVIDENCE:
+        if clauses & HARD_CLAUSES:
             return Adjudication(
                 severity=BreakSeverity.HARD,
                 note=(

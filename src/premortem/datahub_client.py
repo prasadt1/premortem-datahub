@@ -1,4 +1,4 @@
-"""Backward-compatible re-exports — prefer ``premortem.catalog``.
+""" Backward-compatible re-exports — prefer ``premortem.catalog``.
 
 Existing imports (``from premortem.datahub_client import …``) keep working.
 New code should use ``premortem.catalog.create_catalog_client``.
@@ -15,7 +15,6 @@ from premortem.catalog import (
     FakeDataHubClient,
     GraphqlError,
     HttpDataHubClient,
-    KitBackendNotReady,
     WriteBackDisabledError,
     create_catalog_client,
     write_forecast_to_catalog,
@@ -30,7 +29,6 @@ __all__ = [
     "FakeDataHubClient",
     "GraphqlError",
     "HttpDataHubClient",
-    "KitBackendNotReady",
     "WriteBackDisabledError",
     "create_catalog_client",
     "write_forecast_to_catalog",

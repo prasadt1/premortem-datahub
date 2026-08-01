@@ -108,9 +108,10 @@ def test_join_renames_only_subject_side_not_decoy():
     )
     assert item.action == "patch"
     rewritten = item.rewritten_sql or ""
-    assert "o.order_state" in rewritten.replace(" ", "").lower() or "order_state" in rewritten
-    # shipments side keeps old name
-    assert "s.order_status" in rewritten or "shipments" in rewritten.lower()
+    compact = rewritten.replace(" ", "").lower()
+    assert "o.order_state" in compact
+    assert "s.order_status" in compact
+    assert "s.order_state" not in compact
     assert classify_query(
         rewritten,
         column="order_status",

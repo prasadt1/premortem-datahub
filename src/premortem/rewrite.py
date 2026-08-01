@@ -221,6 +221,7 @@ def build_repairs(
 
 def emit_patches_to_dir(repairs: list[RepairItem], directory: str) -> int:
     """Write ``*.patch`` files for patched items. Returns count written."""
+    import hashlib
     import re
     from pathlib import Path
 
@@ -229,7 +230,9 @@ def emit_patches_to_dir(repairs: list[RepairItem], directory: str) -> int:
         cleaned = cleaned.strip("._") or "query"
         if cleaned in {".", ".."} or ".." in cleaned:
             cleaned = "query"
-        return cleaned[:128]
+        cleaned = cleaned[:100]
+        digest = hashlib.sha1(query_id.encode("utf-8")).hexdigest()[:8]
+        return f"{cleaned}-{digest}"
 
     root = Path(directory).resolve()
     root.mkdir(parents=True, exist_ok=True)

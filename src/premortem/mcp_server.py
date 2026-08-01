@@ -44,6 +44,19 @@ def _client(*, write_back: bool = False):
     )
 
 
+def _project_finding(f) -> dict[str, Any]:
+    return {
+        "query_id": f.query_id,
+        "severity": f.severity.value,
+        "evidence": f.evidence,
+        "sql_snippet": f.sql_snippet,
+        "unknown_reason": f.unknown_reason,
+        "unknown_kind": f.unknown_kind,
+        "agent_note": f.agent_note,
+        "cleared": is_cleared_finding(f.evidence),
+    }
+
+
 def rehearse_schema_change_impl(
     *,
     dataset: str = DEMO_URN,
@@ -77,19 +90,7 @@ def rehearse_schema_change_impl(
         markdown=result.markdown,
         existing_description=client.get_description(diff.dataset_urn),
     )
-    findings = []
-    for f in result.forecast.findings:
-        findings.append(
-            {
-                "query_id": f.query_id,
-                "severity": f.severity.value,
-                "evidence": f.evidence,
-                "sql_snippet": f.sql_snippet,
-                "unknown_reason": f.unknown_reason,
-                "unknown_kind": f.unknown_kind,
-                "cleared": is_cleared_finding(f.evidence),
-            }
-        )
+    findings = [_project_finding(f) for f in result.forecast.findings]
     return {
         "dataset": dataset,
         "change": {
@@ -117,6 +118,7 @@ def explain_finding_impl(
     change_kind: str = "rename",
     column: str = "order_status",
     new_name: str | None = "order_state",
+    adjudicate: str = "binder",
 ) -> dict[str, Any]:
     """Evidence detail for one query_id from a binder rehearsal of the same change."""
     result = rehearse_schema_change_impl(
@@ -124,14 +126,21 @@ def explain_finding_impl(
         change_kind=change_kind,
         column=column,
         new_name=new_name,
+        adjudicate=adjudicate,
     )
     for f in result["findings"]:
         if f["query_id"] == query_id:
-            return {"query_id": query_id, "finding": f, "change": result["change"]}
+            return {
+                "query_id": query_id,
+                "finding": f,
+                "change": result["change"],
+                "adjudicate": result["adjudicate"],
+            }
     return {
         "query_id": query_id,
         "finding": None,
         "change": result["change"],
+        "adjudicate": result["adjudicate"],
         "note": "query_id not in latest rehearsal findings "
         "(may be NO_REFERENCE / no query evidence)",
     }
@@ -199,6 +208,7 @@ if mcp is not None:
         change_kind: str = "rename",
         column: str = "order_status",
         new_name: str | None = "order_state",
+        adjudicate: str = "binder",
     ) -> str:
         """Detail one finding by query_id for the same change as rehearse. Never on camera."""
         return json.dumps(
@@ -208,6 +218,7 @@ if mcp is not None:
                 change_kind=change_kind,
                 column=column,
                 new_name=new_name,
+                adjudicate=adjudicate,
             ),
             indent=2,
         )

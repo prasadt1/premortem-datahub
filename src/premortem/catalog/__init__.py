@@ -22,7 +22,6 @@ from premortem.catalog.protocol import (
     CatalogError,
     DataHubClient,
     GraphqlError,
-    KitBackendNotReady,
     WriteBackDisabledError,
 )
 from premortem.catalog.queries import dedupe_queries_by_sql, filter_self_urn, normalize_sql
@@ -56,7 +55,6 @@ __all__ = [
     "GraphqlCatalogClient",
     "GraphqlError",
     "HttpDataHubClient",
-    "KitBackendNotReady",
     "KitCatalogClient",
     "WriteBackDisabledError",
     "create_catalog_client",

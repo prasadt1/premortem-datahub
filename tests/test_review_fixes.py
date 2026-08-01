@@ -31,6 +31,7 @@ def test_explain_finding_passes_change_args():
                 "column": kwargs["column"],
                 "new_name": kwargs["new_name"],
             },
+            "adjudicate": kwargs.get("adjudicate", "binder"),
             "findings": [
                 {
                     "query_id": "q1",
@@ -38,6 +39,8 @@ def test_explain_finding_passes_change_args():
                     "evidence": "WHERE",
                     "sql_snippet": "SELECT 1",
                     "unknown_reason": None,
+                    "unknown_kind": None,
+                    "agent_note": None,
                     "cleared": False,
                 }
             ],
