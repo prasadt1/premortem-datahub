@@ -17,10 +17,10 @@
     <text x="82" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">premortem · premortem gate</text>
   </g>
   <g>
-    <rect x="430" y="136" width="340" height="80" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-    <text x="452" y="160" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP server</text>
-    <text x="452" y="184" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">rehearse_schema_change</text>
-    <text x="452" y="202" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">explain_finding</text>
+    <rect x="430" y="130" width="340" height="92" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+    <text x="452" y="156" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP server</text>
+    <text x="452" y="180" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">rehearse_schema_change</text>
+    <text x="452" y="200" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">explain_finding</text>
   </g>
   <g>
     <rect x="800" y="136" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
@@ -28,7 +28,7 @@
     <text x="822" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">run_eval · run_repair_roundtrip</text>
   </g>
 
-  <path d="M600 224 L600 236" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
+  <path d="M600 230 L600 236" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
 
   <!-- Band 2: core library (highlighted) -->
   <rect x="60" y="244" width="1080" height="212" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2"/>
