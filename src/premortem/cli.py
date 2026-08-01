@@ -76,8 +76,11 @@ def _gate_main(argv: list[str]) -> int:
     p.add_argument("--dialect", default="snowflake")
     p.add_argument(
         "--fail-on",
-        default="hard",
-        help="Comma list: hard | hard,unknown | hard,soft,unknown (default: hard)",
+        default="hard,unknown",
+        help=(
+            "Comma list: hard | hard,unknown | hard,soft,unknown "
+            "(default: hard,unknown — unparseable must not silent-pass)"
+        ),
     )
     p.add_argument(
         "--subject-table",
@@ -158,6 +161,8 @@ def _gate_main(argv: list[str]) -> int:
             tables=tables,
         )
 
+    if summary.note:
+        print(summary.note, file=sys.stderr)
     print(summary.to_json())
     return summary.exit_code
 
@@ -422,7 +427,7 @@ def main(argv: list[str] | None = None) -> None:
         "    … --write-back   # tag + description on the dataset\n"
         "  Merge gate (CI):\n"
         "    premortem gate --queries-dir eval/corpus --rename order_status:order_state "
-        "--subject-table order_history --tables-json eval/schema.json --fail-on hard"
+        "--subject-table order_history --tables-json eval/schema.json --fail-on hard,unknown"
     )
 
 

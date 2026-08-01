@@ -115,8 +115,7 @@ does not ship unverified patches.
 | patched (eligible) | 22 |
 | round-trip pass | **22/22** |
 | refused | 18 |
-| — ambiguous binding | 3 |
-| — does not parse | 4 |
+| — ambiguous binding (incl. 4 unparseable) | 7 |
 | — CLEARED (binds elsewhere) | 4 |
 | — no subject-bound reference | 4 |
 | — SELECT * over subject | 2 |
@@ -124,6 +123,15 @@ does not ship unverified patches.
 
 Kill criterion met: **100%** of emitted patches round-trip. Sample diffs:
 [`examples/patches/`](../examples/patches/).
+
+## Known blind spots of this corpus
+
+The frozen forty contain **no** cross-scope alias shadowing, **no** derived-table
+aliases, and **no** DML (`UPDATE` / `INSERT` column lists / `MERGE … SET`). Those
+classes are covered in `tests/test_binder_tier1_safety.py` only — found by
+adversarial review after the freeze. Tier-1 binder policy for them is **refuse
+instead of guess** (UNKNOWN / no patch), not a claim of full resolution.
+`0.97 / 1.00 / 0.00` remains an accurate measurement of what the corpus measures.
 
 ## Reproduce
 

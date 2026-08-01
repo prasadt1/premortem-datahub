@@ -200,11 +200,31 @@ def build_repairs(
     tables: dict[str, list[str]] | None = None,
 ) -> list[RepairItem]:
     """One repair decision per finding (HARD/SOFT patch; CLEARED/UNKNOWN refuse)."""
-    by_id = {q.query_id: q for q in queries}
+    from collections import defaultdict
+
+    by_id: dict[str, list[QueryRecord]] = defaultdict(list)
+    for q in queries:
+        by_id[q.query_id].append(q)
+
     out: list[RepairItem] = []
     for finding in forecast.findings:
-        q = by_id.get(finding.query_id)
-        sql = q.sql if q is not None else finding.sql_snippet
+        cands = by_id.get(finding.query_id) or []
+        if len(cands) > 1:
+            out.append(
+                RepairItem(
+                    query_id=finding.query_id,
+                    action="refuse",
+                    reason=(
+                        "duplicate query_id — not guessing which SQL to patch"
+                    ),
+                    severity=finding.severity,
+                    original_sql=finding.sql_snippet,
+                    rewritten_sql=None,
+                    unified_diff=None,
+                )
+            )
+            continue
+        sql = cands[0].sql if len(cands) == 1 else finding.sql_snippet
         out.append(
             rewrite_sql(
                 sql,

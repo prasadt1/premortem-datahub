@@ -27,6 +27,8 @@ HARD_CLAUSES = frozenset(
         "HAVING",
         "PARTITION",
         "QUALIFY",
+        "SET",  # UPDATE / MERGE ... UPDATE SET — a write, not a projection
+        "UPDATE",
     }
 )
 
@@ -83,6 +85,9 @@ def _clause_label(node: exp.Expression) -> str | None:
             isinstance(cur, exp.PartitionBy) if hasattr(exp, "PartitionBy") else False
         ):
             return "PARTITION"
+        # UPDATE / MERGE WHEN MATCHED THEN UPDATE SET — write, not SELECT
+        if isinstance(cur, exp.Update):
+            return "SET"
         if isinstance(cur, exp.Select):
             return "SELECT"
         cur = cur.parent
@@ -119,17 +124,40 @@ def _cte_sources(tree: exp.Expression) -> dict[str, set[str]]:
     return sources
 
 
-def _alias_map(tree: exp.Expression, cte_sources: dict[str, set[str]]) -> dict[str, set[str]]:
-    """Map table alias / name → physical base names in this query."""
-    amap: dict[str, set[str]] = dict(cte_sources)
+def _alias_map(
+    tree: exp.Expression, cte_sources: dict[str, set[str]]
+) -> tuple[dict[str, set[str]], frozenset[str]]:
+    """Map table alias / name → physical bases; report aliases with conflicting bindings.
+
+    Global over the tree (no per-scope resolution). When the same alias is bound to
+    different physical sets in different scopes, it is marked shadowed — callers
+    must refuse to guess rather than CLEARED/patch.
+    """
+    amap: dict[str, set[str]] = {k: set(v) for k, v in cte_sources.items()}
+    shadowed: set[str] = set()
     for t in tree.find_all(exp.Table):
         raw = _base_name(t.name)
         if not raw:
             continue
-        physical = cte_sources.get(raw, {raw})
-        amap[_base_name(t.alias_or_name) or raw] = set(physical)
-        amap[raw] = set(physical)
-    return amap
+        physical = set(cte_sources.get(raw, {raw}))
+        alias = _base_name(t.alias_or_name) or raw
+        for key in {alias, raw}:
+            if key in amap and amap[key] != physical:
+                shadowed.add(key)
+                amap[key] = set(amap[key]) | physical
+            else:
+                amap[key] = set(physical)
+    return amap, frozenset(shadowed)
+
+
+def _subquery_aliases(tree: exp.Expression) -> set[str]:
+    """Aliases of derived tables / subqueries — not physical bases."""
+    out: set[str] = set()
+    for s in tree.find_all(exp.Subquery):
+        alias = _base_name(s.alias_or_name)
+        if alias:
+            out.add(alias)
+    return out
 
 
 def _physical_tables_in_scope(
@@ -292,9 +320,10 @@ def analyze_bindings(
         )
 
     cte_sources = _cte_sources(tree)
-    alias_map = _alias_map(tree, cte_sources)
+    alias_map, shadowed_aliases = _alias_map(tree, cte_sources)
     physical_all = _physical_tables_in_scope(tree, cte_sources)
     unnest_aliases = _unnest_aliases(tree)
+    subquery_aliases = _subquery_aliases(tree)
 
     bound: list[tuple[str, exp.Column]] = []
     elsewhere: set[str] = set()
@@ -303,6 +332,20 @@ def analyze_bindings(
         if name != col:
             continue
         clause = _clause_label(node) or "OTHER"
+        # Shadowed qualifier — refuse rather than CLEARED/patch on the wrong scope
+        if node.table:
+            q = _base_name(node.table)
+            if q in shadowed_aliases:
+                return _unknown(
+                    evidence=clause,
+                    reason=(
+                        f"alias `{q}` is reused across scopes — not guessing"
+                    ),
+                    snippet=snippet,
+                    dialect=dialect,
+                    kind="alias_shadowed",
+                    tree=tree,
+                )
         sel = _enclosing_select(node)
         scope_physical = (
             _select_from_physical(sel, cte_sources) if sel is not None else physical_all
@@ -350,7 +393,7 @@ def analyze_bindings(
             }
             if unknown_quals:
                 for t in sorted(unknown_quals):
-                    if t in unnest_aliases:
+                    if t in unnest_aliases or t in subquery_aliases:
                         return _unknown(
                             evidence=clause,
                             reason=(
@@ -383,6 +426,8 @@ def analyze_bindings(
                             kind="unresolvable_qualifier",
                             tree=tree,
                         )
+                # Qualifier is not a FROM table / UNNEST / subquery alias, subject
+                # is in scope → treat as nested path (e.g. BigQuery STRUCT) on subject.
                 bound.append((clause, node))
                 continue
             if known_elsewhere:
@@ -414,6 +459,11 @@ def analyze_bindings(
                 )
             candidates = with_col
         if len(candidates) >= 2:
+            # UPDATE/MERGE SET: SQL write targets typically bind to the subject
+            # being altered — prefer subject over UNKNOWN when it is a candidate.
+            if clause == "SET" and subject in candidates:
+                bound.append((clause, node))
+                continue
             return _unknown(
                 evidence=clause,
                 reason=(
@@ -427,6 +477,34 @@ def analyze_bindings(
             )
         if subject in candidates:
             bound.append((clause, node))
+
+    # INSERT INTO subject (..., col, ...) — column list is Identifier, not Column
+    insert_hit = False
+    for ins in tree.find_all(exp.Insert):
+        schema = ins.args.get("this")
+        if not isinstance(schema, exp.Schema):
+            continue
+        target = schema.this
+        target_table = (
+            _base_name(target.name) if isinstance(target, exp.Table) else None
+        )
+        if subject is not None and target_table and target_table != subject:
+            continue
+        for ident in schema.expressions or []:
+            raw = getattr(ident, "name", None) or getattr(ident, "this", None)
+            if _base_name(str(raw) if raw is not None else "") == col:
+                insert_hit = True
+                break
+
+    if insert_hit and not bound:
+        return BindingAnalysis(
+            severity=BreakSeverity.HARD,
+            evidence="INSERT",
+            snippet=snippet,
+            tree=tree,
+            elsewhere=frozenset(),
+            dialect=dialect,
+        )
 
     if not bound and _star_implies_unknown(
         tree, subject=subject, cte_sources=cte_sources

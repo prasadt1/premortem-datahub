@@ -35,10 +35,10 @@ premortem gate \
   --rename order_status:order_state \
   --subject-table order_history \
   --tables-json eval/schema.json \
-  --fail-on hard
+  --fail-on hard,unknown
 ```
 
-Exit **0** when clean; **1** when any finding meets `--fail-on` (`hard`, `hard,unknown`, …). Worked workflow: [`examples/ci/premortem-gate.yml`](examples/ci/premortem-gate.yml). Live: add `--live` (and drop `--queries-dir`) against your GMS.
+Exit **0** when clean; **1** when any finding meets `--fail-on` (default `hard,unknown` so unparseable SQL cannot silent-pass); **2** if `--fail-on hard` alone would green-light unparseable input. Worked workflow: [`examples/ci/premortem-gate.yml`](examples/ci/premortem-gate.yml). Live: add `--live` (and drop `--queries-dir`) against your GMS.
 
 ## What you get
 
@@ -122,6 +122,7 @@ Frozen classifier fixtures: `tests/fixtures/queries/`. Frozen eval (honest numbe
 ## Limits (honest)
 
 - Not 100% breakage prediction — macros, dynamic SQL, and residual ambiguity land in **unknown**
+- Alias shadowing / derived-table aliases / DML writes are **refused** (UNKNOWN, no patch) when the binder cannot scope them confidently — covered in `tests/`, not the frozen forty (see `eval/RESULTS.md` “Known blind spots”)
 - No legal or compliance guarantees
 - No query evidence ≠ safe to change
 - Premortem reasons about **tables, not view expansion** — a CLEARED bind to `clients_daily` while the subject is `clients_daily_v6` is correct at the table level, but a rename still propagates if that name is a view over the subject

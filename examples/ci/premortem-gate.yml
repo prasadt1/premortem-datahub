@@ -35,4 +35,4 @@ jobs:
             --rename order_status:order_state \
             --subject-table order_history \
             --tables-json eval/schema.json \
-            --fail-on hard
+            --fail-on hard,unknown

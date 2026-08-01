@@ -52,6 +52,8 @@ class GateSummary:
     counts: dict[str, int]
     findings: list[dict]
     exit_code: int
+    unparseable: int = 0
+    note: str | None = None
 
     def to_json(self) -> str:
         return json.dumps(asdict(self), indent=2)
@@ -71,11 +73,16 @@ def evaluate_gate(
     }
     triggered: list[str] = []
     findings_out: list[dict] = []
+    unparseable = 0
     for f in forecast.findings:
         key = f.severity.value
         counts[key] = counts.get(key, 0) + 1
         if f.severity is BreakSeverity.UNAFFECTED and is_cleared_finding(f.evidence):
             counts["cleared"] = counts.get("cleared", 0) + 1
+        if f.severity is BreakSeverity.UNKNOWN and (
+            f.evidence == "PARSE" or f.unknown_kind == "parse"
+        ):
+            unparseable += 1
         row = {
             "query_id": f.query_id,
             "severity": f.severity.value,
@@ -86,13 +93,35 @@ def evaluate_gate(
             triggered.append(f.query_id)
 
     clean = len(triggered) == 0
+    exit_code = 0 if clean else 1
+    note = None
+    # Unparseable input must not silently pass when UNKNOWN is not a fail threshold
+    if (
+        unparseable
+        and BreakSeverity.UNKNOWN not in fail_on
+        and clean
+    ):
+        clean = False
+        exit_code = 2
+        note = (
+            f"{unparseable} queries could not be parsed — refusing silent green. "
+            "Include unknown in --fail-on (default) or fix the SQL."
+        )
+    elif unparseable and BreakSeverity.UNKNOWN not in fail_on:
+        note = (
+            f"{unparseable} queries could not be parsed "
+            "(not in --fail-on; exit already non-zero on other findings)"
+        )
+
     return GateSummary(
         clean=clean,
         fail_on=sorted(s.value for s in fail_on),
         triggered=triggered,
         counts=counts,
         findings=findings_out,
-        exit_code=0 if clean else 1,
+        exit_code=exit_code,
+        unparseable=unparseable,
+        note=note,
     )
 
 
