@@ -2,7 +2,7 @@
   <rect width="1200" height="800" fill="#fcfcfb"/>
   <defs>
     <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#898781"/>
+      <path d="M0 0 L10 5 L0 10 z" fill="#52514e"/>
     </marker>
     <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="#2a78d6"/>
@@ -12,109 +12,122 @@
     </marker>
   </defs>
 
-  <text x="60" y="42" font-size="26" font-weight="700" fill="#0b0b0b">How Premortem is wired</text>
-  <text x="60" y="68" font-size="15" fill="#52514e">Three ways in. One pure core. Catalog access only when live — behind one protocol, three backends.</text>
+  <text x="60" y="36" font-size="24" font-weight="700" fill="#0b0b0b">How Premortem is wired</text>
+  <text x="60" y="58" font-size="14" fill="#52514e">Three ways in. One pure core. Catalog access only when live — behind one protocol, three backends.</text>
 
-  <!-- ========== 1. ENTRY POINTS (equal) ========== -->
-  <text x="60" y="98" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">1 - HOW YOU INVOKE IT (three equal entry points)</text>
+  <!-- ===== BAND 1: INVOKE ===== -->
+  <rect x="48" y="72" width="1104" height="148" rx="12" fill="#f4f4f1" stroke="#c9c7c0" stroke-width="1.5"/>
+  <text x="68" y="96" font-size="13" font-weight="700" fill="#0b0b0b" letter-spacing="0.4">1  ·  HOW YOU INVOKE IT</text>
+  <text x="280" y="96" font-size="13" fill="#52514e">three equal doors into the same library</text>
 
-  <rect x="60" y="110" width="340" height="70" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="80" y="138" font-size="16" font-weight="700" fill="#0b0b0b">CLI</text>
-  <text x="80" y="160" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">premortem  ·  premortem gate</text>
+  <!-- CLI card -->
+  <rect x="68" y="112" width="320" height="88" rx="10" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <!-- terminal icon -->
+  <rect x="86" y="128" width="22" height="18" rx="3" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
+  <path d="M92 134 L98 137 L92 140" fill="none" stroke="#0b0b0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="100" y1="140" x2="104" y2="140" stroke="#0b0b0b" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="118" y="142" font-size="15" font-weight="700" fill="#0b0b0b">CLI</text>
+  <text x="86" y="174" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">premortem · premortem gate</text>
 
-  <rect x="430" y="108" width="340" height="74" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-  <text x="450" y="134" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP</text>
-  <text x="450" y="154" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#52514e">rehearse_schema_change</text>
-  <text x="450" y="170" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#52514e">explain_finding</text>
+  <!-- MCP card (ours — orange) -->
+  <rect x="408" y="112" width="320" height="88" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2.5"/>
+  <!-- plug icon -->
+  <circle cx="425" cy="133" r="9" fill="none" stroke="#eb6834" stroke-width="1.5"/>
+  <path d="M425 124 L425 118 M420 142 L420 148 M430 142 L430 148" stroke="#eb6834" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="442" y="138" font-size="15" font-weight="700" fill="#0b0b0b">Premortem MCP</text>
+  <text x="442" y="154" font-size="11" font-weight="600" fill="#eb6834">we built this</text>
+  <text x="426" y="176" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">rehearse_schema_change</text>
+  <text x="426" y="190" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">explain_finding</text>
 
-  <rect x="800" y="110" width="340" height="70" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="820" y="138" font-size="16" font-weight="700" fill="#0b0b0b">Eval harness</text>
-  <text x="820" y="160" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#52514e">run_eval · run_repair_roundtrip</text>
+  <!-- Eval card -->
+  <rect x="748" y="112" width="380" height="88" rx="10" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <!-- flask icon -->
+  <path d="M768 126 L768 136 L760 150 L784 150 L776 136 L776 126 Z" fill="none" stroke="#0b0b0b" stroke-width="1.5" stroke-linejoin="round"/>
+  <line x1="764" y1="126" x2="780" y2="126" stroke="#0b0b0b" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="794" y="142" font-size="15" font-weight="700" fill="#0b0b0b">Eval harness</text>
+  <text x="766" y="174" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">run_eval · run_repair_roundtrip</text>
 
-  <!-- Three explicit arrows from each entry into the core -->
-  <path d="M230 180 L230 208" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <path d="M600 182 L600 208" stroke="#eb6834" stroke-width="2.5" marker-end="url(#aro)"/>
-  <path d="M970 180 L970 208" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="415" y="200" font-size="11" fill="#898781" text-anchor="middle">all call the same library</text>
+  <!-- three arrows out of band 1 into band 2 -->
+  <path d="M228 220 L228 242" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M568 220 L568 242" stroke="#eb6834" stroke-width="2.5" marker-end="url(#aro)"/>
+  <path d="M938 220 L938 242" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="398" y="236" font-size="11" font-weight="600" fill="#52514e" text-anchor="middle">all call the same library</text>
 
-  <!-- ========== 2. CORE ========== -->
-  <rect x="60" y="210" width="1080" height="250" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2"/>
-  <text x="80" y="236" font-size="12" font-weight="700" fill="#eb6834" letter-spacing="0.6">2 - CORE LIBRARY (pure Python · no DataHub import · no LLM import)</text>
+  <!-- ===== BAND 2: CORE ===== -->
+  <rect x="48" y="244" width="1104" height="230" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2.5"/>
+  <text x="68" y="268" font-size="13" font-weight="700" fill="#eb6834" letter-spacing="0.4">2  ·  CORE LIBRARY</text>
+  <text x="220" y="268" font-size="13" fill="#0b0b0b">pure Python · no DataHub import · no LLM import</text>
 
-  <!-- Binder -->
-  <rect x="80" y="252" width="280" height="188" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-width="2"/>
-  <text x="100" y="280" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.5">THE ONE BINDER</text>
-  <text x="100" y="308" font-size="16" font-weight="700" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">analyze_bindings</text>
-  <text x="100" y="336" font-size="13" fill="#52514e">parse SQL</text>
-  <text x="100" y="356" font-size="13" fill="#52514e">resolve each column to a table</text>
-  <text x="100" y="376" font-size="13" fill="#52514e">score the clause</text>
-  <text x="100" y="408" font-size="13" font-weight="700" fill="#eb6834">if unsure: refuse (UNKNOWN)</text>
+  <rect x="68" y="284" width="280" height="168" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-width="2"/>
+  <text x="88" y="310" font-size="11" font-weight="700" fill="#52514e" letter-spacing="0.5">THE ONE BINDER</text>
+  <text x="88" y="336" font-size="15" font-weight="700" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">analyze_bindings</text>
+  <text x="88" y="362" font-size="13" fill="#0b0b0b">parse SQL</text>
+  <text x="88" y="382" font-size="13" fill="#0b0b0b">resolve each column to a table</text>
+  <text x="88" y="402" font-size="13" fill="#0b0b0b">score the clause</text>
+  <text x="88" y="430" font-size="13" font-weight="700" fill="#eb6834">if unsure: refuse (UNKNOWN)</text>
 
-  <!-- Three fan-out arrows - each to its own consumer -->
-  <path d="M360 300 L400 300" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
-  <path d="M360 346 L400 346" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
-  <path d="M360 392 L400 392" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M348 322 L388 322" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M348 368 L388 368" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M348 414 L388 414" stroke="#0b0b0b" stroke-width="2" marker-end="url(#ar)"/>
 
-  <rect x="408" y="278" width="250" height="44" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="424" y="306" font-size="14" font-weight="600" fill="#0b0b0b">classify · forecast · rank</text>
+  <rect x="396" y="300" width="260" height="44" rx="8" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="412" y="328" font-size="14" font-weight="700" fill="#0b0b0b">classify · forecast · rank</text>
 
-  <rect x="408" y="324" width="250" height="44" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="424" y="352" font-size="14" font-weight="600" fill="#0b0b0b">rewrite (SQL repair patches)</text>
+  <rect x="396" y="346" width="260" height="44" rx="8" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="412" y="374" font-size="14" font-weight="700" fill="#0b0b0b">rewrite (SQL repair patches)</text>
 
-  <rect x="408" y="370" width="250" height="44" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="424" y="398" font-size="14" font-weight="600" fill="#0b0b0b">gate · notify · report</text>
+  <rect x="396" y="392" width="260" height="44" rx="8" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="412" y="420" font-size="14" font-weight="700" fill="#0b0b0b">gate · notify · report</text>
 
-  <!-- Callout -->
-  <rect x="690" y="278" width="420" height="136" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="710" y="308" font-size="14" fill="#52514e">Same binder for classify and repair —</text>
-  <text x="710" y="330" font-size="14" fill="#52514e">no second resolver that can drift.</text>
-  <text x="710" y="358" font-size="14" fill="#52514e">A patch ships only when this binder</text>
-  <text x="710" y="380" font-size="14" fill="#52514e">bound the column to the subject table.</text>
+  <rect x="688" y="300" width="440" height="136" rx="10" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="708" y="330" font-size="14" fill="#0b0b0b">Same binder for classify and repair —</text>
+  <text x="708" y="352" font-size="14" fill="#0b0b0b">no second resolver that can drift.</text>
+  <text x="708" y="380" font-size="14" fill="#0b0b0b">A patch ships only when this binder</text>
+  <text x="708" y="402" font-size="14" fill="#0b0b0b">bound the column to the subject table.</text>
 
-  <!-- ========== 3. CATALOG PROTOCOL ========== -->
-  <text x="60" y="482" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">3 - CATALOG ACCESS</text>
-  <text x="210" y="482" font-size="12" fill="#898781">one protocol; swap the backend, core unchanged</text>
+  <!-- core -> catalog -->
+  <path d="M600 474 L600 498" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
+  <text x="720" y="492" font-size="11" font-weight="600" fill="#2a78d6">live / MCP path only</text>
 
-  <!-- Core bottom (460) -> protocol top (498); label clear of the shaft -->
-  <path d="M600 460 L600 496" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
-  <text x="720" y="482" font-size="11" fill="#2a78d6">live / MCP path only</text>
+  <!-- ===== BAND 3: CATALOG ===== -->
+  <rect x="48" y="500" width="1104" height="168" rx="12" fill="#f0f6fc" stroke="#2a78d6" stroke-width="2"/>
+  <text x="68" y="524" font-size="13" font-weight="700" fill="#2a78d6" letter-spacing="0.4">3  ·  CATALOG ACCESS</text>
+  <text x="240" y="524" font-size="13" fill="#0b0b0b">one protocol; swap the backend, core unchanged</text>
 
-  <!-- Protocol bar spanning the three backends -->
-  <rect x="60" y="498" width="1080" height="36" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="80" y="522" font-size="15" font-weight="700" fill="#0b0b0b">CatalogClient protocol</text>
-  <text x="320" y="522" font-size="13" fill="#52514e">reads: schema · lineage · queries · owners   |   writes: tag · description · assertion</text>
+  <rect x="68" y="538" width="1064" height="34" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="86" y="560" font-size="14" font-weight="700" fill="#0b0b0b">CatalogClient protocol</text>
+  <text x="310" y="560" font-size="12" fill="#0b0b0b">reads: schema · lineage · queries · owners  |  writes: tag · description · assertion</text>
 
-  <!-- Three implementors hanging from the protocol -->
-  <path d="M230 534 L230 552" stroke="#2a78d6" stroke-width="2" marker-end="url(#arb)"/>
-  <path d="M600 534 L600 552" stroke="#2a78d6" stroke-width="2" marker-end="url(#arb)"/>
-  <path d="M970 534 L970 552" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M228 572 L228 586" stroke="#2a78d6" stroke-width="2" marker-end="url(#arb)"/>
+  <path d="M600 572 L600 586" stroke="#2a78d6" stroke-width="2" marker-end="url(#arb)"/>
+  <path d="M970 572 L970 586" stroke="#52514e" stroke-width="2" marker-end="url(#ar)"/>
 
-  <rect x="60" y="556" width="340" height="58" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="80" y="580" font-size="14" font-weight="700" fill="#0b0b0b">Kit (default)</text>
-  <text x="80" y="600" font-size="12" fill="#52514e">Agent Context Kit — live reads/writes</text>
+  <rect x="68" y="590" width="320" height="60" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="86" y="614" font-size="14" font-weight="700" fill="#0b0b0b">Kit (default)</text>
+  <text x="86" y="634" font-size="12" fill="#0b0b0b">Agent Context Kit — live reads/writes</text>
 
-  <rect x="430" y="556" width="340" height="58" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="450" y="580" font-size="14" font-weight="700" fill="#0b0b0b">GraphQL (fallback)</text>
-  <text x="450" y="600" font-size="12" fill="#52514e">+ assertion write (OSS MCP gap #151)</text>
+  <rect x="408" y="590" width="340" height="60" rx="8" fill="#ffffff" stroke="#5b9bd5" stroke-width="1.5"/>
+  <text x="426" y="614" font-size="14" font-weight="700" fill="#0b0b0b">GraphQL (fallback)</text>
+  <text x="426" y="634" font-size="12" fill="#0b0b0b">+ assertion write (OSS MCP gap #151)</text>
 
-  <rect x="800" y="556" width="340" height="58" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="820" y="580" font-size="14" font-weight="700" fill="#0b0b0b">Fake (tests / offline eval)</text>
-  <text x="820" y="600" font-size="12" fill="#52514e">in-memory — never talks to DataHub</text>
+  <rect x="768" y="590" width="364" height="60" rx="8" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="786" y="614" font-size="14" font-weight="700" fill="#0b0b0b">Fake (tests / offline eval)</text>
+  <text x="786" y="634" font-size="12" fill="#0b0b0b">in-memory — never talks to DataHub</text>
 
-  <!-- Only Kit + GraphQL reach DataHub -->
-  <path d="M230 614 L230 640" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
-  <path d="M600 614 L600 640" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
-  <text x="970" y="630" font-size="11" fill="#898781" text-anchor="middle">no DataHub link</text>
+  <!-- Kit + GraphQL -> DataHub; Fake no link -->
+  <path d="M228 650 L228 672" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
+  <path d="M578 650 L578 672" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
+  <text x="950" y="666" font-size="11" font-weight="600" fill="#52514e" text-anchor="middle">no DataHub link</text>
 
-  <!-- ========== 4. DATAHUB ========== -->
-  <rect x="60" y="644" width="720" height="86" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="80" y="670" font-size="12" font-weight="600" fill="#2a78d6" letter-spacing="0.6">4 - DATAHUB (external catalog)</text>
-  <text x="80" y="696" font-size="13" fill="#0b0b0b"><tspan font-weight="700">Reads</tspan> history · lineage · schema · owners</text>
-  <text x="80" y="716" font-size="13" fill="#0b0b0b"><tspan font-weight="700">Writes</tspan> tag + description (DataHub MCP) · assertion (GraphQL)</text>
+  <!-- ===== BAND 4: DATAHUB + EVAL NOTE ===== -->
+  <rect x="48" y="674" width="700" height="108" rx="12" fill="#e8f1fa" stroke="#2a78d6" stroke-width="2"/>
+  <text x="68" y="698" font-size="13" font-weight="700" fill="#2a78d6" letter-spacing="0.4">4  ·  DATAHUB</text>
+  <text x="190" y="698" font-size="13" fill="#0b0b0b">external catalog</text>
+  <text x="68" y="728" font-size="13" fill="#0b0b0b"><tspan font-weight="700">Reads</tspan>  history · lineage · schema · owners</text>
+  <text x="68" y="752" font-size="13" fill="#0b0b0b"><tspan font-weight="700">Writes</tspan>  tag + description (DataHub MCP) · assertion (GraphQL)</text>
 
-  <!-- Side note for Fake/eval -->
-  <rect x="800" y="644" width="340" height="86" rx="10" fill="#f4f4f1" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="820" y="674" font-size="13" font-weight="700" fill="#0b0b0b">Why eval needs no DataHub</text>
-  <text x="820" y="698" font-size="12" fill="#52514e">Harness + Fake backend hit the core</text>
-  <text x="820" y="716" font-size="12" fill="#52514e">only — that is why 0.97 is reproducible offline.</text>
+  <rect x="768" y="674" width="384" height="108" rx="12" fill="#f4f4f1" stroke="#a8a59d" stroke-width="1.5"/>
+  <text x="788" y="704" font-size="13" font-weight="700" fill="#0b0b0b">Why eval needs no DataHub</text>
+  <text x="788" y="730" font-size="12" fill="#0b0b0b">Harness + Fake hit the core only —</text>
+  <text x="788" y="750" font-size="12" fill="#0b0b0b">that is why 0.97 is reproducible offline.</text>
 </svg>
