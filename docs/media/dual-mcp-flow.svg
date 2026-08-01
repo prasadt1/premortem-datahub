@@ -44,8 +44,8 @@
 
   <path d="M880 496 L880 536" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
   <rect x="620" y="544" width="520" height="72" rx="10" fill="#f4f4f1" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="648" y="574" font-size="15" font-weight="700" fill="#0b0b0b">sqlglot classifier - no catalog, no LLM</text>
-  <text x="648" y="598" font-size="15" fill="#52514e">The classifier underneath touches no catalog and calls no model.</text>
+  <text x="648" y="574" font-size="15" font-weight="700" fill="#0b0b0b">sqlglot classifier — catalog-agnostic, no LLM</text>
+  <text x="648" y="598" font-size="15" fill="#52514e">Binder is pure; DataHub context arrives via CatalogClient.</text>
 
   <path d="M616 430 L584 430" stroke="#2a78d6" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arb)"/>
   <text x="612" y="410" font-size="14" font-weight="600" fill="#2a78d6" text-anchor="end">write_payload</text>

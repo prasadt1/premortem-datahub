@@ -60,7 +60,7 @@
   <!-- ===== BAND 2: CORE (orange = Premortem product) ===== -->
   <rect x="48" y="244" width="1104" height="220" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2.5"/>
   <text x="68" y="268" font-size="13" font-weight="700" fill="#eb6834" letter-spacing="0.4">2  ·  CORE LIBRARY</text>
-  <text x="220" y="268" font-size="13" fill="#0b0b0b">pure Python · no DataHub import · no LLM import</text>
+  <text x="220" y="268" font-size="13" fill="#0b0b0b">pure Python · catalog-agnostic · composes with DataHub · no LLM</text>
 
   <rect x="68" y="284" width="280" height="158" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-width="2"/>
   <text x="88" y="308" font-size="11" font-weight="700" fill="#52514e" letter-spacing="0.5">THE ONE BINDER</text>
@@ -115,12 +115,12 @@
 
   <rect x="768" y="602" width="364" height="44" rx="8" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
   <text x="786" y="622" font-size="13" font-weight="700" fill="#0b0b0b">Fake (tests / offline eval)</text>
-  <text x="786" y="638" font-size="11" fill="#0b0b0b">in-memory — never talks to DataHub</text>
+  <text x="786" y="638" font-size="11" fill="#0b0b0b">in-memory — for tests and offline measurement</text>
 
   <!-- gap between 3 and 4; Kit/GraphQL reach DataHub across it -->
   <path d="M228 646 L228 678" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
   <path d="M578 646 L578 678" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
-  <text x="950" y="672" font-size="11" font-weight="600" fill="#52514e" text-anchor="middle">no DataHub link</text>
+  <text x="950" y="672" font-size="11" font-weight="600" fill="#52514e" text-anchor="middle">offline — no live catalog</text>
 
   <!-- ===== BAND 4: DATAHUB (blue = external platform) ===== -->
   <rect x="48" y="680" width="700" height="100" rx="12" fill="#e8f1fa" stroke="#2a78d6" stroke-width="2.5"/>
@@ -130,7 +130,7 @@
   <text x="68" y="754" font-size="13" fill="#0b0b0b"><tspan font-weight="700">Writes</tspan>  tag + description (DataHub MCP) · assertion (GraphQL)</text>
 
   <rect x="768" y="680" width="384" height="100" rx="12" fill="#f4f4f1" stroke="#a8a59d" stroke-width="1.5"/>
-  <text x="788" y="708" font-size="13" font-weight="700" fill="#0b0b0b">Why eval needs no DataHub</text>
+  <text x="788" y="708" font-size="13" font-weight="700" fill="#0b0b0b">Why the frozen eval runs offline</text>
   <text x="788" y="734" font-size="12" fill="#0b0b0b">Harness + Fake exercise the core only —</text>
-  <text x="788" y="754" font-size="12" fill="#0b0b0b">the frozen accuracy numbers need no catalog.</text>
+  <text x="788" y="754" font-size="12" fill="#0b0b0b">accuracy is measured without a live catalog.</text>
 </svg>

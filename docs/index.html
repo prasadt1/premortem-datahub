@@ -475,7 +475,7 @@
         </div>
       </div>
       <div class="reproduce">
-        <p><strong>Reproduce in under a minute, no DataHub required.</strong></p>
+        <p><strong>Reproduce in under a minute — offline, no live catalog required.</strong></p>
         <pre><code>pip install -e ".[dev]"
 pytest -q
 python eval/run_eval.py</code></pre>
@@ -729,9 +729,10 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       <figure>
         <img src="media/dual-mcp-flow.png" width="1800" height="1200" alt="One agent session with two MCP servers: DataHub supplies schema, lineage and query history; Premortem returns forecast, repairs, and write_payload; assertion lands via GraphQL (#151)." />
         <figcaption>
-          DataHub supplies the context. The classifier underneath touches no catalog and
-          calls no model. Premortem’s only direct catalog write is the GraphQL assertion
-          (#151); everything else flows through DataHub’s own tools.
+          DataHub supplies the context. The binder is catalog-agnostic (no LLM);
+          DataHub connects through CatalogClient. Premortem’s only direct catalog
+          write is the GraphQL assertion (#151); everything else flows through
+          DataHub’s own tools.
         </figcaption>
       </figure>
     </section>
@@ -739,17 +740,18 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
     <section aria-labelledby="architecture">
       <h2 id="architecture">Architecture</h2>
       <p>
-        Layered architecture — a pure classifier core (no DataHub, no LLM), one binder
-        shared by classify and repair, catalog access behind one
-        <code>CatalogClient</code> protocol with three backends, DataHub at the edge.
+        Layered architecture — a catalog-agnostic binder core (no LLM) that
+        <strong>composes with DataHub</strong> via one
+        <code>CatalogClient</code> protocol (Kit / GraphQL / Fake). Classify and
+        repair share the same binder.
       </p>
       <figure>
-        <img src="media/architecture.png" width="1800" height="1200" alt="Layered architecture: CLI, Premortem MCP, and eval harness over a pure core library with one binder; CatalogClient backends Kit, GraphQL, Fake; DataHub reads and writes at the edge." />
+        <img src="media/architecture.png" width="1800" height="1200" alt="Layered architecture: CLI, Premortem MCP, and eval harness over a catalog-agnostic core; CatalogClient backends Kit, GraphQL, Fake; DataHub at the edge." />
         <figcaption>
-          The classifier imports no DataHub and no LLM — that is why
-          <code>python eval/run_eval.py</code> needs no infrastructure. Classify and
-          repair share <code>analyze_bindings</code>; swap the catalog backend and the
-          core never changes.
+          The binder does not import DataHub or an LLM — DataHub plugs in at the
+          edge — so <code>python eval/run_eval.py</code> can measure the core
+          offline. Classify and repair share <code>analyze_bindings</code>; swap
+          the catalog backend and the core never changes.
         </figcaption>
       </figure>
     </section>

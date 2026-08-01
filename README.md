@@ -55,7 +55,7 @@ Sample diffs: [`examples/patches/`](examples/patches/). Live / MCP: `repairs[]` 
 
 ## Architecture
 
-Layered architecture — a pure classifier core (no DataHub, no LLM), one binder shared by classify and repair, catalog access behind one `CatalogClient` protocol (Kit / GraphQL / Fake), DataHub at the edge.
+Layered architecture — a catalog-agnostic binder core (no LLM) that **composes with DataHub** via one `CatalogClient` protocol (Kit / GraphQL / Fake). Classify and repair share the same binder.
 
 ![Architecture — pure core, catalog protocol, DataHub at the edge](docs/media/architecture.png)
 

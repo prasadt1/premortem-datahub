@@ -66,5 +66,5 @@
   <text x="378" y="658" font-size="16" font-weight="700" fill="#0ca30c">0.00 — zero false alarms</text>
 
   <text x="60" y="760" font-size="16" fill="#52514e">Published with the misses left in: one classifier error stays unfixed, and my own adjudicator measured</text>
-  <text x="60" y="782" font-size="16" fill="#52514e">net-negative and ships disabled. Reproduce in under a minute — no DataHub required.</text>
+  <text x="60" y="782" font-size="16" fill="#52514e">net-negative and ships disabled. Reproduce offline in under a minute — no live catalog required.</text>
 </svg>

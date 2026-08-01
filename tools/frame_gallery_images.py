@@ -61,7 +61,7 @@ SLIDES: list[tuple[str, str, str]] = [
     (
         "architecture",
         "How it is wired",
-        "Pure classifier core (no DataHub, no LLM), one binder shared by classify and repair, CatalogClient ×3, DataHub at the edge.",
+        "Catalog-agnostic binder core (no LLM) that composes with DataHub via CatalogClient — Kit, GraphQL, or Fake. One binder shared by classify and repair.",
     ),
     (
         "dual-mcp-flow",
