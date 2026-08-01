@@ -17,10 +17,10 @@
     <text x="82" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">premortem · premortem gate</text>
   </g>
   <g>
-    <rect x="430" y="124" width="340" height="100" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-    <text x="452" y="150" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP server</text>
+    <rect x="430" y="118" width="340" height="112" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+    <text x="452" y="148" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP server</text>
     <text x="452" y="172" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">rehearse_schema_change</text>
-    <text x="452" y="190" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">explain_finding</text>
+    <text x="452" y="192" font-size="13" font-family="ui-monospace, Menlo, monospace" fill="#52514e">explain_finding</text>
   </g>
   <g>
     <rect x="800" y="136" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
