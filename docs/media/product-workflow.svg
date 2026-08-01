@@ -6,12 +6,11 @@
     </marker>
   </defs>
 
-  <text x="60" y="52" font-size="28" font-weight="700" fill="#0b0b0b">The full product — not only rehearse and write-back</text>
+  <text x="60" y="52" font-size="28" font-weight="700" fill="#0b0b0b">The full product - not only rehearse and write-back</text>
   <text x="60" y="84" font-size="17" fill="#52514e">Same binder decisions drive patches, the merge gate, who to warn, and the catalog receipt.</text>
 
-  <!-- Input: forecast -->
   <rect x="60" y="110" width="1080" height="72" rx="12" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-  <text x="88" y="142" font-size="12" font-weight="600" fill="#eb6834" letter-spacing="0.6">INPUT — REHEARSE</text>
+  <text x="88" y="142" font-size="12" font-weight="600" fill="#eb6834" letter-spacing="0.6">INPUT - REHEARSE</text>
   <text x="88" y="168" font-size="18" font-weight="700" fill="#0b0b0b">Per-query forecast</text>
   <text x="320" y="168" font-size="16" font-weight="700" fill="#d03b3b">HARD</text>
   <text x="390" y="168" font-size="16" font-weight="700" fill="#fab219">SOFT</text>
@@ -21,15 +20,14 @@
 
   <path d="M600 182 L600 214" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
 
-  <!-- Four verbs -->
   <rect x="60" y="222" width="250" height="320" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="80" y="256" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">1 — REPAIR</text>
+  <text x="80" y="256" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">1 - REPAIR</text>
   <text x="80" y="290" font-size="20" font-weight="700" fill="#0b0b0b">SQL patches</text>
   <text x="80" y="324" font-size="15" fill="#52514e">HARD / SOFT that bind</text>
-  <text x="80" y="346" font-size="15" fill="#52514e">to the subject � emit a</text>
+  <text x="80" y="346" font-size="15" fill="#52514e">to the subject -&gt; emit a</text>
   <text x="80" y="368" font-size="15" fill="#52514e">unified diff.</text>
   <text x="80" y="404" font-size="15" fill="#52514e">CLEARED, UNKNOWN,</text>
-  <text x="80" y="426" font-size="15" fill="#52514e">SELECT *, ambiguous �</text>
+  <text x="80" y="426" font-size="15" fill="#52514e">SELECT *, ambiguous -&gt;</text>
   <text x="80" y="448" font-size="15" font-weight="700" fill="#0b0b0b">refuse. No guessing.</text>
   <text x="80" y="488" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">--emit-patches</text>
   <text x="80" y="514" font-size="14" fill="#52514e">Round-trip 22/22</text>
@@ -37,7 +35,7 @@
   <path d="M318 382 L342 382" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
 
   <rect x="350" y="222" width="250" height="320" rx="12" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="370" y="256" font-size="12" font-weight="600" fill="#2a78d6" letter-spacing="0.6">2 — GATE</text>
+  <text x="370" y="256" font-size="12" font-weight="600" fill="#2a78d6" letter-spacing="0.6">2 - GATE</text>
   <text x="370" y="290" font-size="20" font-weight="700" fill="#0b0b0b">CI merge gate</text>
   <text x="370" y="324" font-size="15" fill="#52514e">premortem gate fails</text>
   <text x="370" y="346" font-size="15" fill="#52514e">the job when findings</text>
@@ -51,12 +49,12 @@
   <path d="M608 382 L632 382" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
 
   <rect x="640" y="222" width="250" height="320" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="660" y="256" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">3 — NOTIFY</text>
+  <text x="660" y="256" font-size="12" font-weight="600" fill="#898781" letter-spacing="0.6">3 - NOTIFY</text>
   <text x="660" y="290" font-size="20" font-weight="700" fill="#0b0b0b">Who to warn</text>
   <text x="660" y="324" font-size="15" fill="#52514e">Owners from the</text>
   <text x="660" y="346" font-size="15" fill="#52514e">catalog (get_owners),</text>
   <text x="660" y="368" font-size="15" fill="#52514e">listed with the</text>
-  <text x="660" y="390" font-size="15" fill="#52514e">forecast — not only</text>
+  <text x="660" y="390" font-size="15" fill="#52514e">forecast - not only</text>
   <text x="660" y="412" font-size="15" fill="#52514e">what breaks.</text>
   <text x="660" y="448" font-size="15" fill="#52514e">Missing ownership is</text>
   <text x="660" y="470" font-size="15" font-weight="700" fill="#0b0b0b">an honest empty list.</text>
@@ -65,7 +63,7 @@
   <path d="M898 382 L922 382" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
 
   <rect x="930" y="222" width="210" height="320" rx="12" fill="#ffffff" stroke="#0ca30c" stroke-width="2"/>
-  <text x="948" y="256" font-size="12" font-weight="600" fill="#0ca30c" letter-spacing="0.6">4 — WRITE-BACK</text>
+  <text x="948" y="256" font-size="12" font-weight="600" fill="#0ca30c" letter-spacing="0.6">4 - WRITE-BACK</text>
   <text x="948" y="290" font-size="18" font-weight="700" fill="#0b0b0b">Catalog receipt</text>
   <text x="948" y="324" font-size="15" fill="#52514e">Quality assertion</text>
   <text x="948" y="346" font-size="15" fill="#52514e">+ premortem_forecast</text>
@@ -76,13 +74,10 @@
   <text x="948" y="470" font-size="15" fill="#52514e">inherits it.</text>
   <text x="948" y="514" font-size="13" fill="#52514e">MCP tag/desc; GQL assert</text>
 
-  <!-- Footnote -->
-  <rect x="60" y="570" width="1080" height="160" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="88" y="610" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">HONESTY — SAME ETHIC EVERYWHERE</text>
-  <text x="88" y="644" font-size="16" fill="#52514e">If binding is unconfident (alias shadowing, derived-table aliases, unparseable SQL), the product</text>
-  <text x="88" y="670" font-size="16" fill="#0b0b0b" font-weight="700">refuses instead of guessing</text>
-  <text x="420" y="670" font-size="16" fill="#52514e"> —  UNKNOWN, no patch, gate fails by default.</text>
-  <text x="88" y="704" font-size="15" fill="#52514e">Frozen eval stays 0.97 / 1.00 / 0.00; those SQL shapes are covered in tests/ and disclosed as corpus blind spots.</text>
-
-  <text x="60" y="772" font-size="15" fill="#52514e">Companion to customer-journey.png (persona path). Upload both in the Devpost gallery.</text>
+  <rect x="60" y="570" width="1080" height="180" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+  <text x="88" y="610" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">HONESTY - SAME ETHIC EVERYWHERE</text>
+  <text x="88" y="648" font-size="16" fill="#52514e">If binding is unconfident (alias shadowing, derived-table aliases, unparseable SQL), the product</text>
+  <text x="88" y="678" font-size="16" font-weight="700" fill="#0b0b0b">refuses instead of guessing</text>
+  <text x="420" y="678" font-size="16" fill="#52514e"> - UNKNOWN, no patch, gate fails by default.</text>
+  <text x="88" y="712" font-size="15" fill="#52514e">Frozen eval stays 0.97 / 1.00 / 0.00; those SQL shapes are covered in tests/ and disclosed as corpus blind spots.</text>
 </svg>

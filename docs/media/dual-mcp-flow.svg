@@ -9,59 +9,53 @@
     </marker>
   </defs>
 
-  <text x="60" y="60" font-size="30" font-weight="700" fill="#0b0b0b">Two MCP servers, one agent session</text>
-  <text x="60" y="94" font-size="18" fill="#52514e">DataHub supplies the context and receives the result. Premortem only rehearses.</text>
+  <text x="60" y="56" font-size="28" font-weight="700" fill="#0b0b0b">Two MCP servers, one agent session</text>
+  <text x="60" y="88" font-size="17" fill="#52514e">DataHub supplies context. Premortem returns forecast, repairs, and write_payload.</text>
 
-  <!-- agent -->
-  <rect x="60" y="132" width="1080" height="96" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="88" y="166" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">HOST AGENT — CLAUDE CODE</text>
-  <text x="88" y="200" font-size="19" fill="#0b0b0b">“Rehearse renaming <tspan font-family="ui-monospace, Menlo, monospace" font-weight="700">order_status</tspan> → <tspan font-family="ui-monospace, Menlo, monospace" font-weight="700">order_state</tspan> on ORDER_HISTORY.”</text>
+  <rect x="60" y="116" width="1080" height="88" rx="12" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+  <text x="88" y="148" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">HOST AGENT - CLAUDE CODE</text>
+  <text x="88" y="180" font-size="18" fill="#0b0b0b">"Rehearse renaming <tspan font-family="ui-monospace, Menlo, monospace" font-weight="700">order_status</tspan> -&gt; <tspan font-family="ui-monospace, Menlo, monospace" font-weight="700">order_state</tspan> on ORDER_HISTORY."</text>
 
-  <!-- arrows down -->
-  <path d="M330 232 L330 292" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <path d="M870 232 L870 292" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="344" y="268" font-size="14" fill="#52514e">① read context</text>
-  <text x="884" y="268" font-size="14" fill="#52514e">② rehearse</text>
+  <path d="M330 208 L330 268" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
+  <path d="M870 208 L870 268" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="344" y="244" font-size="14" fill="#52514e">1 read context</text>
+  <text x="884" y="244" font-size="14" fill="#52514e">2 rehearse</text>
 
-  <!-- datahub mcp -->
-  <rect x="60" y="300" width="520" height="212" rx="12" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="88" y="334" font-size="13" font-weight="600" fill="#2a78d6" letter-spacing="0.6">DATAHUB — OFFICIAL MCP SERVER</text>
-  <text x="88" y="366" font-size="21" font-weight="700" fill="#0b0b0b">Shipped by DataHub</text>
+  <rect x="60" y="276" width="520" height="220" rx="12" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="88" y="310" font-size="13" font-weight="600" fill="#2a78d6" letter-spacing="0.6">DATAHUB - OFFICIAL MCP SERVER</text>
+  <text x="88" y="342" font-size="20" font-weight="700" fill="#0b0b0b">Shipped by DataHub</text>
   <g font-size="16" font-family="ui-monospace, Menlo, monospace" fill="#52514e">
-    <text x="88" y="404">list_schema_fields</text>
-    <text x="88" y="432">get_lineage</text>
-    <text x="88" y="460">get_dataset_queries</text>
-    <text x="88" y="488">add_tags · update_description</text>
+    <text x="88" y="380">list_schema_fields</text>
+    <text x="88" y="408">get_lineage</text>
+    <text x="88" y="436">get_dataset_queries</text>
+    <text x="88" y="464">add_tags · update_description</text>
   </g>
 
-  <!-- premortem mcp -->
-  <rect x="620" y="300" width="520" height="212" rx="12" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-  <text x="648" y="334" font-size="13" font-weight="600" fill="#eb6834" letter-spacing="0.6">PREMORTEM — MCP SERVER</text>
-  <text x="648" y="366" font-size="21" font-weight="700" fill="#0b0b0b">The rehearsal, and nothing else</text>
-  <g font-size="16" font-family="ui-monospace, Menlo, monospace" fill="#52514e">
-    <text x="648" y="404" font-weight="700" fill="#0b0b0b">rehearse_schema_change</text>
-    <text x="648" y="432">  → verdict per query</text>
-    <text x="648" y="460">  → write_payload</text>
-    <text x="648" y="488">explain_finding</text>
+  <rect x="620" y="276" width="520" height="220" rx="12" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+  <text x="648" y="310" font-size="13" font-weight="600" fill="#eb6834" letter-spacing="0.6">PREMORTEM - MCP SERVER</text>
+  <text x="648" y="342" font-size="20" font-weight="700" fill="#0b0b0b">Rehearse, repair, write_payload</text>
+  <g font-size="15" font-family="ui-monospace, Menlo, monospace" fill="#52514e">
+    <text x="648" y="378" font-weight="700" fill="#0b0b0b">rehearse_schema_change</text>
+    <text x="648" y="404">  -&gt; verdict per query</text>
+    <text x="648" y="428">  -&gt; repairs (HARD/SOFT patch; else refuse)</text>
+    <text x="648" y="452">  -&gt; write_payload</text>
+    <text x="648" y="476">explain_finding</text>
   </g>
 
-  <!-- classifier under premortem -->
-  <path d="M880 512 L880 556" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
-  <rect x="620" y="564" width="520" height="72" rx="10" fill="#f4f4f1" stroke="#e1e0d9" stroke-width="1.5"/>
-  <text x="648" y="594" font-size="15" font-weight="700" fill="#0b0b0b">sqlglot classifier — no catalog, no LLM</text>
-  <text x="648" y="618" font-size="15" fill="#52514e">parse → bind each reference to a table → clause verdict</text>
+  <path d="M880 496 L880 536" stroke="#898781" stroke-width="2" marker-end="url(#ar)"/>
+  <rect x="620" y="544" width="520" height="72" rx="10" fill="#f4f4f1" stroke="#e1e0d9" stroke-width="1.5"/>
+  <text x="648" y="574" font-size="15" font-weight="700" fill="#0b0b0b">sqlglot classifier - no catalog, no LLM</text>
+  <text x="648" y="598" font-size="15" fill="#52514e">The classifier underneath touches no catalog and calls no model.</text>
 
-  <!-- payload handed from Premortem back to DataHub's mutation tools -->
-  <path d="M616 462 L584 462" stroke="#2a78d6" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arb)"/>
-  <text x="612" y="442" font-size="14" font-weight="600" fill="#2a78d6" text-anchor="end">write_payload</text>
+  <path d="M616 430 L584 430" stroke="#2a78d6" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arb)"/>
+  <text x="612" y="410" font-size="14" font-weight="600" fill="#2a78d6" text-anchor="end">write_payload</text>
 
-  <path d="M330 512 L330 700" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
-  <text x="60" y="672" font-size="14" font-weight="600" fill="#2a78d6">③ host applies write_payload as-is</text>
+  <path d="M330 496 L330 640" stroke="#2a78d6" stroke-width="2.5" marker-end="url(#arb)"/>
+  <text x="60" y="620" font-size="14" font-weight="600" fill="#2a78d6">3 host applies write_payload as-is</text>
 
-  <!-- catalog -->
-  <rect x="60" y="708" width="1080" height="64" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-  <text x="88" y="748" font-size="18" fill="#0b0b0b"><tspan font-weight="700">DataHub catalog</tspan>  —  custom assertion on the Quality tab  ·  <tspan font-family="ui-monospace, Menlo, monospace">premortem_forecast</tspan> tag  ·  description</text>
+  <rect x="60" y="648" width="1080" height="56" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="88" y="684" font-size="17" fill="#0b0b0b"><tspan font-weight="700">DataHub catalog</tspan>  -  custom assertion on Quality  ·  <tspan font-family="ui-monospace, Menlo, monospace">premortem_forecast</tspan> tag  ·  description</text>
 
-  <text x="620" y="672" font-size="15" fill="#52514e">No recomputing, no paraphrasing — Premortem never</text>
-  <text x="620" y="694" font-size="15" fill="#52514e">writes to the catalog itself.</text>
+  <text x="60" y="746" font-size="15" fill="#52514e">Premortem's only direct catalog write is the GraphQL assertion - the OSS MCP gap I filed as #151;</text>
+  <text x="60" y="770" font-size="15" fill="#52514e">everything else flows through DataHub's own tools. No recomputing, no paraphrasing the forecast.</text>
 </svg>

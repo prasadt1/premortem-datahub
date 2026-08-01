@@ -5,7 +5,9 @@ Harness is an adapter; this file records measurement against that freeze.
 **Do not edit `eval/labels.json`.** Named limitations stay here.
 
 Measured on binder commit `94949ba` (+ catalog facade thereafter does not change
-classifier numbers). Re-run: `python eval/run_eval.py`.
+classifier numbers). Headline metrics **re-verified unchanged** after Tier-1
+refuse-instead-of-guess (no corpus query uses the newly refused shapes).
+Re-run: `python eval/run_eval.py`.
 
 **Discipline:** the binder was developed against `tests/` fixtures; the frozen forty
 queries were never tuning targets. Measurement only: `python eval/run_eval.py`.

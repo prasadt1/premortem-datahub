@@ -40,6 +40,19 @@ premortem gate \
 
 Exit **0** when clean; **1** when any finding meets `--fail-on` (default `hard,unknown` so unparseable SQL cannot silent-pass); **2** if `--fail-on hard` alone would green-light unparseable input. Worked workflow: [`examples/ci/premortem-gate.yml`](examples/ci/premortem-gate.yml). Live: add `--live` (and drop `--queries-dir`) against your GMS.
 
+## Repair plan
+
+Same binder decisions drive SQL patches. Subject-bound HARD/SOFT → emit a rename diff; CLEARED, UNKNOWN, `SELECT *`, and ambiguous binding → **refuse** (no guessing on production SQL).
+
+```bash
+premortem --queries-dir eval/corpus --rename order_status:order_state \
+  --subject-table order_history --tables-json eval/schema.json \
+  --emit-patches /tmp/patches
+python eval/run_repair_roundtrip.py   # 22/22 eligible; 18 refused
+```
+
+Sample diffs: [`examples/patches/`](examples/patches/). Live / MCP: `repairs[]` rides with the forecast; owners (who to warn) are listed in the forecast markdown from catalog `get_owners` — missing ownership is an honest empty list.
+
 ## What you get
 
 | Output | Meaning (remediation blast radius) |
