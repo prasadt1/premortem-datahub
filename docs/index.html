@@ -736,6 +736,24 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       </figure>
     </section>
 
+    <section aria-labelledby="architecture">
+      <h2 id="architecture">Architecture</h2>
+      <p>
+        Layered architecture — a pure classifier core (no DataHub, no LLM), one binder
+        shared by classify and repair, catalog access behind one
+        <code>CatalogClient</code> protocol with three backends, DataHub at the edge.
+      </p>
+      <figure>
+        <img src="media/architecture.png" width="1800" height="1200" alt="Layered architecture: CLI, Premortem MCP, and eval harness over a pure core library with one binder; CatalogClient backends Kit, GraphQL, Fake; DataHub reads and writes at the edge." />
+        <figcaption>
+          The classifier imports no DataHub and no LLM — that is why
+          <code>python eval/run_eval.py</code> needs no infrastructure. Classify and
+          repair share <code>analyze_bindings</code>; swap the catalog backend and the
+          core never changes.
+        </figcaption>
+      </figure>
+    </section>
+
     <section aria-labelledby="numbers">
       <h2 id="numbers">The numbers</h2>
       <figure>

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="1200" height="800" fill="#fcfcfb"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#898781"/>
+    </marker>
+  </defs>
+
+  <text x="60" y="54" font-size="28" font-weight="700" fill="#0b0b0b">Architecture — a pure core, everything else a shell around it</text>
+  <text x="60" y="86" font-size="17" fill="#52514e">The classifier imports no DataHub and no LLM. That is why the eval runs with no infrastructure — and why the numbers mean something.</text>
+
+  <!-- Band 1: interfaces -->
+  <text x="60" y="126" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">INTERFACES</text>
+  <g>
+    <rect x="60" y="136" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="82" y="164" font-size="16" font-weight="700" fill="#0b0b0b">CLI</text>
+    <text x="82" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">premortem · premortem gate</text>
+  </g>
+  <g>
+    <rect x="430" y="136" width="340" height="66" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
+    <text x="452" y="164" font-size="16" font-weight="700" fill="#0b0b0b">Premortem MCP server</text>
+    <text x="452" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">rehearse_schema_change · explain_finding</text>
+  </g>
+  <g>
+    <rect x="800" y="136" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="822" y="164" font-size="16" font-weight="700" fill="#0b0b0b">Eval harness</text>
+    <text x="822" y="188" font-size="14" font-family="ui-monospace, Menlo, monospace" fill="#52514e">run_eval · run_repair_roundtrip</text>
+  </g>
+
+  <path d="M600 210 L600 236" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Band 2: core library (highlighted) -->
+  <rect x="60" y="244" width="1080" height="212" rx="12" fill="#fbf6f2" stroke="#eb6834" stroke-width="2"/>
+  <text x="82" y="274" font-size="13" font-weight="700" fill="#eb6834" letter-spacing="0.6">CORE LIBRARY — pure Python · no DataHub · no LLM</text>
+
+  <!-- the single binder -->
+  <rect x="82" y="292" width="300" height="146" rx="10" fill="#ffffff" stroke="#0b0b0b" stroke-width="2"/>
+  <text x="102" y="320" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.5">THE ONE BINDER</text>
+  <text x="102" y="346" font-size="17" font-weight="700" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">analyze_bindings</text>
+  <text x="102" y="372" font-size="14" fill="#52514e">parse → resolve each column</text>
+  <text x="102" y="392" font-size="14" fill="#52514e">to a real table → clause verdict</text>
+  <text x="102" y="418" font-size="13" fill="#eb6834" font-weight="600">unconfident → refuse (UNKNOWN)</text>
+
+  <!-- consumers fan out from the binder -->
+  <path d="M382 365 L410 365" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
+  <g font-size="15" fill="#0b0b0b">
+    <rect x="418" y="300" width="220" height="40" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="438" y="325" font-weight="600">classify · forecast · rank</text>
+    <rect x="418" y="348" width="220" height="40" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="438" y="373" font-weight="600">rewrite (repair patches)</text>
+    <rect x="418" y="396" width="220" height="40" rx="8" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="438" y="421" font-weight="600">gate · notify · report</text>
+  </g>
+
+  <!-- callout -->
+  <rect x="668" y="300" width="450" height="136" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+  <text x="690" y="330" font-size="15" fill="#52514e">Classify and repair share <tspan font-weight="700" fill="#0b0b0b">one resolver</tspan> — no</text>
+  <text x="690" y="352" font-size="15" fill="#52514e">second binder to drift out of sync. A repair</text>
+  <text x="690" y="374" font-size="15" fill="#52514e">is only emitted for a reference the binder</text>
+  <text x="690" y="396" font-size="15" fill="#52514e">confidently bound to the subject; every patch</text>
+  <text x="690" y="418" font-size="15" fill="#52514e">is re-checked against the binder before it ships.</text>
+
+  <path d="M600 464 L600 490" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Band 3: catalog access -->
+  <text x="60" y="510" font-size="13" font-weight="600" fill="#898781" letter-spacing="0.6">CATALOG ACCESS — one CatalogClient protocol, three backends</text>
+  <g>
+    <rect x="60" y="520" width="340" height="66" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+    <text x="82" y="548" font-size="16" font-weight="700" fill="#0b0b0b">Agent Context Kit <tspan font-size="13" font-weight="400" fill="#52514e">(default)</tspan></text>
+    <text x="82" y="572" font-size="14" fill="#52514e">live reads + writes</text>
+  </g>
+  <g>
+    <rect x="430" y="520" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="452" y="548" font-size="16" font-weight="700" fill="#0b0b0b">GraphQL <tspan font-size="13" font-weight="400" fill="#52514e">(fallback)</tspan></text>
+    <text x="452" y="572" font-size="14" fill="#52514e">+ the assertion write (#151 gap)</text>
+  </g>
+  <g>
+    <rect x="800" y="520" width="340" height="66" rx="10" fill="#ffffff" stroke="#e1e0d9" stroke-width="1.5"/>
+    <text x="822" y="548" font-size="16" font-weight="700" fill="#0b0b0b">Fake <tspan font-size="13" font-weight="400" fill="#52514e">(tests)</tspan></text>
+    <text x="822" y="572" font-size="14" fill="#52514e">no network — deterministic</text>
+  </g>
+
+  <path d="M600 594 L600 620" stroke="#898781" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Band 4: DataHub -->
+  <rect x="60" y="628" width="1080" height="96" rx="12" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
+  <text x="88" y="658" font-size="13" font-weight="600" fill="#2a78d6" letter-spacing="0.6">DATAHUB</text>
+  <text x="88" y="686" font-size="16" fill="#0b0b0b"><tspan font-weight="700">Reads:</tspan> query history · lineage · schema · owners</text>
+  <text x="88" y="712" font-size="16" fill="#0b0b0b"><tspan font-weight="700">Writes:</tspan> tag + description via DataHub MCP mutations · assertion via GraphQL</text>
+
+  <text x="60" y="762" font-size="15" fill="#52514e">Swap the backend, the core never changes. Point it at the fake and the whole classifier runs — and is measured — with no catalog at all.</text>
+</svg>

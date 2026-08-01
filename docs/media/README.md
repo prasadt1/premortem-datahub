@@ -6,18 +6,19 @@ Diagrams for the README, the Devpost article, and the submission gallery.
 
 | File | What it shows | Used in |
 |---|---|---|
+| `binding-problem` | Two tables carry `order_status`; name matching flags the wrong one, binding clears it | Devpost inline · gallery · README · Pages |
 | `customer-journey` | Persona + core path: PR → Impact Analysis → agent → forecast → write-back | Devpost inline · gallery · Pages |
-| `product-workflow` | Full verbs after forecast: **repair → gate → notify → write-back** (+ refuse ethic) | Devpost gallery (companion to journey) |
-| `binding-problem` | Two tables carry `order_status`; name matching flags the wrong one, binding clears it | Devpost inline · gallery · README |
+| `product-workflow` | Full verbs after forecast: **repair → gate → notify → write-back** (+ refuse ethic) | Devpost gallery |
 | `verdict-taxonomy` | HARD / SOFT / UNKNOWN / CLEARED, each with a real query | Devpost gallery |
-| `dual-mcp-flow` | DataHub's MCP server and Premortem's in one agent session | Devpost gallery |
-| `eval-results` | HARD precision and decoy false-alarm rate vs both baselines | Devpost gallery |
+| `eval-results` | HARD precision and decoy false-alarm rate vs both baselines | Devpost gallery · Pages |
+| `architecture` | Layered: pure classifier core, one binder shared by classify+repair, CatalogClient ×3, DataHub edge | Devpost gallery · Pages · README |
+| `dual-mcp-flow` | DataHub's MCP server and Premortem's in one agent session | Devpost gallery · Pages |
 
 ## Regenerating
 
 ```bash
 cd docs/media
-for f in customer-journey product-workflow binding-problem dual-mcp-flow eval-results verdict-taxonomy; do
+for f in binding-problem customer-journey product-workflow verdict-taxonomy eval-results architecture dual-mcp-flow; do
   rsvg-convert -w 1800 -h 1200 -b '#fcfcfb' "$f.svg" -o "$f.png"
 done
 ```

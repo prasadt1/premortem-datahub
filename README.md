@@ -53,6 +53,12 @@ python eval/run_repair_roundtrip.py   # 22/22 eligible; 18 refused
 
 Sample diffs: [`examples/patches/`](examples/patches/). Live / MCP: `repairs[]` rides with the forecast; owners (who to warn) are listed in the forecast markdown from catalog `get_owners` — missing ownership is an honest empty list.
 
+## Architecture
+
+Layered architecture — a pure classifier core (no DataHub, no LLM), one binder shared by classify and repair, catalog access behind one `CatalogClient` protocol (Kit / GraphQL / Fake), DataHub at the edge.
+
+![Architecture — pure core, catalog protocol, DataHub at the edge](docs/media/architecture.png)
+
 ## What you get
 
 | Output | Meaning (remediation blast radius) |
