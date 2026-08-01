@@ -133,6 +133,12 @@ adversarial review after the freeze. Tier-1 binder policy for them is **refuse
 instead of guess** (UNKNOWN / no patch), not a claim of full resolution.
 `0.97 / 1.00 / 0.00` remains an accurate measurement of what the corpus measures.
 
+## What's next
+
+Per-scope binding via sqlglot's scope resolver — today those shapes are
+**refused rather than guessed** (Tier 1). Elective: convert declines back into
+correct verdicts only when eval and round-trip stay bit-identical.
+
 ## Reproduce
 
 ```bash
