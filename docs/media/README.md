@@ -11,8 +11,9 @@ Diagrams for the README, the Devpost article, and the submission gallery.
 | `product-workflow` | Full verbs after forecast: **repair → gate → notify → write-back** (+ refuse ethic) | Devpost gallery |
 | `verdict-taxonomy` | HARD / SOFT / UNKNOWN / CLEARED, each with a real query | Devpost gallery |
 | `eval-results` | HARD precision and decoy false-alarm rate vs both baselines | Devpost gallery · Pages |
-| `architecture` | Layered: pure classifier core, one binder shared by classify+repair, CatalogClient ×3, DataHub edge | Devpost gallery · Pages · README |
+| `architecture` | Layered: pure classifier core, one binder shared by classify+repair, CatalogClient ×3, DataHub edge | Devpost inline · gallery · Pages · README |
 | `dual-mcp-flow` | DataHub's MCP server and Premortem's in one agent session | Devpost gallery · Pages |
+| `gallery/*.png` | **Framed canvases** for Devpost upload (brand + caption panel) | Devpost gallery only — regenerate with `python tools/frame_gallery_images.py` |
 
 ## Regenerating
 
