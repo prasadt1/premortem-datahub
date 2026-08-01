@@ -16,12 +16,12 @@
   <text x="60" y="58" font-size="14" fill="#52514e">Three ways in. One pure core. Catalog access only when live — behind one protocol, three backends.</text>
 
   <!-- ===== BAND 1: INVOKE ===== -->
-  <rect x="48" y="72" width="1104" height="148" rx="12" fill="#f4f4f1" stroke="#c9c7c0" stroke-width="1.5"/>
-  <text x="68" y="96" font-size="13" font-weight="700" fill="#0b0b0b" letter-spacing="0.4">1  ·  HOW YOU INVOKE IT</text>
-  <text x="280" y="96" font-size="13" fill="#52514e">three equal doors into the same library</text>
+  <rect x="48" y="72" width="1104" height="148" rx="12" fill="#eceae4" stroke="#898781" stroke-width="2"/>
+  <text x="68" y="96" font-size="14" font-weight="700" fill="#0b0b0b" letter-spacing="0.4">1  ·  HOW YOU INVOKE IT</text>
+  <text x="300" y="96" font-size="13" font-weight="600" fill="#52514e">three equal doors into the same library</text>
 
   <!-- CLI card -->
-  <rect x="68" y="112" width="320" height="88" rx="10" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <rect x="68" y="112" width="320" height="92" rx="10" fill="#ffffff" stroke="#52514e" stroke-width="1.5"/>
   <!-- terminal icon -->
   <rect x="86" y="128" width="22" height="18" rx="3" fill="none" stroke="#0b0b0b" stroke-width="1.5"/>
   <path d="M92 134 L98 137 L92 140" fill="none" stroke="#0b0b0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -30,17 +30,17 @@
   <text x="86" y="174" font-size="12" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">premortem · premortem gate</text>
 
   <!-- MCP card (ours — orange) -->
-  <rect x="408" y="112" width="320" height="88" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2.5"/>
+  <rect x="408" y="108" width="320" height="96" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2.5"/>
   <!-- plug icon -->
-  <circle cx="425" cy="133" r="9" fill="none" stroke="#eb6834" stroke-width="1.5"/>
-  <path d="M425 124 L425 118 M420 142 L420 148 M430 142 L430 148" stroke="#eb6834" stroke-width="1.5" stroke-linecap="round"/>
-  <text x="442" y="138" font-size="15" font-weight="700" fill="#0b0b0b">Premortem MCP</text>
-  <text x="442" y="154" font-size="11" font-weight="600" fill="#eb6834">we built this</text>
-  <text x="426" y="176" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">rehearse_schema_change</text>
-  <text x="426" y="190" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">explain_finding</text>
+  <circle cx="425" cy="130" r="9" fill="none" stroke="#eb6834" stroke-width="1.5"/>
+  <path d="M425 121 L425 115 M420 139 L420 145 M430 139 L430 145" stroke="#eb6834" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="442" y="135" font-size="15" font-weight="700" fill="#0b0b0b">Premortem MCP</text>
+  <text x="442" y="151" font-size="11" font-weight="600" fill="#eb6834">we built this</text>
+  <text x="426" y="172" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">rehearse_schema_change</text>
+  <text x="426" y="188" font-size="11" font-family="ui-monospace, Menlo, monospace" fill="#0b0b0b">explain_finding</text>
 
   <!-- Eval card -->
-  <rect x="748" y="112" width="380" height="88" rx="10" fill="#ffffff" stroke="#a8a59d" stroke-width="1.5"/>
+  <rect x="748" y="112" width="380" height="92" rx="10" fill="#ffffff" stroke="#52514e" stroke-width="1.5"/>
   <!-- flask icon -->
   <path d="M768 126 L768 136 L760 150 L784 150 L776 136 L776 126 Z" fill="none" stroke="#0b0b0b" stroke-width="1.5" stroke-linejoin="round"/>
   <line x1="764" y1="126" x2="780" y2="126" stroke="#0b0b0b" stroke-width="1.5" stroke-linecap="round"/>
