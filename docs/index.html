@@ -369,6 +369,44 @@
       color: var(--muted);
     }
     .bw-tables-follow { margin-top: 0.75rem; }
+    .bw-verdict-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 0.15rem 0 0.5rem;
+    }
+    .bw-verdict-row .badge { width: auto; }
+    .bw-verbs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin: 0.15rem 0 0.5rem;
+    }
+    .bw-verb {
+      border: 1px solid var(--line);
+      background: var(--code-bg);
+      padding: 0.55rem 0.65rem;
+      font-size: 0.85rem;
+    }
+    .bw-verb strong {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+    .bw-verb span { color: var(--muted); font-size: 0.8rem; }
+    .bw-rename {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      margin: 0.15rem 0 0.65rem;
+    }
+    .bw-rename .from { color: var(--unknown-ink); }
+    .bw-rename .to { color: var(--soft-ink); }
+    .bw-rename .arrow { color: var(--accent); font-weight: 700; margin: 0 0.35rem; }
+    @media (max-width: 560px) {
+      .bw-verbs { grid-template-columns: 1fr; }
+    }
     .bw-controls {
       display: flex;
       align-items: center;
@@ -505,17 +543,13 @@ python eval/run_eval.py</code></pre>
       </figure>
     </section>
 
-    <section aria-labelledby="binding">
-      <h2 id="binding">The binding problem</h2>
-      <figure>
-        <img src="media/binding-problem.png" width="1800" height="1200" alt="Two tables carry a column called order_status; only one of them is the subject of the change. Name matching flags the wrong one as breaking; resolving what the reference binds to clears it." />
-        <figcaption>
-          The whole product in one picture. <code>order_status</code> exists on two tables.
-          A check that matches column names calls this query breaking; Premortem resolves
-          the alias to <code>shipments</code>, sees it isn’t the table being changed, and
-          clears it by name. That single distinction took decoy false positives from 0.50 to 0.00.
-        </figcaption>
-      </figure>
+    <section aria-labelledby="product-tour">
+      <h2 id="product-tour">What Premortem does</h2>
+      <p class="muted">
+        Full path in seven beats — from DataHub Impact Analysis through forecast,
+        repair, gate, notify, and catalog write-back. Binding is the differentiator
+        inside the forecast; the verbs after it are the product.
+      </p>
 
       <div
         class="binding-walk"
@@ -526,45 +560,53 @@ python eval/run_eval.py</code></pre>
         tabindex="0"
       >
         <div class="binding-walk-head">
-          <strong id="binding-walk-title">Decoy walkthrough</strong>
-          <span>Same column name on two tables — only binding clears the false positive</span>
+          <strong id="binding-walk-title">Product walkthrough</strong>
+          <span>Rehearse → bind → refuse when unsure → repair → gate → notify → write-back</span>
         </div>
 
         <div class="binding-walk-stage" id="bw-stage">
           <p class="bw-sr" id="bw-live" aria-live="polite"></p>
 
           <div class="bw-step is-active" data-step="0" role="group" aria-labelledby="bw-k0" aria-hidden="false">
-            <p class="bw-kicker" id="bw-k0">Step 1 of 4 — Query arrives</p>
-            <pre class="bw-sql" tabindex="0"><code>SELECT s.shipment_id FROM shipments s
-WHERE s.order_status = 'SHIPPED'</code></pre>
+            <p class="bw-kicker" id="bw-k0">Step 1 of 7 — Start from DataHub</p>
+            <p class="bw-rename">
+              <span class="from">order_status</span><span class="arrow" aria-hidden="true">→</span><span class="to">order_state</span>
+              on <code>ORDER_HISTORY</code>
+            </p>
+            <div class="bw-tables">
+              <div class="bw-table is-subject">
+                <span class="name">Impact Analysis</span>
+                <span class="meta">DataHub already knows</span>
+                <span class="col">3 downstream dependents</span>
+              </div>
+              <div class="bw-table">
+                <span class="name">Still missing</span>
+                <span class="meta">what Premortem adds</span>
+                <span class="col">how each consumer breaks</span>
+              </div>
+            </div>
             <p class="bw-explain">
-              A consumer query mentions <code>order_status</code>. Naïve name matching
-              would flag it as breaking the rename on <code>order_history</code>.
+              Lineage lists what is connected. Premortem rehearses the rename against
+              real query history before you merge.
             </p>
           </div>
 
           <div class="bw-step" data-step="1" role="group" aria-labelledby="bw-k1" aria-hidden="true" hidden>
-            <p class="bw-kicker" id="bw-k1">Step 2 of 4 — Two tables in scope</p>
-            <div class="bw-tables">
-              <div class="bw-table is-subject">
-                <span class="name">order_history</span>
-                <span class="meta">subject of the rename</span>
-                <span class="col">order_status</span>
-              </div>
-              <div class="bw-table">
-                <span class="name">shipments</span>
-                <span class="meta">also in the warehouse</span>
-                <span class="col">order_status</span>
-              </div>
+            <p class="bw-kicker" id="bw-k1">Step 2 of 7 — Rehearse: four verdicts</p>
+            <div class="bw-verdict-row">
+              <span class="badge hard">HARD</span>
+              <span class="badge soft">SOFT</span>
+              <span class="badge unknown">UNKNOWN</span>
+              <span class="badge cleared">CLEARED</span>
             </div>
             <p class="bw-explain">
-              Both tables carry <code>order_status</code>. Column-name equality alone
-              cannot tell which one this query means.
+              Per-query forecast from warehouse SQL: filter/join risk (HARD), display-only
+              (SOFT), needs a human (UNKNOWN), or false alarm (CLEARED).
             </p>
           </div>
 
           <div class="bw-step" data-step="2" role="group" aria-labelledby="bw-k2" aria-hidden="true" hidden>
-            <p class="bw-kicker" id="bw-k2">Step 3 of 4 — Resolve the alias</p>
+            <p class="bw-kicker" id="bw-k2">Step 3 of 7 — Bind, don’t name-match</p>
             <pre class="bw-sql" tabindex="0"><code>SELECT <span class="hl">s</span>.shipment_id FROM shipments <span class="hl">s</span>
 WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
             <div class="bw-bind">
@@ -572,31 +614,62 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
               <span class="arrow" aria-hidden="true">→</span>
               <span class="bw-sr">binds to</span>
               <span class="token">shipments</span>
+              <span class="badge cleared">CLEARED</span>
             </div>
             <p class="bw-explain">
-              Premortem binds alias <code>s</code> to <code>shipments</code>, so
-              <code>s.order_status</code> is not a reference to the subject table.
+              Two tables can both have <code>order_status</code>. Binding resolves the
+              alias to a known non-subject table and clears the decoy — decoy FP 0.50 → 0.00.
             </p>
           </div>
 
           <div class="bw-step" data-step="3" role="group" aria-labelledby="bw-k3" aria-hidden="true" hidden>
-            <p class="bw-kicker" id="bw-k3">Step 4 of 4 — Not the subject</p>
+            <p class="bw-kicker" id="bw-k3">Step 4 of 7 — Refuse when unsure</p>
             <div class="bw-verdict">
-              <span class="badge cleared">CLEARED</span>
-              <span class="bw-verdict-note">binds to <code>shipments</code> · not <code>order_history</code></span>
+              <span class="badge unknown">UNKNOWN</span>
+              <span class="bw-verdict-note">no CLEARED · no SQL patch</span>
             </div>
-            <div class="bw-tables bw-tables-follow">
-              <div class="bw-table">
-                <span class="name">order_history</span>
-                <span class="meta">subject — unchanged by this query</span>
+            <p class="bw-explain">
+              Shadowed aliases, unresolvable qualifiers, unparseable SQL: Premortem
+              does not guess. UNKNOWN fails the gate by default so unread SQL cannot silent-pass.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="4" role="group" aria-labelledby="bw-k4" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k4">Step 5 of 7 — Repair</p>
+            <pre class="bw-sql" tabindex="0"><code>WHERE order_status = 'COMPLETE'
+      ↓ patch (subject-bound HARD/SOFT only)
+WHERE order_state = 'COMPLETE'</code></pre>
+            <p class="bw-explain">
+              Same binder drives patches. CLEARED, UNKNOWN, <code>SELECT *</code>, and
+              ambiguous binds are refused. Frozen corpus: <strong>22/22</strong> eligible patches.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="5" role="group" aria-labelledby="bw-k5" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k5">Step 6 of 7 — Gate the PR</p>
+            <pre class="bw-sql" tabindex="0"><code>premortem gate --fail-on hard,unknown
+# exit 1 if HARD or UNKNOWN findings</code></pre>
+            <p class="bw-explain">
+              Drop-in CI: fail the merge when the forecast says the change is unsafe or
+              still unread. Offline or live against your catalog.
+            </p>
+          </div>
+
+          <div class="bw-step" data-step="6" role="group" aria-labelledby="bw-k6" aria-hidden="true" hidden>
+            <p class="bw-kicker" id="bw-k6">Step 7 of 7 — Notify + write-back</p>
+            <div class="bw-verbs">
+              <div class="bw-verb">
+                <strong>Notify</strong>
+                <span>Surface dataset owners from DataHub with the forecast</span>
               </div>
-              <div class="bw-table is-bound">
-                <span class="name">shipments</span>
-                <span class="meta">bound reference — safe to clear</span>
+              <div class="bw-verb">
+                <strong>Write-back</strong>
+                <span>Tag + description via DataHub MCP; assertion on Quality (<code>platform=premortem</code>)</span>
               </div>
             </div>
             <p class="bw-explain">
-              Cleared by name. That distinction took decoy false positives from 0.50 to 0.00.
+              The next person who opens the dataset inherits the rehearsal — they do not
+              re-discover the break from a dashboard.
             </p>
           </div>
         </div>
@@ -604,14 +677,30 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
         <div class="bw-controls">
           <button type="button" class="bw-btn" id="bw-prev" aria-label="Previous step" disabled>Prev</button>
           <div class="bw-dots" role="group" aria-label="Walkthrough steps">
-            <button type="button" class="bw-dot" aria-label="Go to step 1: Query arrives" aria-current="true" data-goto="0"></button>
-            <button type="button" class="bw-dot" aria-label="Go to step 2: Two tables in scope" data-goto="1"></button>
-            <button type="button" class="bw-dot" aria-label="Go to step 3: Resolve the alias" data-goto="2"></button>
-            <button type="button" class="bw-dot" aria-label="Go to step 4: Not the subject — CLEARED" data-goto="3"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 1: Start from DataHub" aria-current="true" data-goto="0"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 2: Four verdicts" data-goto="1"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 3: Bind not name-match" data-goto="2"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 4: Refuse when unsure" data-goto="3"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 5: Repair" data-goto="4"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 6: Gate the PR" data-goto="5"></button>
+            <button type="button" class="bw-dot" aria-label="Go to step 7: Notify and write-back" data-goto="6"></button>
           </div>
           <button type="button" class="bw-btn" id="bw-next" aria-label="Next step">Next</button>
         </div>
       </div>
+    </section>
+
+    <section aria-labelledby="binding">
+      <h2 id="binding">The binding problem</h2>
+      <figure>
+        <img src="media/binding-problem.png" width="1800" height="1200" alt="Two tables carry a column called order_status; only one of them is the subject of the change. Name matching flags the wrong one as breaking; resolving what the reference binds to clears it." />
+        <figcaption>
+          Differentiator in one picture. <code>order_status</code> exists on two tables.
+          Name matching flags this query as breaking; Premortem binds the alias to
+          <code>shipments</code>, sees it is not the subject table, and clears it.
+          That distinction took decoy false positives from 0.50 to 0.00.
+        </figcaption>
+      </figure>
     </section>
 
     <section aria-labelledby="forecast">
@@ -624,9 +713,9 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       <figure>
         <img src="media/verdict-taxonomy.png" width="1800" height="1200" alt="HARD, SOFT, UNKNOWN, and CLEARED each illustrated with a real query shape." />
         <figcaption>
-          Four named outcomes on the page; CLEARED is the named subset of UNAFFECTED
-          (same-named column binds elsewhere). Full taxonomy in the diagram.
-        </figcaption>        <figcaption>Verdict taxonomy — remediation blast radius, not “breaks vs still runs.”</figcaption>
+          Verdict taxonomy — remediation blast radius, not “breaks vs still runs.”
+          CLEARED is the named subset of UNAFFECTED (same-named column binds elsewhere).
+        </figcaption>
       </figure>
       <div class="forecast" aria-label="Sample forecast output">
         <div class="forecast-head">
@@ -910,14 +999,17 @@ WHERE <span class="hl">s</span>.order_status = 'SHIPPED'</code></pre>
       var current = 0;
       var autoplayDone = false;
       var autoplayTimer = null;
-      var STEP_MS = 2800;
+      var STEP_MS = 3200;
       var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       var titles = [
-        "Step 1 of 4: Query arrives",
-        "Step 2 of 4: Two tables in scope",
-        "Step 3 of 4: Resolve alias s to shipments",
-        "Step 4 of 4: Not the subject — CLEARED"
+        "Step 1 of 7: Start from DataHub Impact Analysis",
+        "Step 2 of 7: Rehearse — HARD, SOFT, UNKNOWN, CLEARED",
+        "Step 3 of 7: Bind, don’t name-match — CLEARED decoy",
+        "Step 4 of 7: Refuse when unsure — UNKNOWN, no patch",
+        "Step 5 of 7: Repair subject-bound HARD/SOFT hits",
+        "Step 6 of 7: Gate the PR on hard,unknown",
+        "Step 7 of 7: Notify owners and write-back to Quality"
       ];
 
       function stopAutoplay() {
