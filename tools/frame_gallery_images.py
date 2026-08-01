@@ -19,8 +19,11 @@ OUT = MEDIA / "gallery"
 W, H = 1800, 1200
 PAD = 48
 LEFT = 56
-CAPTION_W = 420
-GAP = 36
+GAP = 28
+# Content row between left margin and right pad: 85% diagram / 15% caption
+CONTENT_W = W - LEFT - PAD
+INSET_W = int(CONTENT_W * 0.85) - GAP // 2
+CAPTION_W = CONTENT_W - INSET_W - GAP
 BRAND = "#0b0b0b"
 ACCENT = "#eb6834"
 PANEL = "#161614"
@@ -111,17 +114,15 @@ def frame_one(stem: str, title: str, caption: str) -> Path:
     draw.rectangle((0, 0, 8, H), fill=ACCENT)
 
     brand_font = _font(36, bold=True)
-    title_font = _font(28, bold=True)
-    body_font = _font(22)
     small_font = _font(16)
 
     draw.text((LEFT, PAD), "PREMORTEM", font=brand_font, fill=INK)
     draw.text((LEFT, PAD + 44), "how it breaks, before you merge", font=small_font, fill=MUTED)
 
-    # Diagram inset area
+    # Diagram inset area (85% of content width)
     inset_x = LEFT
     inset_y = PAD + 90
-    inset_w = W - LEFT - CAPTION_W - GAP - PAD
+    inset_w = INSET_W
     inset_h = H - inset_y - PAD
 
     # White panel for diagram
@@ -145,28 +146,30 @@ def frame_one(stem: str, title: str, caption: str) -> Path:
     dy = inset_y + (inset_h - nh) // 2
     canvas.paste(diagram, (dx, dy))
 
-    # Caption panel
+    # Caption panel (15% of content width)
     cx = inset_x + inset_w + GAP
     cy = inset_y
     draw.rounded_rectangle(
-        (cx, cy, cx + CAPTION_W - PAD + LEFT - 8, cy + inset_h),
+        (cx, cy, cx + CAPTION_W, cy + inset_h),
         radius=16,
         fill=PANEL,
         outline="#2a2a28",
         width=1,
     )
-    tx = cx + 28
-    ty = cy + 36
+    tx = cx + 20
+    ty = cy + 28
+    # Slightly smaller type so 15% panel still reads
+    title_font = _font(24, bold=True)
+    body_font = _font(18)
     draw.text((tx, ty), title, font=title_font, fill=INK)
-    # Accent underline
-    draw.rectangle((tx, ty + 40, tx + 48, ty + 44), fill=ACCENT)
+    draw.rectangle((tx, ty + 34, tx + 40, ty + 38), fill=ACCENT)
 
-    body_top = ty + 64
-    lines = _wrap(draw, caption, body_font, CAPTION_W - PAD - 40)
+    body_top = ty + 52
+    lines = _wrap(draw, caption, body_font, CAPTION_W - 40)
     y = body_top
     for line in lines:
         draw.text((tx, y), line, font=body_font, fill=MUTED)
-        y += 32
+        y += 26
 
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{stem}.png"
