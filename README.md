@@ -4,7 +4,7 @@
 
 Premortem is a schema-change rehearsal agent for [DataHub](https://datahub.com/).
 
-When I propose renaming or dropping a column, Impact Analysis already tells me *what’s connected*. Premortem starts from that map and goes one layer deeper: it reads warehouse SQL from query history and forecasts *how* each consumer breaks — **hard**, **soft**, or **unknown** — then optionally writes the forecast back into the catalog so the next person (or agent) inherits it.
+When I propose renaming or dropping a column, Impact Analysis already tells me *what’s connected*. Premortem starts from that map and goes one layer deeper: it reads warehouse SQL from query history and forecasts *how* each consumer breaks — **HARD**, **SOFT**, **UNKNOWN**, or **CLEARED** — then **repairs** what it can, **gates** the PR, **notifies** owners, and writes the forecast back into the catalog so the next person (or agent) inherits it.
 
 Built for the [DataHub Agent Hackathon](https://datahub.devpost.com/) (Apache-2.0).
 

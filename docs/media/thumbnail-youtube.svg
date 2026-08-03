@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="1280" height="720" fill="#0b0b0b"/>
+  <rect x="0" y="0" width="12" height="720" fill="#eb6834"/>
+
+  <g stroke="#1c1c1a" stroke-width="1">
+    <path d="M160 0 V720 M320 0 V720 M480 0 V720 M640 0 V720 M800 0 V720 M960 0 V720 M1120 0 V720"/>
+    <path d="M0 144 H1280 M0 288 H1280 M0 432 H1280 M0 576 H1280"/>
+  </g>
+
+  <text x="64" y="120" font-size="22" font-weight="700" fill="#eb6834" letter-spacing="3">DATAHUB × PREMORTEM</text>
+  <text x="64" y="220" font-size="78" font-weight="700" fill="#fcfcfb">PREMORTEM</text>
+  <text x="64" y="280" font-size="32" fill="#b0aea6">how it breaks, before you merge</text>
+
+  <rect x="64" y="360" width="1152" height="220" rx="20" fill="#161614" stroke="#2a2a28" stroke-width="2"/>
+
+  <rect x="96" y="400" width="400" height="140" rx="16" fill="#0b0b0b" stroke="#2a78d6" stroke-width="2.5"/>
+  <text x="120" y="455" font-size="20" font-weight="700" fill="#2a78d6">DATAHUB</text>
+  <text x="120" y="500" font-size="26" font-weight="700" fill="#fcfcfb">query history + lineage</text>
+
+  <path d="M530 470 L620 470" stroke="#eb6834" stroke-width="5" stroke-linecap="round"/>
+  <path d="M600 452 L640 470 L600 488" fill="none" stroke="#eb6834" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="660" y="400" width="520" height="140" rx="16" fill="#0b0b0b" stroke="#eb6834" stroke-width="2.5"/>
+  <text x="684" y="455" font-size="20" font-weight="700" fill="#eb6834">PREMORTEM</text>
+  <text x="684" y="500" font-size="24" font-weight="700" fill="#fcfcfb">HARD · SOFT · UNKNOWN · CLEARED</text>
+
+  <text x="64" y="660" font-size="24" fill="#b0aea6">Schema-change rehearsal on real warehouse SQL — before you merge.</text>
+</svg>

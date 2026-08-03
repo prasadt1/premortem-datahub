@@ -232,6 +232,10 @@ def test_seed_refuses_non_localhost(monkeypatch):
     import importlib.util
     from pathlib import Path
 
+    # The seeder imports the DataHub SDK at module scope; skip on the light
+    # install path (`pip install -e ".[dev]"`) the README's judge path uses.
+    pytest.importorskip("datahub")
+
     path = Path(__file__).resolve().parents[1] / "tools" / "seed_demo_environment.py"
     spec = importlib.util.spec_from_file_location("seed_demo_environment", path)
     assert spec and spec.loader

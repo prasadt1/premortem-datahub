@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" width="1800" height="1200" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="1800" height="1200" fill="#0b0b0b"/>
+  <rect x="0" y="0" width="14" height="1200" fill="#eb6834"/>
+
+  <g stroke="#1c1c1a" stroke-width="1">
+    <path d="M200 0 V1200 M400 0 V1200 M600 0 V1200 M800 0 V1200 M1000 0 V1200 M1200 0 V1200 M1400 0 V1200 M1600 0 V1200"/>
+    <path d="M0 200 H1800 M0 400 H1800 M0 600 H1800 M0 800 H1800 M0 1000 H1800"/>
+  </g>
+
+  <text x="80" y="120" font-size="28" font-weight="700" fill="#eb6834" letter-spacing="3">DATAHUB AGENT HACKATHON</text>
+  <text x="80" y="220" font-size="92" font-weight="700" fill="#fcfcfb">PREMORTEM</text>
+  <text x="80" y="290" font-size="36" fill="#b0aea6">how it breaks, before you merge</text>
+
+  <rect x="80" y="400" width="720" height="520" rx="24" fill="#161614" stroke="#2a78d6" stroke-width="3"/>
+  <text x="120" y="470" font-size="22" font-weight="700" fill="#2a78d6" letter-spacing="2">DATAHUB</text>
+  <text x="120" y="530" font-size="34" font-weight="700" fill="#fcfcfb">Impact Analysis</text>
+  <text x="120" y="580" font-size="24" fill="#b0aea6">what is connected</text>
+  <text x="120" y="680" font-size="64" font-weight="700" fill="#fcfcfb">3</text>
+  <text x="200" y="680" font-size="28" fill="#b0aea6">downstream dependents</text>
+  <text x="120" y="760" font-size="22" fill="#898781">query history · lineage · schema</text>
+  <text x="120" y="820" font-size="22" fill="#898781">catalog write-back on Quality</text>
+
+  <path d="M840 660 L960 660" stroke="#eb6834" stroke-width="6" stroke-linecap="round"/>
+  <path d="M940 640 L980 660 L940 680" fill="none" stroke="#eb6834" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="900" y="620" font-size="20" font-weight="700" fill="#eb6834" text-anchor="middle">rehearse</text>
+
+  <rect x="1000" y="400" width="720" height="520" rx="24" fill="#161614" stroke="#eb6834" stroke-width="3"/>
+  <text x="1040" y="470" font-size="22" font-weight="700" fill="#eb6834" letter-spacing="2">PREMORTEM</text>
+  <text x="1040" y="530" font-size="34" font-weight="700" fill="#fcfcfb">Per-query forecast</text>
+  <text x="1040" y="580" font-size="24" fill="#b0aea6">how each consumer breaks</text>
+
+  <g font-size="28" font-weight="700">
+    <text x="1040" y="680" fill="#d03b3b">HARD</text>
+    <text x="1180" y="680" fill="#fab219">SOFT</text>
+    <text x="1340" y="680" fill="#898781">UNKNOWN</text>
+    <text x="1040" y="750" fill="#0ca30c">CLEARED</text>
+  </g>
+  <text x="1040" y="840" font-size="22" fill="#b0aea6">repair · gate · notify · write-back</text>
+
+  <text x="80" y="1120" font-size="26" fill="#b0aea6">Composes with DataHub — before a dashboard finds the break.</text>
+</svg>

@@ -13,7 +13,9 @@ Diagrams for the README, the Devpost article, and the submission gallery.
 | `eval-results` | HARD precision and decoy false-alarm rate vs both baselines | Devpost gallery · Pages |
 | `architecture` | Layered: pure classifier core, one binder shared by classify+repair, CatalogClient ×3, DataHub edge | Devpost inline · gallery · Pages · README |
 | `dual-mcp-flow` | DataHub's MCP server and Premortem's in one agent session | Devpost gallery · Pages |
-| `gallery/*.png` | **Framed canvases** for Devpost upload (brand + caption panel) | Devpost gallery only — regenerate with `python tools/frame_gallery_images.py` |
+| `gallery/*.png` | **Framed canvases** (brand + caption panel) | Devpost **carousel only** — never inline in the story. Regenerate: `python tools/frame_gallery_images.py` |
+| `thumbnail-devpost` | Project overview thumbnail: DataHub Impact Analysis → Premortem forecast | Devpost **Edit thumbnail** (3:2, ≤5 MB) |
+| `thumbnail-youtube` | Video cover: same thesis, large wordmark | YouTube custom thumbnail (16:9; use `*-1080.png` for upload) |
 
 ## Regenerating
 
@@ -22,6 +24,9 @@ cd docs/media
 for f in binding-problem customer-journey product-workflow verdict-taxonomy eval-results architecture dual-mcp-flow; do
   rsvg-convert -w 1800 -h 1200 -b '#fcfcfb' "$f.svg" -o "$f.png"
 done
+rsvg-convert -w 1800 -h 1200 thumbnail-devpost.svg -o thumbnail-devpost.png
+rsvg-convert -w 1280 -h 720 thumbnail-youtube.svg -o thumbnail-youtube.png
+rsvg-convert -w 1920 -h 1080 thumbnail-youtube.svg -o thumbnail-youtube-1080.png
 ```
 
 ### Eval explorer data
