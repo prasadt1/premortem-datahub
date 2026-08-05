@@ -68,7 +68,7 @@ Layered architecture — a catalog-agnostic binder core (no LLM) that **composes
 | **UNKNOWN** | Unparseable SQL, bare column still ambiguous after schema resolution, `SELECT *` — needs a human; never guessed |
 | **UNAFFECTED** | No subject-bound reference — either **CLEARED** (the named subset: same-named column binds elsewhere; listed) or no query evidence of the column (count) |
 
-Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON. I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
+Forecasts are ranked HARD → SOFT → UNKNOWN, composed under an Impact Analysis baseline (“N downstream dependents”), and emitted as markdown + JSON + optional self-contained HTML (`--html-out`). I do **not** invent execution counts; `(exec×N)` appears only when the catalog actually provides them.
 
 ## See it against a live catalog
 

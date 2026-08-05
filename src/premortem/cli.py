@@ -13,8 +13,8 @@ from premortem.classify import classify_query
 from premortem.datahub_client import create_catalog_client, write_forecast_to_catalog
 from premortem.gate import parse_fail_on, run_live_gate, run_offline_gate
 from premortem.live import run_live_rehearsal
-from premortem.models import BreakSeverity, QueryRecord, SchemaDiff
-from premortem.report import to_json, to_markdown
+from premortem.models import BreakSeverity, Forecast, QueryRecord, SchemaDiff
+from premortem.report import to_html, to_json, to_markdown
 from premortem.rewrite import build_repairs, emit_patches_to_dir
 
 DEMO_URN = (
@@ -167,7 +167,15 @@ def _gate_main(argv: list[str]) -> int:
     return summary.exit_code
 
 
-def _emit(forecast_md: str, forecast_js: str, args: argparse.Namespace) -> None:
+def _emit(
+    forecast_md: str,
+    forecast_js: str,
+    args: argparse.Namespace,
+    *,
+    forecast: Forecast | None = None,
+    baseline_source: str = "measured",
+    notify=None,
+) -> None:
     if args.out:
         Path(args.out).write_text(forecast_md, encoding="utf-8")
         print(f"wrote {args.out}")
@@ -176,6 +184,16 @@ def _emit(forecast_md: str, forecast_js: str, args: argparse.Namespace) -> None:
     if args.json_out:
         Path(args.json_out).write_text(forecast_js, encoding="utf-8")
         print(f"wrote {args.json_out}")
+    if args.html_out:
+        fc = forecast if forecast is not None else Forecast.model_validate_json(forecast_js)
+        html_doc = to_html(
+            fc,
+            use_exec_count=args.use_exec_count,
+            baseline_source=baseline_source,
+            notify=notify,
+        )
+        Path(args.html_out).write_text(html_doc, encoding="utf-8")
+        print(f"wrote {args.html_out}")
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -204,6 +222,10 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--drop", help="column to drop (mutually exclusive with --rename)")
     p.add_argument("--out", help="Write markdown forecast to this path")
     p.add_argument("--json-out", help="Write JSON forecast to this path")
+    p.add_argument(
+        "--html-out",
+        help="Write self-contained HTML report (shareable snapshot for PR/Slack)",
+    )
     p.add_argument(
         "--lineage-count",
         type=int,
@@ -384,7 +406,13 @@ def main(argv: list[str] | None = None) -> None:
             baseline_source=baseline_source,
         )
         js = to_json(forecast, use_exec_count=args.use_exec_count)
-        _emit(md, js, args)
+        _emit(
+            md,
+            js,
+            args,
+            forecast=forecast,
+            baseline_source=baseline_source,
+        )
 
         if args.emit_patches:
             repairs = build_repairs(
